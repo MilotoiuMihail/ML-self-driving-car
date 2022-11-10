@@ -8,6 +8,11 @@ using System.Linq;
 // STEERING IS DONE ONLY WITH FRONT WHEELS
 public class Car : MonoBehaviour
 {
+    private enum Driver
+    {
+        PLAYER,
+        AI
+    }
     private enum DriveType
     {
         REAR,
@@ -15,12 +20,12 @@ public class Car : MonoBehaviour
         FULL
     }
     private DriveType drive;
+    private Driver driver;
+    private CarInput input;
     [SerializeField] private Transform centreOfMass;
     [SerializeField] private Wheel[] wheels;
     private Rigidbody rb;
     private float motorTorque;
-    private float maxSteerAngle;
-    private float brakeForce;
     private float wheelBase;
     private float turnRadius;
     private float rearTrack;
@@ -30,6 +35,7 @@ public class Car : MonoBehaviour
     void Start()
     {
         wheels = GetComponentsInChildren<Wheel>();
+        input = GetComponent<CarInput>();
         rb = GetComponent<Rigidbody>();
         rb.centerOfMass = centreOfMass.localPosition;
         InitializeCar();
@@ -37,13 +43,13 @@ public class Car : MonoBehaviour
 
     void Update()
     {
+        ManageDriver();
         Steer();
         ApplyTorque();
     }
 
     private void Steer()
     {
-
         if (steer > 0)
         {
             wheels[0].SteeringAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + rearTrack * .5f)) * steer;
@@ -66,6 +72,7 @@ public class Car : MonoBehaviour
         foreach (var wheel in wheels)
             wheel.Torque = motorTorque * throttle;
     }
+
     private void ApplyDriveType()
     {
         bool rear = false;
@@ -98,6 +105,21 @@ public class Car : MonoBehaviour
         if (wheels.Length != 4)
             return; //EXCEPTION
         ApplyDriveType();
+    }
+
+    private void ManageDriver()
+    {
+        switch (driver)
+        {
+            case Driver.PLAYER:
+                steer = input.SteerInput;
+                throttle = input.ThrottleInput;
+                break;
+            case Driver.AI:
+                break;
+            default:
+                break;
+        }
     }
 
 }
