@@ -44,4 +44,12 @@ public class Wheel : MonoBehaviour
         wheelCollider.motorTorque = Torque;
     }
 
+    public void SetTorque(bool _hasTorque)
+    {
+        hasTorque = _hasTorque;
+    }
+    public void setSteering(bool _isSteering)
+    {
+        isSteering = _isSteering;
+    }
 }
