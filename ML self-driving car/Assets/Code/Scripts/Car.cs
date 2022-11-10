@@ -25,10 +25,10 @@ public class Car : MonoBehaviour
     [SerializeField] private Transform centreOfMass;
     [SerializeField] private Wheel[] wheels;
     private Rigidbody rb;
-    private float motorTorque;
-    private float wheelBase;
-    private float turnRadius;
-    private float rearTrack;
+    [SerializeField] private float motorTorque;
+    [SerializeField] private float wheelBase;
+    [SerializeField] private float turnRadius;
+    [SerializeField] private float rearTrack;
     private float steer;
     private float throttle;
 
@@ -109,6 +109,7 @@ public class Car : MonoBehaviour
 
     private void ManageDriver()
     {
+        if (!input) return; //momentan
         switch (driver)
         {
             case Driver.PLAYER:
