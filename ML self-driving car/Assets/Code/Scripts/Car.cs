@@ -5,6 +5,7 @@ using System.Linq;
 
 // CAR IS ASSUMED TO HAVE 4 WHEELS
 // NOTED WITH FL - 0, FR - 1, RL - 2, RR - 3
+// STEERING IS DONE ONLY WITH FRONT WHEELS
 public class Car : MonoBehaviour
 {
     private enum DriveType
@@ -14,14 +15,15 @@ public class Car : MonoBehaviour
         FULL
     }
     private DriveType drive;
-    [SerializeField]
-    private Transform centreOfMass;
+    [SerializeField] private Transform centreOfMass;
     [SerializeField] private Wheel[] wheels;
     private Rigidbody rb;
     private float motorTorque;
     private float maxSteerAngle;
     private float brakeForce;
-
+    private float wheelBase;
+    private float turnRadius;
+    private float rearTrack;
     private float steer;
     private float throttle;
 
@@ -35,13 +37,35 @@ public class Car : MonoBehaviour
 
     void Update()
     {
-        foreach (var wheel in wheels)
+        Steer();
+        ApplyTorque();
+    }
+
+    private void Steer()
+    {
+
+        if (steer > 0)
         {
-            wheel.SteeringAngle = maxSteerAngle * steer;
-            wheel.Torque = motorTorque * throttle;
+            wheels[0].SteeringAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + rearTrack * .5f)) * steer;
+            wheels[1].SteeringAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius - rearTrack * .5f)) * steer;
+        }
+        else if (steer < 0)
+        {
+            wheels[0].SteeringAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius - rearTrack * .5f)) * steer;
+            wheels[1].SteeringAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + rearTrack * .5f)) * steer;
+        }
+        else
+        {
+            wheels[0].SteeringAngle = 0;
+            wheels[1].SteeringAngle = 0;
         }
     }
 
+    private void ApplyTorque()
+    {
+        foreach (var wheel in wheels)
+            wheel.Torque = motorTorque * throttle;
+    }
     private void ApplyDriveType()
     {
         bool rear = false;
@@ -69,20 +93,11 @@ public class Car : MonoBehaviour
         motorTorque = rear && front ? motorTorque / 4 : motorTorque / 2;
     }
 
-    private void InitializeSteering()
-    {
-        wheels[0].setSteering(true);
-        wheels[1].setSteering(true);
-        wheels[2].setSteering(false);
-        wheels[3].setSteering(false);
-    }
-
     private void InitializeCar()
     {
         if (wheels.Length != 4)
             return; //EXCEPTION
         ApplyDriveType();
-        InitializeSteering();
     }
 
 }

@@ -6,7 +6,6 @@ public class Wheel : MonoBehaviour
 {
     private WheelCollider wheelCollider;
     private Transform wheelTransform;
-    private bool isSteering;
     private bool hasTorque;
 
     public float SteeringAngle { get; set; }
@@ -16,6 +15,9 @@ public class Wheel : MonoBehaviour
     {
         wheelCollider = GetComponent<WheelCollider>();
         wheelTransform = GetComponentInChildren<Transform>();
+
+        hasTorque = false;
+        SteeringAngle = 0;
     }
 
     void Update()
@@ -25,7 +27,7 @@ public class Wheel : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (isSteering) Steer();
+        Steer();
         if (hasTorque) ApplyTorque();
     }
 
@@ -43,13 +45,8 @@ public class Wheel : MonoBehaviour
     {
         wheelCollider.motorTorque = Torque;
     }
-
     public void SetTorque(bool _hasTorque)
     {
         hasTorque = _hasTorque;
-    }
-    public void setSteering(bool _isSteering)
-    {
-        isSteering = _isSteering;
     }
 }
