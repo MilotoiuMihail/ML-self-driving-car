@@ -9,8 +9,8 @@ public class Wheel : MonoBehaviour
     private bool isSteering;
     private bool hasTorque;
 
-    private float steeringAngle;
-    private float torque;
+    public float SteeringAngle { get; set; }
+    public float Torque { get; set; }
 
     void Start()
     {
@@ -37,11 +37,11 @@ public class Wheel : MonoBehaviour
     }
     private void Steer()
     {
-        wheelCollider.steerAngle = steeringAngle;
+        wheelCollider.steerAngle = SteeringAngle;
     }
     private void ApplyTorque()
     {
-        wheelCollider.motorTorque = torque;
+        wheelCollider.motorTorque = Torque;
     }
 
 }
