@@ -23,14 +23,20 @@ public class Car : MonoBehaviour
     private Driver driver;
     private CarInput input;
     [SerializeField] private Transform centreOfMass;
-    [SerializeField] private Wheel[] wheels;
+    [SerializeField] private Transform steeringWheel;
+    private Wheel[] wheels;
     private Rigidbody rb;
     [SerializeField] private float motorTorque;
     [SerializeField] private float wheelBase;
     [SerializeField] private float turnRadius;
     [SerializeField] private float rearTrack;
+    [SerializeField] private float steeringSmoothness;
+    [SerializeField] private float maxSteeringWheelAngle;
+    private float KPH;
     private float steer;
     private float throttle;
+    private float leftSteerAngle;
+    private float rightSteerAngle;
 
     void Start()
     {
@@ -45,6 +51,7 @@ public class Car : MonoBehaviour
     {
         ManageDriver();
         Steer();
+        AnimateSteeringWheel();
         ApplyTorque();
     }
 
@@ -52,25 +59,34 @@ public class Car : MonoBehaviour
     {
         if (steer > 0)
         {
-            wheels[0].SteeringAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + rearTrack * .5f)) * steer;
-            wheels[1].SteeringAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius - rearTrack * .5f)) * steer;
+            leftSteerAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + rearTrack * .5f)) * steer;
+            rightSteerAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius - rearTrack * .5f)) * steer;
         }
         else if (steer < 0)
         {
-            wheels[0].SteeringAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius - rearTrack * .5f)) * steer;
-            wheels[1].SteeringAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + rearTrack * .5f)) * steer;
+            leftSteerAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius - rearTrack * .5f)) * steer;
+            rightSteerAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBase / (turnRadius + rearTrack * .5f)) * steer;
         }
         else
         {
-            wheels[0].SteeringAngle = 0;
-            wheels[1].SteeringAngle = 0;
+            leftSteerAngle = 0;
+            rightSteerAngle = 0;
         }
+        wheels[0].SteeringAngle = Mathf.Lerp(wheels[0].SteeringAngle, leftSteerAngle, steeringSmoothness * Time.deltaTime);
+        wheels[1].SteeringAngle = Mathf.Lerp(wheels[0].SteeringAngle, rightSteerAngle, steeringSmoothness * Time.deltaTime);
+    }
+
+    private void AnimateSteeringWheel()
+    {
+        var desiredRotation = Quaternion.Euler(steeringWheel.localEulerAngles.x, steeringWheel.localEulerAngles.y, -steer * maxSteeringWheelAngle);
+        steeringWheel.localRotation = Quaternion.Lerp(steeringWheel.localRotation, desiredRotation, steeringSmoothness * Time.deltaTime);
     }
 
     private void ApplyTorque()
     {
         foreach (var wheel in wheels)
             wheel.Torque = motorTorque * throttle;
+        KPH = rb.velocity.magnitude * 3.6f;
     }
 
     private void ApplyDriveType()
@@ -92,10 +108,10 @@ public class Car : MonoBehaviour
             default:
                 break;
         }
-        wheels[0].SetTorque(front);
-        wheels[1].SetTorque(front);
-        wheels[2].SetTorque(rear);
-        wheels[3].SetTorque(rear);
+        wheels[0].SetPower(front);
+        wheels[1].SetPower(front);
+        wheels[2].SetPower(rear);
+        wheels[3].SetPower(rear);
 
         motorTorque = rear && front ? motorTorque / 4 : motorTorque / 2;
     }

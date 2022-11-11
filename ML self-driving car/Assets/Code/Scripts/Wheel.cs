@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Wheel : MonoBehaviour
 {
-    private WheelCollider wheelCollider;
-    private Transform wheelTransform;
-    private bool hasTorque;
+    [SerializeField] private WheelCollider wheelCollider;
+    [SerializeField] private Transform wheelTransform;
+    private bool hasPower;
 
     public float SteeringAngle { get; set; }
     public float Torque { get; set; }
@@ -14,9 +14,9 @@ public class Wheel : MonoBehaviour
     void Start()
     {
         wheelCollider = GetComponent<WheelCollider>();
-        wheelTransform = GetComponentInChildren<Transform>();
+        wheelTransform = GetComponentInChildren<MeshRenderer>().transform;
 
-        hasTorque = false;
+        hasPower = false;
         SteeringAngle = 0;
     }
 
@@ -28,7 +28,7 @@ public class Wheel : MonoBehaviour
     void FixedUpdate()
     {
         Steer();
-        if (hasTorque) ApplyTorque();
+        if (hasPower) ApplyTorque();
     }
 
     private void Animate()
@@ -45,8 +45,8 @@ public class Wheel : MonoBehaviour
     {
         wheelCollider.motorTorque = Torque;
     }
-    public void SetTorque(bool _hasTorque)
+    public void SetPower(bool _hasPower)
     {
-        hasTorque = _hasTorque;
+        hasPower = _hasPower;
     }
 }
