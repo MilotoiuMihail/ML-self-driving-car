@@ -4,23 +4,16 @@ using UnityEngine;
 
 public class CameraCarFollow : MonoBehaviour
 {
-    [SerializeField] private Transform target;
-    [SerializeField] private Vector3 offset;
-    [SerializeField] private Vector3 eulerRotation;
-    private float smoothness;
-    private float speed;
+    [SerializeField] private Transform followTarget;
+    [SerializeField] private Transform lookAt;
+    [SerializeField] private float speed;
 
-    void Start()
+    void FixedUpdate()
     {
-        transform.eulerAngles = eulerRotation;
-    }
+        if (!followTarget) return;
 
-    void Update()
-    {
-        if (!target) return;
-
-        transform.position = Vector3.Lerp(transform.position, target.position + offset, smoothness * Time.deltaTime);
-        transform.LookAt(target.position);
+        transform.position = Vector3.Lerp(transform.position, followTarget.position, speed * Time.deltaTime);
+        transform.LookAt(lookAt.position);
     }
 
 }
