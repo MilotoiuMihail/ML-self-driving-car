@@ -32,6 +32,7 @@ public class Car : MonoBehaviour
     [SerializeField] private float rearTrack;
     [SerializeField] private float steeringSmoothness;
     [SerializeField] private float maxSteeringWheelAngle;
+    [SerializeField] private float downforce;
     private float KPH;
     private float steer;
     private float throttle;
@@ -50,12 +51,13 @@ public class Car : MonoBehaviour
     void Update()
     {
         ManageDriver();
-        Steer();
+        Steering();
+        ApplyDownforce();
         AnimateSteeringWheel();
-        ApplyTorque();
+        Movement();
     }
 
-    private void Steer()
+    private void Steering()
     {
         if (steer > 0)
         {
@@ -82,11 +84,16 @@ public class Car : MonoBehaviour
         steeringWheel.localRotation = Quaternion.Lerp(steeringWheel.localRotation, desiredRotation, steeringSmoothness * Time.deltaTime);
     }
 
-    private void ApplyTorque()
+    private void Movement()
     {
         foreach (var wheel in wheels)
             wheel.Torque = motorTorque * throttle;
         KPH = rb.velocity.magnitude * 3.6f;
+    }
+
+    private void ApplyDownforce()
+    {
+        rb.AddForce(-transform.up * downforce * rb.velocity.magnitude);
     }
 
     private void ApplyDriveType()
