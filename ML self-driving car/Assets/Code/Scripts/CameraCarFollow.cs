@@ -7,11 +7,15 @@ public class CameraCarFollow : MonoBehaviour
     [SerializeField] private Transform followTarget;
     [SerializeField] private Transform lookAt;
     [SerializeField] private float speed;
+    private Rigidbody rb;
+
+    void Start()
+    {
+        rb = followTarget.GetComponentInParent<Rigidbody>();
+    }
 
     void FixedUpdate()
     {
-        if (!followTarget) return;
-
         transform.position = Vector3.Lerp(transform.position, followTarget.position, speed * Time.deltaTime);
         transform.LookAt(lookAt.position);
     }

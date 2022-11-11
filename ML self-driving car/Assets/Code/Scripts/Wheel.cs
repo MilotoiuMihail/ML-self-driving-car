@@ -10,6 +10,7 @@ public class Wheel : MonoBehaviour
 
     public float SteeringAngle { get; set; }
     public float Torque { get; set; }
+    public float BrakeTorque { get; set; }
 
     void Start()
     {
@@ -28,7 +29,7 @@ public class Wheel : MonoBehaviour
     void FixedUpdate()
     {
         Steer();
-        if (hasPower) ApplyTorque();
+        if (hasPower) Accelerate();
     }
 
     private void Animate()
@@ -41,9 +42,13 @@ public class Wheel : MonoBehaviour
     {
         wheelCollider.steerAngle = SteeringAngle;
     }
-    private void ApplyTorque()
+    private void Accelerate()
     {
         wheelCollider.motorTorque = Torque;
+    }
+    private void Brake()
+    {
+        wheelCollider.brakeTorque = BrakeTorque;
     }
     public void SetPower(bool _hasPower)
     {

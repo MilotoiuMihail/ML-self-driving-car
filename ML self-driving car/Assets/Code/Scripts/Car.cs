@@ -33,6 +33,8 @@ public class Car : MonoBehaviour
     [SerializeField] private float steeringSmoothness;
     [SerializeField] private float maxSteeringWheelAngle;
     [SerializeField] private float downforce;
+    [SerializeField] private float brakeTorque;
+    [SerializeField] private float deceleration;
     private float KPH;
     private float steer;
     private float throttle;
@@ -87,7 +89,16 @@ public class Car : MonoBehaviour
     private void Movement()
     {
         foreach (var wheel in wheels)
-            wheel.Torque = motorTorque * throttle;
+            if (throttle > 0)
+                wheel.Torque = motorTorque * throttle;
+            else if (throttle < 0)
+                wheel.BrakeTorque = brakeTorque; //*Time.deltaTime
+            else
+                wheel.BrakeTorque = deceleration; //*Time.deltaTime
+    }
+
+    private void CalculateSpeed()
+    {
         KPH = rb.velocity.magnitude * 3.6f;
     }
 
