@@ -30,6 +30,7 @@ public class Wheel : MonoBehaviour
     {
         Steer();
         if (hasPower) Accelerate();
+        Brake();
     }
 
     private void Animate()

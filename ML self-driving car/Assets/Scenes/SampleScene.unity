@@ -1101,6 +1101,8 @@ MonoBehaviour:
   steeringSmoothness: 2
   maxSteeringWheelAngle: 30
   downforce: 50
+  brakeTorque: 90000
+  deceleration: 100
 --- !u!114 &1180061665
 MonoBehaviour:
   m_ObjectHideFlags: 0

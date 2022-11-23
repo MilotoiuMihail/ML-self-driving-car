@@ -89,12 +89,25 @@ public class Car : MonoBehaviour
     private void Movement()
     {
         foreach (var wheel in wheels)
+        {
+
             if (throttle > 0)
+            {
                 wheel.Torque = motorTorque * throttle;
+                wheel.BrakeTorque = 0;
+            }
             else if (throttle < 0)
-                wheel.BrakeTorque = brakeTorque; //*Time.deltaTime
+            {
+                wheel.Torque = 0;
+                wheel.BrakeTorque = brakeTorque * Time.deltaTime;
+            }
             else
-                wheel.BrakeTorque = deceleration; //*Time.deltaTime
+            {
+
+                wheel.Torque = 0;
+                wheel.BrakeTorque = deceleration * Time.deltaTime;
+            }
+        }
     }
 
     private void CalculateSpeed()
