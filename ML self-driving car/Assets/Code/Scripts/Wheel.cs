@@ -55,4 +55,16 @@ public class Wheel : MonoBehaviour
     {
         hasPower = _hasPower;
     }
+
+    public float getRpm()
+    {
+        return wheelCollider.rpm;
+    }
+
+    public bool isGrounded()
+    {
+        return wheelCollider.isGrounded;
+    }
+
+    public float Radius => wheelCollider.radius;
 }
