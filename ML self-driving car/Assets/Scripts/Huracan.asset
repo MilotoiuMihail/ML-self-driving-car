@@ -1,0 +1,178 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8ee0a8ee789e8d4cbd7177d1b4c0780, type: 3}
+  m_Name: Huracan
+  m_EditorClassIdentifier: 
+  <Drive>k__BackingField: 0
+  <WheelBase>k__BackingField: 2.62
+  <TurnRadius>k__BackingField: 11.5
+  <RearTrack>k__BackingField: 1.62
+  <EngineCurve>k__BackingField:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 1
+      value: 238
+      inSlope: 237.79999
+      outSlope: 237.79999
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1.5
+      value: 356.9
+      inSlope: 178.4
+      outSlope: 178.4
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 2
+      value: 416.4
+      inSlope: 95.20001
+      outSlope: 95.20001
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 2.5
+      value: 452.1
+      inSlope: 59.5
+      outSlope: 59.5
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 3
+      value: 475.9
+      inSlope: 40.799988
+      outSlope: 40.799988
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 3.5
+      value: 492.9
+      inSlope: 29.800018
+      outSlope: 29.800018
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 4
+      value: 505.7
+      inSlope: 22.699982
+      outSlope: 22.699982
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 4.5
+      value: 515.6
+      inSlope: 17.799988
+      outSlope: 17.799988
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 5
+      value: 523.5
+      inSlope: 14.400024
+      outSlope: 14.400024
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 5.5
+      value: 530
+      inSlope: 11.900024
+      outSlope: 11.900024
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 6
+      value: 535.4
+      inSlope: 10
+      outSlope: 10
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 6.5
+      value: 540
+      inSlope: 1.1999512
+      outSlope: 1.1999512
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 7
+      value: 536.6
+      inSlope: -13.700012
+      outSlope: -13.700012
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 7.5
+      value: 526.3
+      inSlope: -27.49997
+      outSlope: -27.49997
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 8
+      value: 509.1
+      inSlope: -95.099976
+      outSlope: -95.099976
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 8.5
+      value: 431.2
+      inSlope: -155.79999
+      outSlope: -155.79999
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  gearRatios:
+  - 2.647
+  - 3.133
+  - 2.083
+  - 1.575
+  - 1.244
+  - 0.979
+  - 0.788
+  - 0.677
+  finalDrive: 4.89
