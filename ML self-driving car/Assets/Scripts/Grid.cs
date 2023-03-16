@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Grid
@@ -30,19 +31,19 @@ public class Grid
         Vector2Int gridPosition = WorldToGridPosition(worldPosition);
         return GetNeighbors(gridPosition.x, gridPosition.y);
     }
-    private void PlaceItem(int x, int y, GameObject item)
+    private bool TryPlaceItem(int x, int y, GameObject item)
     {
         if (!isInBounds(x, y))
-            return;
+            return false;
         if (items[x, y])
-            return;
+            return false;
         items[x, y] = item;
-        item.transform.position = GridToWorldPosition(x, y);
+        return true;
     }
-    public void PlaceItem(Vector3 worldPosition, GameObject item)
+    public bool TryPlaceItem(Vector3 worldPosition, GameObject item)
     {
         Vector2Int gridPosition = WorldToGridPosition(worldPosition);
-        PlaceItem(gridPosition.x, gridPosition.y, item);
+        return TryPlaceItem(gridPosition.x, gridPosition.y, item);
     }
     private GameObject RemoveItem(int x, int y)
     {
@@ -74,10 +75,11 @@ public class Grid
         gridPosition.y = Mathf.FloorToInt((worldPosition - origin).z / cellsize);
         return gridPosition;
     }
-    public Vector3 SnappedToGridPosition(Vector3 worldPosition)
+    public Vector3 SnapPositionToGrid(Vector3 worldPosition)
     {
         Vector2Int gridPosition = WorldToGridPosition(worldPosition);
-        return GridToWorldPosition(gridPosition.x, gridPosition.y);
+        Vector3 snappedposition = GridToWorldPosition(gridPosition.x, gridPosition.y);
+        return snappedposition + new Vector3(.5f, 0, .5f) * cellsize;
     }
 
     void OnDrawGizmos()

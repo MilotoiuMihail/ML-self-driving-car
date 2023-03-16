@@ -11,21 +11,12 @@ public class TrackBuilder : MonoBehaviour
         REMOVE
     }
     private Grid grid;
-    private GameObject currentItem;
+    private TrackSegment currentItem;
     [SerializeField] private Transform track;
-    [SerializeField] private GameObject straight;
-    [SerializeField] private GameObject corner;
+    [SerializeField] private TrackSegment straight;
+    [SerializeField] private TrackSegment corner;
     [SerializeField] private BuildState state;
     public static TrackBuilder Instance { get; private set; }
-    private void Awake()
-    {
-        IntializeSingleton();
-    }
-
-    private void Start()
-    {
-        grid = new Grid(20, 10, 40, Vector3.zero);
-    }
     private void IntializeSingleton()
     {
         if (Instance && Instance != this)
@@ -37,7 +28,41 @@ public class TrackBuilder : MonoBehaviour
             Instance = this;
         }
     }
-    private void CreateItem(GameObject item, Vector3 position)
+    private void Awake()
+    {
+        IntializeSingleton();
+    }
+
+    private void Start()
+    {
+        grid = new Grid(20, 10, 40, Vector3.zero);
+        CreateItem(straight, grid.SnapPositionToGrid(TrackBuilder.GetMouseWorldPosition()));
+    }
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            PlaceItemOnGrid(TrackBuilder.GetMouseWorldPosition());
+            return;
+        }
+        if (Input.GetMouseButtonDown(1))
+        {
+            RemoveItemFromGrid(TrackBuilder.GetMouseWorldPosition());
+            return;
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            RotateItem(90);
+            return;
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            RotateItem(0);
+            return;
+        }
+    }
+
+    private void CreateItem(TrackSegment item, Vector3 position)
     {
         if (currentItem)
         {
@@ -48,41 +73,35 @@ public class TrackBuilder : MonoBehaviour
     }
     private void PlaceItemOnGrid(Vector3 position)
     {
-        grid.PlaceItem(position, currentItem);
+        if (!grid.TryPlaceItem(position, currentItem.gameObject))
+        {
+            return;
+        }
+        currentItem.Place(grid.SnapPositionToGrid(position));
         currentItem = null;
+        CreateItem(straight, grid.SnapPositionToGrid(TrackBuilder.GetMouseWorldPosition()));
     }
     private void RemoveItemFromGrid(Vector3 position)
     {
         GameObject item = grid.RemoveItem(position);
         Destroy(item);
     }
-    private void RotateItem(Quaternion rotation)
+    private void RotateItem(float degrees)
     {
-        currentItem.transform.rotation = Quaternion.Lerp(currentItem.transform.rotation, rotation, Time.deltaTime);
-    }
-    private void MoveItem(Vector3 position)
-    {
-        currentItem.transform.position = Vector3.Lerp(currentItem.transform.position, position, Time.deltaTime);
+        currentItem.SetYRotation(degrees);
     }
 
-    private static Vector3? GetMouseWorldPosition()
+    private static Vector3 GetMouseWorldPosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        Vector3? mouseWorldPosition = null;
         if (Physics.Raycast(ray, out RaycastHit raycastHit))
         {
-            mouseWorldPosition = new Vector3(raycastHit.point.x, 0, raycastHit.point.z);
+            return new Vector3(raycastHit.point.x, 0, raycastHit.point.z);
         }
-        return mouseWorldPosition;
+        return Vector3.zero;
     }
-
-    public static Vector3? GetMouseSnappedPosition()
+    public static Vector3 GetMouseSnappedPosition()
     {
-        Vector3? mousePosition = GetMouseWorldPosition();
-        if (mousePosition != null)
-        {
-            return TrackBuilder.Instance.grid.SnappedToGridPosition(mousePosition.Value);
-        }
-        return null;
+        return TrackBuilder.Instance.grid.SnapPositionToGrid(GetMouseWorldPosition());
     }
 }
