@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class TrackSegment : MonoBehaviour
@@ -13,7 +11,7 @@ public class TrackSegment : MonoBehaviour
             return;
         }
         FollowMouse();
-        RotateTowards(rotation);
+        // RotateTowards(rotation);
     }
     private void FollowMouse()
     {
@@ -35,6 +33,6 @@ public class TrackSegment : MonoBehaviour
     {
         isPlaced = true;
         transform.position = position;
-        transform.rotation = rotation;
+        // transform.rotation = rotation;
     }
 }
