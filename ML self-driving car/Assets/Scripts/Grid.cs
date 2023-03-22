@@ -81,7 +81,7 @@ public class Grid
         return snappedposition + new Vector3(.5f, 0, .5f) * cellsize;
     }
 
-    void OnDrawGizmos()
+    public void DrawGizmos()
     {
         if (items == null)
             return;

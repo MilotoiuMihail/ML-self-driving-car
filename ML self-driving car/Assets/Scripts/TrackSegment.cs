@@ -4,6 +4,10 @@ public class TrackSegment : MonoBehaviour
 {
     private bool isPlaced;
     private Quaternion rotation = Quaternion.identity;
+    private void Start()
+    {
+        transform.position = TrackBuilder.GetMouseSnappedPosition();
+    }
     private void Update()
     {
         if (isPlaced)
@@ -11,7 +15,7 @@ public class TrackSegment : MonoBehaviour
             return;
         }
         FollowMouse();
-        // RotateTowards(rotation);
+        RotateTowards(rotation);
     }
     private void FollowMouse()
     {
@@ -25,14 +29,14 @@ public class TrackSegment : MonoBehaviour
     {
         transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * 10);
     }
-    public void SetYRotation(float degrees)
+    public void RotateBy(float degrees)
     {
-        rotation = Quaternion.Euler(0, degrees, 0);
+        rotation = Quaternion.Euler(0, rotation.eulerAngles.y + degrees, 0);
     }
     public void Place(Vector3 position)
     {
         isPlaced = true;
         transform.position = position;
-        // transform.rotation = rotation;
+        transform.rotation = rotation;
     }
 }
