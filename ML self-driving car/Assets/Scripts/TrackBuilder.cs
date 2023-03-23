@@ -5,11 +5,15 @@ using UnityEngine;
 public class TrackBuilder : MonoBehaviour
 {
     private Grid grid;
-    private TrackSegment currentItem;
+    private TrackPiece currentPiece;
     [SerializeField] private Transform track;
     [SerializeField] private Straight straight;
     [SerializeField] private Corner corner;
-    private TrackSegment lastPiece;
+    private TrackPiece lastPiece;
+    private TrackPiece startPiece;
+    private bool selectStart;
+    private List<Checkpoint> checkpoints;
+    private List<TrackPiece> trackPieces;
     public static TrackBuilder Instance { get; private set; }
     private void IntializeSingleton()
     {
@@ -25,79 +29,121 @@ public class TrackBuilder : MonoBehaviour
     private void Awake()
     {
         IntializeSingleton();
+        grid = new Grid(20, 10, 40, Vector3.zero);
     }
 
     private void Start()
     {
-        grid = new Grid(20, 10, 40, Vector3.zero);
-        CreateItem(straight);
+        CreatePiece(straight);
+        checkpoints = new List<Checkpoint>();
     }
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            PlaceItemOnGrid(TrackBuilder.GetMouseWorldPosition());
-            CreateItem(lastPiece);
+            if (selectStart)
+            {
+                startPiece = (TrackPiece)grid.GetPiece(TrackBuilder.GetMouseWorldPosition());
+                selectStart = false;
+            }
+            PlacePieceOnGrid(TrackBuilder.GetMouseWorldPosition());
+            CreatePiece(lastPiece);
             return;
         }
         if (Input.GetMouseButtonDown(1))
         {
-            RemoveItemFromGrid(TrackBuilder.GetMouseWorldPosition());
+            RemovePieceFromGrid(TrackBuilder.GetMouseWorldPosition());
             return;
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
-            RotateItemBy(90);
+            RotatePieceBy(90);
             return;
         }
         if (Input.GetKeyDown(KeyCode.E))
         {
-            RotateItemBy(-90);
+            RotatePieceBy(-90);
             return;
         }
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            CreateItem(straight);
+            CreatePiece(straight);
             return;
         }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            CreateItem(corner);
+            CreatePiece(corner);
+            return;
+        }
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            selectStart = true;
             return;
         }
     }
-
-    private void CreateItem(TrackSegment item)
+    private void GetTrackPieces()
     {
-        if (currentItem)
+        if (!startPiece)
         {
-            if (currentItem.GetType() == item.GetType())
+            return;
+        }
+        trackPieces.Add(startPiece);
+        TrackPiece piece = GetNextPiece(startPiece);
+        while (piece != startPiece)
+        {
+            trackPieces.Add(piece);
+            piece = GetNextPiece(piece);
+        }
+    }
+    private TrackPiece GetNextPiece(TrackPiece piece)
+    {
+        return null;
+    }
+    // private void GetCheckpoints()
+    // {
+    //     if (!startPiece)
+    //     {
+    //         return;
+    //     }
+    //     checkpoints.Add(startPiece.GetComponentsInChildren<Checkpoint>()[0]);
+    //     TrackSegment piece = GetNextPiece(startPiece);
+    //     while (piece != startPiece.GetComponent<TrackSegment>())
+    //     {
+    //         checkpoints.AddRange(piece.GetComponentsInChildren<Checkpoint>());
+    //         piece = GetNextPiece(piece);
+    //     }
+    //     checkpoints.Add(startPiece.GetComponentsInChildren<Checkpoint>()[1]);
+    // }
+    private void CreatePiece(TrackPiece piece)
+    {
+        if (currentPiece)
+        {
+            if (currentPiece.GetType() == piece.GetType())
             {
                 return;
             }
-            Destroy(currentItem.gameObject);
+            Destroy(currentPiece.gameObject);
         }
-        lastPiece = item;
-        currentItem = Instantiate(item, transform.position, Quaternion.identity);
-        currentItem.transform.parent = track;
+        lastPiece = piece;
+        currentPiece = Instantiate(piece, transform.position, Quaternion.identity);
+        currentPiece.transform.parent = track;
     }
-    private void PlaceItemOnGrid(Vector3 position)
+    private void PlacePieceOnGrid(Vector3 position)
     {
-        if (!currentItem || !grid.TryPlaceItem(position, currentItem.gameObject))
+        if (!currentPiece || !grid.TryPlacePiece(position, currentPiece))
         {
             return;
         }
-        currentItem.Place(grid.SnapPositionToGrid(position));
-        currentItem = null;
+        currentPiece.Place(grid.SnapPositionToGrid(position));
+        currentPiece = null;
     }
-    private void RemoveItemFromGrid(Vector3 position)
+    private void RemovePieceFromGrid(Vector3 position)
     {
-        GameObject item = grid.RemoveItem(position);
-        Destroy(item);
+        Destroy(grid.RemovePiece(position).gameObject);
     }
-    private void RotateItemBy(float degrees)
+    private void RotatePieceBy(float degrees)
     {
-        currentItem.RotateBy(degrees);
+        currentPiece.RotateBy(degrees);
     }
     private static Vector3 GetMouseWorldPosition()
     {

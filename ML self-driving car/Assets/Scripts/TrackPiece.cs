@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TrackSegment : MonoBehaviour
+public class TrackPiece : MonoBehaviour
 {
     private bool isPlaced;
     private Quaternion rotation = Quaternion.identity;

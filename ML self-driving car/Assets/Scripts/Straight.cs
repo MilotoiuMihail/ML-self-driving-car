@@ -1,4 +1,4 @@
-public class Straight : TrackSegment
+public class Straight : TrackPiece
 {
 
 }

@@ -1,4 +1,4 @@
-public class Corner : TrackSegment
+public class Corner : TrackPiece
 {
 
 }

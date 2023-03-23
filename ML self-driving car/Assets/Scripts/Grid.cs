@@ -6,62 +6,78 @@ public class Grid
     private int height;
     private float cellsize;
     private Vector3 origin;
-    private GameObject[,] items;
+    private Component[,] pieces;
 
     public Grid(int width, int height, float cellsize, Vector3 origin)
     {
-        this.items = new GameObject[width, height];
+        this.pieces = new Component[width, height];
         this.width = width;
         this.height = height;
         this.cellsize = cellsize;
         this.origin = origin;
     }
-    private GameObject[] GetNeighbors(int x, int y)
+    private Component[] GetNeighbors(int x, int y)
     {
-        GameObject[] neighbors = new GameObject[4];
-        neighbors[0] = isInBounds(x, y + 1) ? items[x, y + 1] : null;
-        neighbors[1] = isInBounds(x + 1, y) ? items[x + 1, y] : null;
-        neighbors[2] = isInBounds(x, y - 1) ? items[x, y - 1] : null;
-        neighbors[3] = isInBounds(x - 1, y) ? items[x - 1, y] : null;
+        Component[] neighbors = new Component[4];
+        neighbors[0] = isInBounds(x, y + 1) ? pieces[x, y + 1] : null;
+        neighbors[1] = isInBounds(x + 1, y) ? pieces[x + 1, y] : null;
+        neighbors[2] = isInBounds(x, y - 1) ? pieces[x, y - 1] : null;
+        neighbors[3] = isInBounds(x - 1, y) ? pieces[x - 1, y] : null;
         return neighbors;
     }
-    public GameObject[] GetNeighbors(Vector3 worldPosition)
+    public Component[] GetNeighbors(Vector3 worldPosition)
     {
         Vector2Int gridPosition = WorldToGridPosition(worldPosition);
         return GetNeighbors(gridPosition.x, gridPosition.y);
     }
-    private bool TryPlaceItem(int x, int y, GameObject item)
+    public Component GetNeighbor(Vector3 worldPosition, Vector2Int direction)
+    {
+        Vector2Int gridPosition = WorldToGridPosition(worldPosition) + direction;
+        return GetPiece(gridPosition.x, gridPosition.y);
+    }
+    private bool TryPlacePiece(int x, int y, Component piece)
     {
         if (!isInBounds(x, y))
             return false;
-        if (items[x, y])
+        if (pieces[x, y])
             return false;
-        items[x, y] = item;
+        pieces[x, y] = piece;
         return true;
     }
-    public bool TryPlaceItem(Vector3 worldPosition, GameObject item)
+    public bool TryPlacePiece(Vector3 worldPosition, Component piece)
     {
         Vector2Int gridPosition = WorldToGridPosition(worldPosition);
-        return TryPlaceItem(gridPosition.x, gridPosition.y, item);
+        return TryPlacePiece(gridPosition.x, gridPosition.y, piece);
     }
-    private GameObject RemoveItem(int x, int y)
+    private Component RemovePiece(int x, int y)
     {
         if (!isInBounds(x, y))
             return null;
-        if (!items[x, y])
+        if (!pieces[x, y])
             return null;
-        GameObject item = items[x, y];
-        items[x, y] = null;
-        return item;
+        Component piece = pieces[x, y];
+        pieces[x, y] = null;
+        return piece;
     }
-    public GameObject RemoveItem(Vector3 worldPosition)
+    public Component RemovePiece(Vector3 worldPosition)
     {
         Vector2Int gridPosition = WorldToGridPosition(worldPosition);
-        return RemoveItem(gridPosition.x, gridPosition.y);
+        return RemovePiece(gridPosition.x, gridPosition.y);
     }
     private bool isInBounds(int x, int y)
     {
         return x >= 0 && x < width && y >= 0 && y < height;
+    }
+    private Component GetPiece(int x, int y)
+    {
+        if (!isInBounds(x, y))
+            return null;
+        return pieces[x, y];
+    }
+    public Component GetPiece(Vector3 worldPosition)
+    {
+        Vector2Int gridPosition = WorldToGridPosition(worldPosition);
+        return GetPiece(gridPosition.x, gridPosition.y);
     }
     private Vector3 GridToWorldPosition(int x, int y)
     {
@@ -83,12 +99,12 @@ public class Grid
 
     public void DrawGizmos()
     {
-        if (items == null)
+        if (pieces == null)
             return;
         Gizmos.color = Color.white;
-        for (int x = 0; x < items.GetLength(0); x++)
+        for (int x = 0; x < pieces.GetLength(0); x++)
         {
-            for (int y = 0; y < items.GetLength(1); y++)
+            for (int y = 0; y < pieces.GetLength(1); y++)
             {
                 Gizmos.DrawLine(GridToWorldPosition(x, y), GridToWorldPosition(x, y + 1));
                 Gizmos.DrawLine(GridToWorldPosition(x, y), GridToWorldPosition(x + 1, y));
