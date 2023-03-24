@@ -13,9 +13,10 @@ public class TrackBuilder : MonoBehaviour
     private TrackPiece lastPieceType;
     private TrackPiece startPiece;
     private bool selectStart;
+    [SerializeField] private bool trackUpDirection;
+    private int nextCheckpointIndex;
     private List<Checkpoint> checkpoints;
     private List<TrackPiece> trackPieces;
-    [SerializeField] private bool trackUpDirection;
     public static TrackBuilder Instance { get; private set; }
     private void IntializeSingleton()
     {
@@ -90,6 +91,18 @@ public class TrackBuilder : MonoBehaviour
             return;
         }
     }
+    public void PassedCheckpoint(Checkpoint checkpoint)
+    {
+        if (checkpoints?.IndexOf(checkpoint) == nextCheckpointIndex)
+        {
+            Debug.Log("Correct");
+            nextCheckpointIndex = (nextCheckpointIndex + 1) % checkpoints.Count;
+        }
+        else
+        {
+            Debug.Log("Wrong");
+        }
+    }
     private void ComputeTrack()
     {
         if (!startPiece)
@@ -98,6 +111,7 @@ public class TrackBuilder : MonoBehaviour
         }
         trackPieces?.Clear();
         checkpoints?.Clear();
+        nextCheckpointIndex = 0;
         trackPieces.Add(startPiece);
         TrackPiece piece = GetSecondPiece();
         trackPieces.Add(piece);

@@ -8,7 +8,7 @@ public class Checkpoint : MonoBehaviour
     {
         if (other.TryGetComponent<Player>(out Player player))
         {
-            Debug.Log("Check");
+            TrackBuilder.Instance.PassedCheckpoint(this);
         }
     }
 }
