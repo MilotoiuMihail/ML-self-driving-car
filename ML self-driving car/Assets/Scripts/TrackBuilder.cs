@@ -115,30 +115,66 @@ public class TrackBuilder : MonoBehaviour
         {
             if (startPiece.HasRotation(0))
             {
-                return trackUpDirection ? neighbors[0] : neighbors[2];
+                if (trackUpDirection)
+                {
+                    checkpoints.AddRange(GetCheckpoints(startPiece));
+                    return neighbors[0];
+                }
+                checkpoints.AddRange(GetCheckpoints(startPiece).Reverse());
+                return neighbors[2];
             }
             if (startPiece.HasRotation(90))
             {
-                return trackUpDirection ? neighbors[1] : neighbors[3];
+                if (trackUpDirection)
+                {
+                    checkpoints.AddRange(GetCheckpoints(startPiece));
+                    return neighbors[1];
+                }
+                checkpoints.AddRange(GetCheckpoints(startPiece).Reverse());
+                return neighbors[3];
             }
         }
         else if (startPiece.IsCorner())
         {
             if (startPiece.HasRotation(0))
             {
-                return trackUpDirection ? neighbors[1] : neighbors[2];
+                if (trackUpDirection)
+                {
+                    checkpoints.AddRange(GetCheckpoints(startPiece));
+                    return neighbors[1];
+                }
+                checkpoints.AddRange(GetCheckpoints(startPiece).Reverse());
+                return neighbors[2];
             }
             if (startPiece.HasRotation(90))
             {
-                return trackUpDirection ? neighbors[3] : neighbors[2];
+                if (trackUpDirection)
+                {
+                    checkpoints.AddRange(GetCheckpoints(startPiece).Reverse());
+                    return neighbors[3];
+                }
+                checkpoints.AddRange(GetCheckpoints(startPiece));
+                return neighbors[2];
             }
             if (startPiece.HasRotation(180))
             {
-                return trackUpDirection ? neighbors[0] : neighbors[3];
+                if (trackUpDirection)
+                {
+                    checkpoints.AddRange(GetCheckpoints(startPiece).Reverse());
+                    return neighbors[0];
+                }
+                checkpoints.AddRange(GetCheckpoints(startPiece));
+                return neighbors[3];
             }
             if (startPiece.HasRotation(270))
             {
-                return trackUpDirection ? neighbors[0] : neighbors[1];
+                if (trackUpDirection)
+                {
+                    checkpoints.AddRange(GetCheckpoints(startPiece));
+                    return neighbors[0];
+                }
+                checkpoints.AddRange(GetCheckpoints(startPiece).Reverse());
+                return neighbors[1];
             }
         }
         return null;
@@ -151,30 +187,66 @@ public class TrackBuilder : MonoBehaviour
         {
             if (piece.HasRotation(0))
             {
-                return neighbors[0] != previousPiece ? neighbors[0] : neighbors[2];
+                if (neighbors[0] != previousPiece)
+                {
+                    checkpoints.AddRange(GetCheckpoints(piece));
+                    return neighbors[0];
+                }
+                checkpoints.AddRange(GetCheckpoints(piece).Reverse());
+                return neighbors[2];
             }
             if (piece.HasRotation(90))
             {
-                return neighbors[1] != previousPiece ? neighbors[1] : neighbors[3];
+                if (neighbors[1] != previousPiece)
+                {
+                    checkpoints.AddRange(GetCheckpoints(piece));
+                    return neighbors[1];
+                }
+                checkpoints.AddRange(GetCheckpoints(piece).Reverse());
+                return neighbors[3];
             }
         }
         else if (piece.IsCorner())
         {
             if (piece.HasRotation(0))
             {
-                return neighbors[1] != previousPiece ? neighbors[1] : neighbors[2];
+                if (neighbors[1] != previousPiece)
+                {
+                    checkpoints.AddRange(GetCheckpoints(piece));
+                    return neighbors[1];
+                }
+                checkpoints.AddRange(GetCheckpoints(piece).Reverse());
+                return neighbors[2];
             }
             if (piece.HasRotation(90))
             {
-                return neighbors[2] != previousPiece ? neighbors[2] : neighbors[3];
+                if (neighbors[2] != previousPiece)
+                {
+                    checkpoints.AddRange(GetCheckpoints(piece));
+                    return neighbors[2];
+                }
+                checkpoints.AddRange(GetCheckpoints(piece).Reverse());
+                return neighbors[3];
             }
             if (piece.HasRotation(180))
             {
-                return neighbors[0] != previousPiece ? neighbors[0] : neighbors[3];
+                if (neighbors[3] != previousPiece)
+                {
+                    checkpoints.AddRange(GetCheckpoints(piece));
+                    return neighbors[3];
+                }
+                checkpoints.AddRange(GetCheckpoints(piece).Reverse());
+                return neighbors[0];
             }
             if (piece.HasRotation(270))
             {
-                return neighbors[0] != previousPiece ? neighbors[0] : neighbors[1];
+                if (neighbors[0] != previousPiece)
+                {
+                    checkpoints.AddRange(GetCheckpoints(piece));
+                    return neighbors[0];
+                }
+                checkpoints.AddRange(GetCheckpoints(piece).Reverse());
+                return neighbors[1];
             }
         }
         return null;

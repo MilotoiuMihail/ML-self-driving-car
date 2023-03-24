@@ -57,6 +57,6 @@ public class TrackPiece : MonoBehaviour
     }
     public bool HasRotation(float degrees)
     {
-        return Mathf.FloorToInt(transform.rotation.eulerAngles.y) == degrees;
+        return Mathf.Approximately(transform.rotation.eulerAngles.y, degrees);
     }
 }
