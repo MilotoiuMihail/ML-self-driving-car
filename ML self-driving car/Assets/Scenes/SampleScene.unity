@@ -23076,6 +23076,7 @@ MonoBehaviour:
   straight: {fileID: 6950146972040068190, guid: 4be0cee281714d2478a65faff3e35ab3,
     type: 3}
   corner: {fileID: 1803658807463394410, guid: 51122b433f9a62047bb9fb503508c5ed, type: 3}
+  trackUpDirection: 0
 --- !u!4 &1177306734
 Transform:
   m_ObjectHideFlags: 0

@@ -38,5 +38,25 @@ public class TrackPiece : MonoBehaviour
         isPlaced = true;
         transform.position = position;
         transform.rotation = rotation;
+        if (IsStraight())
+        {
+            if (HasRotation(180) || HasRotation(270))
+            {
+                RotateBy(180);
+                transform.rotation = rotation;
+            }
+        }
+    }
+    public bool IsStraight()
+    {
+        return GetComponent<Straight>();
+    }
+    public bool IsCorner()
+    {
+        return GetComponent<Corner>();
+    }
+    public bool HasRotation(float degrees)
+    {
+        return Mathf.FloorToInt(transform.rotation.eulerAngles.y) == degrees;
     }
 }

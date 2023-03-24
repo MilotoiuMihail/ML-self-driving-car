@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,11 +10,12 @@ public class TrackBuilder : MonoBehaviour
     [SerializeField] private Transform track;
     [SerializeField] private Straight straight;
     [SerializeField] private Corner corner;
-    private TrackPiece lastPiece;
+    private TrackPiece lastPieceType;
     private TrackPiece startPiece;
     private bool selectStart;
     private List<Checkpoint> checkpoints;
     private List<TrackPiece> trackPieces;
+    [SerializeField] private bool trackUpDirection;
     public static TrackBuilder Instance { get; private set; }
     private void IntializeSingleton()
     {
@@ -30,11 +32,13 @@ public class TrackBuilder : MonoBehaviour
     {
         IntializeSingleton();
         grid = new Grid(20, 10, 40, Vector3.zero);
+        trackUpDirection = true;
     }
 
     private void Start()
     {
         CreatePiece(straight);
+        trackPieces = new List<TrackPiece>();
         checkpoints = new List<Checkpoint>();
     }
     private void Update()
@@ -47,7 +51,7 @@ public class TrackBuilder : MonoBehaviour
                 selectStart = false;
             }
             PlacePieceOnGrid(TrackBuilder.GetMouseWorldPosition());
-            CreatePiece(lastPiece);
+            CreatePiece(lastPieceType);
             return;
         }
         if (Input.GetMouseButtonDown(1))
@@ -80,40 +84,105 @@ public class TrackBuilder : MonoBehaviour
             selectStart = true;
             return;
         }
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            ComputeTrack();
+            return;
+        }
     }
-    private void GetTrackPieces()
+    private void ComputeTrack()
     {
         if (!startPiece)
         {
             return;
         }
+        trackPieces?.Clear();
+        checkpoints?.Clear();
         trackPieces.Add(startPiece);
-        TrackPiece piece = GetNextPiece(startPiece);
-        while (piece != startPiece)
+        TrackPiece piece = GetSecondPiece();
+        trackPieces.Add(piece);
+        piece = GetNextPiece(piece);
+        while (piece != startPiece && piece != null)
         {
             trackPieces.Add(piece);
             piece = GetNextPiece(piece);
         }
     }
-    private TrackPiece GetNextPiece(TrackPiece piece)
+    private TrackPiece GetSecondPiece()
     {
+        TrackPiece[] neighbors = grid.GetNeighbors(startPiece.transform.position).Select(neighbor => (TrackPiece)neighbor).ToArray<TrackPiece>();
+        if (startPiece.IsStraight())
+        {
+            if (startPiece.HasRotation(0))
+            {
+                return trackUpDirection ? neighbors[0] : neighbors[2];
+            }
+            if (startPiece.HasRotation(90))
+            {
+                return trackUpDirection ? neighbors[1] : neighbors[3];
+            }
+        }
+        else if (startPiece.IsCorner())
+        {
+            if (startPiece.HasRotation(0))
+            {
+                return trackUpDirection ? neighbors[1] : neighbors[2];
+            }
+            if (startPiece.HasRotation(90))
+            {
+                return trackUpDirection ? neighbors[3] : neighbors[2];
+            }
+            if (startPiece.HasRotation(180))
+            {
+                return trackUpDirection ? neighbors[0] : neighbors[3];
+            }
+            if (startPiece.HasRotation(270))
+            {
+                return trackUpDirection ? neighbors[0] : neighbors[1];
+            }
+        }
         return null;
     }
-    // private void GetCheckpoints()
-    // {
-    //     if (!startPiece)
-    //     {
-    //         return;
-    //     }
-    //     checkpoints.Add(startPiece.GetComponentsInChildren<Checkpoint>()[0]);
-    //     TrackSegment piece = GetNextPiece(startPiece);
-    //     while (piece != startPiece.GetComponent<TrackSegment>())
-    //     {
-    //         checkpoints.AddRange(piece.GetComponentsInChildren<Checkpoint>());
-    //         piece = GetNextPiece(piece);
-    //     }
-    //     checkpoints.Add(startPiece.GetComponentsInChildren<Checkpoint>()[1]);
-    // }
+    private TrackPiece GetNextPiece(TrackPiece piece)
+    {
+        TrackPiece[] neighbors = grid.GetNeighbors(piece.transform.position).Select(neighbor => (TrackPiece)neighbor).ToArray<TrackPiece>();
+        TrackPiece previousPiece = trackPieces[trackPieces.Count - 2];
+        if (piece.IsStraight())
+        {
+            if (piece.HasRotation(0))
+            {
+                return neighbors[0] != previousPiece ? neighbors[0] : neighbors[2];
+            }
+            if (piece.HasRotation(90))
+            {
+                return neighbors[1] != previousPiece ? neighbors[1] : neighbors[3];
+            }
+        }
+        else if (piece.IsCorner())
+        {
+            if (piece.HasRotation(0))
+            {
+                return neighbors[1] != previousPiece ? neighbors[1] : neighbors[2];
+            }
+            if (piece.HasRotation(90))
+            {
+                return neighbors[2] != previousPiece ? neighbors[2] : neighbors[3];
+            }
+            if (piece.HasRotation(180))
+            {
+                return neighbors[0] != previousPiece ? neighbors[0] : neighbors[3];
+            }
+            if (piece.HasRotation(270))
+            {
+                return neighbors[0] != previousPiece ? neighbors[0] : neighbors[1];
+            }
+        }
+        return null;
+    }
+    private Checkpoint[] GetCheckpoints(TrackPiece piece)
+    {
+        return piece?.GetComponentsInChildren<Checkpoint>();
+    }
     private void CreatePiece(TrackPiece piece)
     {
         if (currentPiece)
@@ -124,7 +193,7 @@ public class TrackBuilder : MonoBehaviour
             }
             Destroy(currentPiece.gameObject);
         }
-        lastPiece = piece;
+        lastPieceType = piece;
         currentPiece = Instantiate(piece, transform.position, Quaternion.identity);
         currentPiece.transform.parent = track;
     }
@@ -139,7 +208,7 @@ public class TrackBuilder : MonoBehaviour
     }
     private void RemovePieceFromGrid(Vector3 position)
     {
-        Destroy(grid.RemovePiece(position).gameObject);
+        Destroy(grid.RemovePiece(position)?.gameObject);
     }
     private void RotatePieceBy(float degrees)
     {
