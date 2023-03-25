@@ -5,15 +5,21 @@ using UnityEngine;
 
 public class TrackBuilder : MonoBehaviour
 {
+    [SerializeField] private Straight straightPrefab;
+    [SerializeField] private Corner cornerPrefab;
+    [SerializeField] private Transform trackPiecesParent;
+    [SerializeField] private Transform ground;
+    [SerializeField] private bool trackDirectionUp;
     private Grid grid;
+    [Header("Grid")]
+    [SerializeField] private int width;
+    [SerializeField] private int height;
+    [SerializeField] private float cellSize;
+    [SerializeField] private Vector3 origin;
     private TrackPiece currentPiece;
-    [SerializeField] private Transform track;
-    [SerializeField] private Straight straight;
-    [SerializeField] private Corner corner;
-    private TrackPiece lastPieceType;
+    private TrackPiece lastPlacedPrefab;
     private TrackPiece startPiece;
-    private bool selectStart;
-    [SerializeField] private bool trackUpDirection;
+    private bool selectStartPiece;
     private int nextCheckpointIndex;
     private List<Checkpoint> checkpoints;
     private List<TrackPiece> trackPieces;
@@ -29,16 +35,21 @@ public class TrackBuilder : MonoBehaviour
             Instance = this;
         }
     }
+    private void OnValidate()
+    {
+        grid = new Grid(width, height, cellSize, origin);
+        ground.position = origin + Vector3.down * .1f;
+        ground.localScale = new Vector3(-width * cellSize * .1f, 1, -height * cellSize * .1f);
+    }
     private void Awake()
     {
         IntializeSingleton();
-        grid = new Grid(20, 10, 40, Vector3.zero);
-        trackUpDirection = true;
+        trackDirectionUp = true;
     }
 
     private void Start()
     {
-        CreatePiece(straight);
+        CreatePiece(straightPrefab);
         trackPieces = new List<TrackPiece>();
         checkpoints = new List<Checkpoint>();
     }
@@ -46,13 +57,13 @@ public class TrackBuilder : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            if (selectStart)
+            if (selectStartPiece)
             {
                 startPiece = (TrackPiece)grid.GetPiece(TrackBuilder.GetMouseWorldPosition());
-                selectStart = false;
+                selectStartPiece = false;
             }
             PlacePieceOnGrid(TrackBuilder.GetMouseWorldPosition());
-            CreatePiece(lastPieceType);
+            CreatePiece(lastPlacedPrefab);
             return;
         }
         if (Input.GetMouseButtonDown(1))
@@ -72,17 +83,17 @@ public class TrackBuilder : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            CreatePiece(straight);
+            CreatePiece(straightPrefab);
             return;
         }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            CreatePiece(corner);
+            CreatePiece(cornerPrefab);
             return;
         }
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            selectStart = true;
+            selectStartPiece = true;
             return;
         }
         if (Input.GetKeyDown(KeyCode.W))
@@ -129,7 +140,7 @@ public class TrackBuilder : MonoBehaviour
         {
             if (startPiece.HasRotation(0))
             {
-                if (trackUpDirection)
+                if (trackDirectionUp)
                 {
                     checkpoints.AddRange(GetCheckpoints(startPiece));
                     return neighbors[0];
@@ -139,7 +150,7 @@ public class TrackBuilder : MonoBehaviour
             }
             if (startPiece.HasRotation(90))
             {
-                if (trackUpDirection)
+                if (trackDirectionUp)
                 {
                     checkpoints.AddRange(GetCheckpoints(startPiece));
                     return neighbors[1];
@@ -152,7 +163,7 @@ public class TrackBuilder : MonoBehaviour
         {
             if (startPiece.HasRotation(0))
             {
-                if (trackUpDirection)
+                if (trackDirectionUp)
                 {
                     checkpoints.AddRange(GetCheckpoints(startPiece));
                     return neighbors[1];
@@ -162,7 +173,7 @@ public class TrackBuilder : MonoBehaviour
             }
             if (startPiece.HasRotation(90))
             {
-                if (trackUpDirection)
+                if (trackDirectionUp)
                 {
                     checkpoints.AddRange(GetCheckpoints(startPiece).Reverse());
                     return neighbors[3];
@@ -172,7 +183,7 @@ public class TrackBuilder : MonoBehaviour
             }
             if (startPiece.HasRotation(180))
             {
-                if (trackUpDirection)
+                if (trackDirectionUp)
                 {
                     checkpoints.AddRange(GetCheckpoints(startPiece).Reverse());
                     return neighbors[0];
@@ -182,7 +193,7 @@ public class TrackBuilder : MonoBehaviour
             }
             if (startPiece.HasRotation(270))
             {
-                if (trackUpDirection)
+                if (trackDirectionUp)
                 {
                     checkpoints.AddRange(GetCheckpoints(startPiece));
                     return neighbors[0];
@@ -279,9 +290,9 @@ public class TrackBuilder : MonoBehaviour
             }
             Destroy(currentPiece.gameObject);
         }
-        lastPieceType = piece;
+        lastPlacedPrefab = piece;
         currentPiece = Instantiate(piece, transform.position, Quaternion.identity);
-        currentPiece.transform.parent = track;
+        currentPiece.transform.parent = trackPiecesParent;
     }
     private void PlacePieceOnGrid(Vector3 position)
     {
