@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 public static class SaveManager
 {
     public static SaveData CurrentSaveData { get; private set; } = new SaveData();
-    public const string SaveDirectory = "Saves/";
+    public const string SaveDirectory = "Saves";
     public const string FileName = "Save.game";
     public static void Save()
     {
