@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 using TMPro;
 using System;
 
@@ -9,7 +10,7 @@ public class ModalButton : MonoBehaviour
 {
     private TMP_Text textComponent;
     private Image image;
-    private Action interact;
+    private UnityEvent interactEvent = new UnityEvent();
 
     private void Awake()
     {
@@ -18,11 +19,12 @@ public class ModalButton : MonoBehaviour
     }
     public void OnInteract()
     {
-        interact?.Invoke();
+        interactEvent?.Invoke();
     }
-    public void SetInteractAction(Action action)
+    public void SetInteractAction(UnityEvent action)
     {
-        interact = action;
+        interactEvent.RemoveAllListeners();
+        interactEvent.AddListener(action.Invoke);
     }
     public void SetColor(Color32 color)
     {

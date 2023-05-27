@@ -42,7 +42,7 @@ public class ModalWindow : MonoBehaviour
         }
         buttons[index].OnInteract();
     }
-    private void Close()
+    public void Close()
     {
         gameObject.SetActive(false);
     }
@@ -70,7 +70,7 @@ public class ModalWindow : MonoBehaviour
     {
         for (int i = 0; i < buttons.Length; i++)
         {
-            SetButton(buttons[i], buttonsData[i]);
+            SetButton(buttons[i], i < buttonsData.Length ? buttonsData[i] : new ModalButtonData());
         }
     }
 
@@ -78,7 +78,7 @@ public class ModalWindow : MonoBehaviour
     {
         button.SetText(buttonData.Text);
         button.SetColor(buttonData.Color);
-        button.SetInteractAction(buttonData.Action);
+        button.SetInteractAction(buttonData.ActionEvent);
         button.gameObject.SetActive(!string.IsNullOrEmpty(buttonData.Text));
     }
 }

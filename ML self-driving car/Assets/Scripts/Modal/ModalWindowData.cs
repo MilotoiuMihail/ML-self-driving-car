@@ -1,13 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using System;
 
+[System.Serializable]
 public class ModalWindowData
 {
-    public string Title { get; set; }
-    public string Body { get; set; }
-    private ModalButtonData[] buttons;
+    public string Title;
+    [TextArea]
+    public string Body;
+    [SerializeField] private ModalButtonData[] buttons;
 
     public ModalWindowData(int noButtons)
     {
@@ -21,19 +24,20 @@ public class ModalWindowData
     {
         return buttons;
     }
-    public void SetButton(int index, string text, Action buttonAction)
+    public void SetButton(int index, string text, UnityAction buttonAction)
     {
         if (IsInRange(index))
         {
             buttons[index].Text = text;
-            buttons[index].Action = buttonAction;
+            buttons[index].ActionEvent.RemoveAllListeners();
+            buttons[index].ActionEvent.AddListener(buttonAction);
         }
         else
         {
             Debug.LogWarning("Button index out of range");
         }
     }
-    public void SetButton(int index, string text, Action buttonAction, Color32 color)
+    public void SetButton(int index, string text, UnityAction buttonAction, Color32 color)
     {
         if (IsInRange(index))
         {

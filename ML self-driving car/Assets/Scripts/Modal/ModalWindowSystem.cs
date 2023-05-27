@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using System;
 
 public class ModalWindowSystem : Singleton<ModalWindowSystem>
@@ -25,12 +26,12 @@ public class ModalWindowSystem : Singleton<ModalWindowSystem>
         modalWindowData.Body = text;
         return this;
     }
-    public ModalWindowSystem SetButton(int index, string text, Action buttonAction)
+    public ModalWindowSystem SetButton(int index, string text, UnityAction buttonAction)
     {
         modalWindowData.SetButton(index, text, buttonAction);
         return this;
     }
-    public ModalWindowSystem SetButton(int index, string text, Action buttonAction, Color32 color)
+    public ModalWindowSystem SetButton(int index, string text, UnityAction buttonAction, Color32 color)
     {
         modalWindowData.SetButton(index, text, buttonAction, color);
         return this;
