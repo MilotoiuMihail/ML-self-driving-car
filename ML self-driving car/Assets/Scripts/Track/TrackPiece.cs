@@ -4,9 +4,11 @@ public class TrackPiece : MonoBehaviour
 {
     private bool isPlaced;
     private Quaternion rotation = Quaternion.identity;
-    private void Start()
+    private Checkpoint[] checkpoints;
+    private void Awake()
     {
-        transform.position = TrackBuilder.GetMouseSnappedPosition();
+        checkpoints = GetComponentsInChildren<Checkpoint>();
+        transform.position = InputManager.Instance.MousePosition;
     }
     private void Update()
     {
@@ -17,9 +19,17 @@ public class TrackPiece : MonoBehaviour
         FollowMouse();
         RotateTowards(rotation);
     }
+    public TrackPieceData ToData()
+    {
+        TrackPieceData data = new TrackPieceData();
+        data.Position = transform.position;
+        data.Rotation = transform.rotation;
+        data.Type = IsStraight() ? TrackPieceType.STRAIGHT : TrackPieceType.CORNER;
+        return data;
+    }
     private void FollowMouse()
     {
-        MoveTowards(TrackBuilder.GetMouseSnappedPosition());
+        MoveTowards(InputManager.Instance.MousePosition);
     }
     private void MoveTowards(Vector3 position)
     {
@@ -33,6 +43,10 @@ public class TrackPiece : MonoBehaviour
     {
         rotation = Quaternion.Euler(0, rotation.eulerAngles.y + degrees, 0);
     }
+    public void SetRotation(Quaternion rotation)
+    {
+        this.rotation = rotation;
+    }
     public void Place(Vector3 position)
     {
         isPlaced = true;
@@ -42,7 +56,7 @@ public class TrackPiece : MonoBehaviour
         {
             if (HasRotation(180) || HasRotation(270))
             {
-                RotateBy(180);
+                RotateBy(-180);
                 transform.rotation = rotation;
             }
         }
@@ -51,12 +65,12 @@ public class TrackPiece : MonoBehaviour
     {
         return GetComponent<Straight>();
     }
-    public bool IsCorner()
-    {
-        return GetComponent<Corner>();
-    }
     public bool HasRotation(float degrees)
     {
         return Mathf.Approximately(transform.rotation.eulerAngles.y, degrees);
+    }
+    public Checkpoint[] GetCheckpoints()
+    {
+        return checkpoints;
     }
 }
