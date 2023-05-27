@@ -11,6 +11,9 @@ public class TopDownCameraRig : MonoBehaviour
     [SerializeField] private float maxMovementSpeed;
     [SerializeField] private float zoomSpeed;
     [SerializeField] private float rotationSpeed;
+    [SerializeField] private Transform target;
+    private bool followTarget;
+    private bool previousFollowTarget;
     private float edgeSizeRatio;
     private Vector3 zoomAmount;
     private Vector3 desiredPosition;
@@ -19,38 +22,78 @@ public class TopDownCameraRig : MonoBehaviour
     private Vector3 rotateStartPosition;
     private Vector3 rotateCurrentPosition;
 
-    // [SerializeField] private Transform bounds;
-    // private Vector3 minBounds;
-    // private Vector3 maxBounds;
-
-    void Start()
+    [SerializeField] private Renderer boundsRenderer;
+    private Vector3 minBounds;
+    private Vector3 maxBounds;
+    [SerializeField] private Vector2 zoomBounds;
+    public Vector2 ZoomBounds => zoomBounds;
+    private void OnEnable()
     {
+        GameManager.Instance.EnterEditState += UnsetFollowTarget;
+        GameManager.Instance.ExitEditState += SetPreviousFollowTarget;
+    }
+    private void OnDisable()
+    {
+        GameManager.Instance.EnterEditState -= UnsetFollowTarget;
+        GameManager.Instance.ExitEditState += SetPreviousFollowTarget;
+    }
+    private void Start()
+    {
+        minBounds = boundsRenderer.bounds.min;
+        maxBounds = boundsRenderer.bounds.max;
+
+        followTarget = true;
+
+        transform.position = boundsRenderer.bounds.center;
         desiredPosition = transform.position;
         desiredRotation = transform.rotation;
+        float defaultZoom = (ZoomBounds.x + ZoomBounds.y) * .5f;
+        cameraTransform.localPosition = new Vector3(
+            cameraTransform.localPosition.x,
+            defaultZoom,
+            -defaultZoom
+        );
         desiredZoom = cameraTransform.localPosition;
         edgeSizeRatio = 1 / edgeSize;
         zoomAmount = new Vector3(0, -zoomSpeed, zoomSpeed) * 100;
-
-        // Get the bounds of the map from the mapBounds transform
-        // Renderer renderer = bounds.GetComponent<Renderer>();
-        // minBounds = renderer.bounds.min;
-        // maxBounds = renderer.bounds.max;
     }
     void LateUpdate()
     {
-        // Clamp camera position to map bounds
-        // transform.position = new Vector3(
-        //     Mathf.Clamp(transform.position.x, minBounds.x, maxBounds.z),
-        //     transform.position.y,
-        //     Mathf.Clamp(transform.position.z, minBounds.z, maxBounds.z)
-        // );
-
+        if (followTarget)
+        {
+            FollowTarget();
+            return;
+        }
         Vector2 mousePosition = Input.mousePosition;
         HandleMovement(mousePosition);
         HandleRotation(mousePosition);
         HandleZoom();
     }
-
+    private void UnsetFollowTarget()
+    {
+        SetFollowTarget(false);
+    }
+    private void SetPreviousFollowTarget()
+    {
+        SetFollowTarget(previousFollowTarget);
+    }
+    public void SetFollowTarget(bool follow)
+    {
+        SaveFollowTarget();
+        followTarget = follow;
+    }
+    private void SaveFollowTarget()
+    {
+        previousFollowTarget = followTarget;
+    }
+    private void FollowTarget()
+    {
+        if (!target)
+        {
+            return;
+        }
+        transform.position = target.position;
+    }
     private void HandleMovement(Vector2 mousePosition)
     {
         if (Input.GetKey(KeyCode.LeftAlt))
@@ -77,6 +120,7 @@ public class TopDownCameraRig : MonoBehaviour
             float distanceFromEdge = edgeSize - mousePosition.x;
             desiredPosition += CalculateMovementAmount(-transform.right, distanceFromEdge);
         }
+        ClampMovement();
         UpdatePosition();
     }
     private void HandleRotation(Vector2 mousePosition)
@@ -101,6 +145,7 @@ public class TopDownCameraRig : MonoBehaviour
         {
             desiredZoom += CalculateZoomAmount(mouseScroll);
         }
+        ClampZoom();
         UpdateZoom();
     }
     float CalculateSpeedMultiplier(float distanceFromEdge)
@@ -119,6 +164,14 @@ public class TopDownCameraRig : MonoBehaviour
     {
         transform.position = Vector3.Lerp(transform.position, desiredPosition, Time.deltaTime * smoothing);
     }
+    private void ClampMovement()
+    {
+        desiredPosition = new Vector3(
+                    Mathf.Clamp(desiredPosition.x, minBounds.x, maxBounds.z),
+                    desiredPosition.y,
+                    Mathf.Clamp(desiredPosition.z, minBounds.z, maxBounds.z)
+                );
+    }
     private Quaternion CalculateRotationAmount(float positionDelta)
     {
         return Quaternion.Euler(Vector3.up * (-positionDelta * rotationSpeed * Time.deltaTime));
@@ -134,5 +187,13 @@ public class TopDownCameraRig : MonoBehaviour
     private void UpdateZoom()
     {
         cameraTransform.localPosition = Vector3.Lerp(cameraTransform.localPosition, desiredZoom, Time.deltaTime * smoothing);
+    }
+    private void ClampZoom()
+    {
+        desiredZoom = new Vector3(
+            desiredZoom.x,
+            Mathf.Clamp(desiredZoom.y, ZoomBounds.x, ZoomBounds.y),
+            Mathf.Clamp(desiredZoom.z, -ZoomBounds.y, -ZoomBounds.x)
+        );
     }
 }
