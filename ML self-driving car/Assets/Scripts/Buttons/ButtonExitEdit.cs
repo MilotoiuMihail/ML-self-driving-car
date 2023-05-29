@@ -71,7 +71,7 @@ public class ButtonExitEdit : MonoBehaviour
     }
     private bool IsSameTrackDirection()
     {
-        return SaveManager.CurrentSaveData.Track != null && track.IsTrackDirectionClockwise == SaveManager.CurrentSaveData.Track.IsTrackDirectionClockwise;
+        return track.IsTrackDirectionClockwise == SaveManager.CurrentSaveData.Track.IsTrackDirectionClockwise;
     }
     private bool IsSameData()
     {
