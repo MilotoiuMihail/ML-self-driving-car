@@ -2,25 +2,26 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 // CAR IS ASSUMED TO HAVE 4 WHEELS
 // NOTED WITH FL - 0, FR - 1, RL - 2, RR - 3
 // STEERING IS DONE ONLY WITH FRONT WHEELS
 public class Car : MonoBehaviour
 {
-    private enum Driver
+    private enum DriverType
     {
         PLAYER,
         AI
     }
     [SerializeField] private CarSpecs specs;
-    private enum GearBox
-    {
-        MANUAL,
-        AUTOMATIC
-    }
-    private Driver driver;
-    [SerializeField] private GearBox gearBox;
+    // private enum GearBox
+    // {
+    //     MANUAL,
+    //     AUTOMATIC
+    // }
+    private DriverType driver;
+    // [SerializeField] private GearBox gearBox;
     private CarInput input;
 
     private Wheel[] wheels;
@@ -40,11 +41,11 @@ public class Car : MonoBehaviour
     private float throttle;
     private float currentEngineTorque;
     private int currentGear;
-    [SerializeField] private float idleTreshold;
+    // [SerializeField] private float idleTreshold;
 
     private Gear[] gears;
     private Engine engine;
-    private float direction;
+    // private float direction;
     void Start()
     {
         currentGear = 1;
@@ -55,12 +56,14 @@ public class Car : MonoBehaviour
         engine = new Engine(specs.EngineCurve);
         InitializeCar();
 
-        gears = new Gear[specs.FinalGearRatios.Length + 1];
-        gears[0] = new Gear(specs.FinalGearRatios[0], Gear.ConvertGearIndexToName(0), 1000, 8500);
-        gears[1] = new Gear(0, Gear.ConvertGearIndexToName(1), 1000, 8500);
-        for (int i = 1; i < specs.FinalGearRatios.Length; i++)
+        // gears = new Gear[specs.FinalGearRatios.Length + 1];
+        gears = new Gear[specs.EffectiveGearRatios.Length];
+        gears[0] = new Gear(specs.EffectiveGearRatios[0], Gear.ConvertGearIndexToName(0), 1000, 8500);
+        // gears[1] = new Gear(0, Gear.ConvertGearIndexToName(1), 1000, 8500);
+        for (int i = 1; i < specs.EffectiveGearRatios.Length; i++)
         {
-            gears[i + 1] = new Gear(specs.FinalGearRatios[i], Gear.ConvertGearIndexToName(i + 1), 4500, 7000);
+            // gears[i + 1] = new Gear(specs.FinalGearRatios[i], Gear.ConvertGearIndexToName(i + 1), 4500, 7000);
+            gears[i] = new Gear(specs.EffectiveGearRatios[i], Gear.ConvertGearIndexToName(i), 4500, 7000);
         }
     }
 
@@ -68,44 +71,66 @@ public class Car : MonoBehaviour
     {
         ManageDriver();
         Steering();
-        ApplyDownforce();
         AnimateSteeringWheel();
+        ApplyDownforce();
         ComputeEngineTorque();
         Movement();
-        Shifting();
-        float v = 0;
+        AutomaticShift();
+        // Shifting();
         // direction = Vector3.Dot(rb.velocity, transform.forward);
         // Debug.Log(rb.velocity.magnitude);
+        if (input.HandBrake)
+        {
+            ToggleReverse();
+        }
         Debug.Log($"speed: {Mathf.Round(GetSpeedKph())}; RPM: {engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {currentEngineTorque}");
+        // Debug.Log(wheels[0].getRpm());
+
     }
-    private void OnDrawGizmos()
+
+    private void ToggleReverse()
     {
-        if (!rb)
-            return;
-        // Set the color of the gizmo
-        Gizmos.color = Color.green;
-
-        // Get the start position of the gizmo line
-        Vector3 startPosition = transform.position;
-
-        // Calculate the end position of the gizmo line based on the transform's forward direction
-        Vector3 endPosition = startPosition + transform.forward * 5;
-
-        // Draw the gizmo line
-        Gizmos.DrawLine(startPosition, endPosition);
+        if (currentGear == 0)
+        {
+            currentGear = 1;
+        }
+        else if (currentGear == 1)
+        {
+            currentGear = 0;
+        }
     }
+
+    // private void OnDrawGizmos()
+    // {
+    //     if (!rb)
+    //         return;
+    //     // Set the color of the gizmo
+    //     Gizmos.color = Color.green;
+
+    //     // Get the start position of the gizmo line
+    //     Vector3 startPosition = transform.position;
+
+    //     // Calculate the end position of the gizmo line based on the transform's forward direction
+    //     Vector3 endPosition = startPosition + transform.forward * 5;
+
+    //     // Draw the gizmo line
+    //     Gizmos.DrawLine(startPosition, endPosition);
+    // }
     // by computing the engine torque we also compute the rpm
     private void ComputeEngineTorque()
     {
-        if (currentGear == 1 && gearBox == GearBox.MANUAL)
-        {
-            engine.ComputeNeutralRpm(throttle);
-            currentEngineTorque = 0;
-            return;
-        }
+        // if (currentGear == 1 && gearBox == GearBox.MANUAL)
+        // {
+        //     engine.ComputeNeutralRpm(throttle);
+        //     currentEngineTorque = 0;
+        //     return;
+        // }
         // engineRpm = 1000 + Mathf.Abs(GetWheelsRpm()) * gears[currentGear].Ratio;
         engine.ComputeRpmInGear(GetWheelsRpm(), gears[currentGear].Ratio);
-        currentEngineTorque = throttle * engine.GetCurrentMaxTorque();
+        if (throttle >= 0)
+        {
+        }
+        // currentEngineTorque = throttle * engine.GetCurrentMaxTorque();
         // currentEngineTorque = throttle * (engineRpm < 8500 ? specs.EngineCurve.Evaluate(engineRpm / 1000f) : 0);
     }
 
@@ -114,11 +139,11 @@ public class Car : MonoBehaviour
         switch (specs.Drive)
         {
             case DriveType.REAR:
-                return (wheels[2].getRpm() + wheels[3].getRpm()) * .5f;
+                return (wheels[2].Rpm + wheels[3].Rpm) * .5f;
             case DriveType.FRONT:
-                return (wheels[0].getRpm() + wheels[1].getRpm()) * .5f;
+                return (wheels[0].Rpm + wheels[1].Rpm) * .5f;
             case DriveType.FULL:
-                return wheels.Average(wheel => wheel.getRpm());
+                return wheels.Average(wheel => wheel.Rpm);
             default:
                 return 0;
         }
@@ -128,33 +153,45 @@ public class Car : MonoBehaviour
     {
         foreach (var wheel in wheels)
         {
-            wheel.Torque = currentEngineTorque;
-            wheel.BrakeTorque = input.HandBrake ? brakeTorque : (throttle != 0 ? 0 : deceleration);
+            // wheel.Torque = currentEngineTorque;
+            // wheel.BrakeTorque = input.HandBrake ? brakeTorque : (throttle != 0 ? 0 : deceleration);
+            // wheel.BrakeTorque = throttle < 0 ? -throttle * brakeTorque : 0;
+
+            if (currentGear != 0)
+            {
+                wheel.Torque = (throttle > 0) ? currentEngineTorque : 0;
+                wheel.BrakeTorque = (throttle > 0) ? 0 : -throttle * brakeTorque;
+            }
+            else
+            {
+                wheel.Torque = (throttle > 0) ? 0 : currentEngineTorque;
+                wheel.BrakeTorque = (throttle > 0) ? throttle * brakeTorque : 0;
+            }
         }
     }
-    private void Shifting()
-    {
-        switch (gearBox)
-        {
-            case GearBox.MANUAL:
-                ManualShift();
-                return;
-            case GearBox.AUTOMATIC:
-                AutomaticShift();
-                return;
-        }
-    }
-    private void ManualShift()
-    {
-        if (input.GearUp)
-        {
-            ShiftUp();
-        }
-        if (input.GearDown)
-        {
-            ShiftDown();
-        }
-    }
+    // private void Shifting()
+    // {
+    //     switch (gearBox)
+    //     {
+    //         case GearBox.MANUAL:
+    //             ManualShift();
+    //             return;
+    //         case GearBox.AUTOMATIC:
+    //             AutomaticShift();
+    //             return;
+    //     }
+    // }
+    // private void ManualShift()
+    // {
+    //     if (input.GearUp)
+    //     {
+    //         ShiftUp();
+    //     }
+    //     if (input.GearDown)
+    //     {
+    //         ShiftDown();
+    //     }
+    // }
     private void ShiftUp()
     {
         currentGear = Mathf.Min(currentGear + 1, gears.Length - 1);
@@ -165,48 +202,53 @@ public class Car : MonoBehaviour
     }
     private void AutomaticShift()
     {
-        if (IsIdle())
+        // if (IsIdle())
+        // {
+        //     currentGear = 1;
+        //     return;
+        // }
+        // if (IsReversed())
+        // {
+        //     currentGear = 0;
+        //     return;
+        // }
+        // if (currentGear == 1 && throttle > 0)
+        // {
+        //     ShiftUp();
+        // }
+        if (currentGear == 0 || GetSpeedKph() <= 5)
         {
-            currentGear = 1;
             return;
-        }
-        if (IsReversed())
-        {
-            currentGear = 0;
-            return;
-        }
-        if (currentGear == 1 && throttle > 0)
-        {
-            ShiftUp();
         }
         if (engine.Rpm > gears[currentGear].MaxRpm && currentGear < gears.Length - 1)
         {
-            StartCoroutine(ShiftUpWithDelay(0.5f));
-            // ShiftUp();
+            // StartCoroutine(ShiftUpWithDelay(0.5f));
+            ShiftUp();
         }
-        if (engine.Rpm < gears[currentGear].MinRpm && currentGear > 2)
+        // if (engine.Rpm < gears[currentGear].MinRpm && currentGear > 2)
+        if (engine.Rpm < gears[currentGear].MinRpm && currentGear > 1)
         {
             ShiftDown();
         }
     }
-    private IEnumerator ShiftUpWithDelay(float shiftDelay)
-    {
-        Debug.Log("Start");
-        yield return new WaitForSeconds(shiftDelay);
-        ShiftUp();
-        Debug.Log("Finish");
-    }
+    // private IEnumerator ShiftUpWithDelay(float shiftDelay)
+    // {
+    //     Debug.Log("Start");
+    //     yield return new WaitForSeconds(shiftDelay);
+    //     ShiftUp();
+    //     Debug.Log("Finish");
+    // }
     // used for automatic gearbox. Checks if it is needed to shift in reverse
-    private bool IsReversed()
-    {
-        // Check if the throttle input is not positive and the car is moving in the opposite direction of its forward vector
-        return Vector3.Dot(rb.velocity, transform.forward) < -0.1f;
-    }
-    // used for automatic gearbox. Check if it is needed to shift in neutral
-    private bool IsIdle()
-    {
-        return rb.velocity.magnitude <= idleTreshold && throttle == 0;
-    }
+    // private bool IsReversed()
+    // {
+    //     // Check if the throttle input is not positive and the car is moving in the opposite direction of its forward vector
+    //     return Vector3.Dot(rb.velocity, transform.forward) < -0.1f;
+    // }
+    // // used for automatic gearbox. Check if it is needed to shift in neutral
+    // private bool IsIdle()
+    // {
+    //     return rb.velocity.magnitude <= idleTreshold && throttle == 0;
+    // }
     private void Steering()
     {
         float leftSteerAngle = 0;
@@ -240,15 +282,15 @@ public class Car : MonoBehaviour
     {
         return rb.velocity.magnitude * 3.6f;
     }
-    private float GetSpeedMph()
-    {
-        return rb.velocity.magnitude * 2.23694f;
-    }
+    // private float GetSpeedMph()
+    // {
+    //     return rb.velocity.magnitude * 2.23694f;
+    // }
 
-    private bool isGrounded()
-    {
-        return wheels.All(x => x.isGrounded());
-    }
+    // private bool isGrounded()
+    // {
+    //     return wheels.All(x => x.isGrounded());
+    // }
     private void ApplyDownforce()
     {
         rb.AddForce(-transform.up * downforce * rb.velocity.magnitude);
@@ -293,11 +335,11 @@ public class Car : MonoBehaviour
         if (!input) return; //momentan
         switch (driver)
         {
-            case Driver.PLAYER:
+            case DriverType.PLAYER:
                 steer = input.SteerInput;
                 throttle = input.ThrottleInput;
                 break;
-            case Driver.AI:
+            case DriverType.AI:
                 break;
             default:
                 break;

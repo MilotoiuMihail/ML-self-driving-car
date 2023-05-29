@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Wheel : MonoBehaviour
 {
-    [SerializeField] public WheelCollider wheelCollider;
+    [SerializeField] private WheelCollider wheelCollider;
     [SerializeField] private Transform wheelTransform;
     private bool hasPower;
 
@@ -17,11 +17,11 @@ public class Wheel : MonoBehaviour
         wheelCollider = GetComponent<WheelCollider>();
         wheelTransform = GetComponentInChildren<MeshRenderer>().transform;
 
-        hasPower = false;
-        SteeringAngle = 0;
+        // hasPower = false;
+        // SteeringAngle = 0;
     }
 
-    void Update()
+    void LateUpdate()
     {
         Animate();
     }
@@ -29,7 +29,10 @@ public class Wheel : MonoBehaviour
     void FixedUpdate()
     {
         Steer();
-        if (hasPower) Accelerate();
+        if (hasPower)
+        {
+            Accelerate();
+        }
         Brake();
     }
 
@@ -51,20 +54,16 @@ public class Wheel : MonoBehaviour
     {
         wheelCollider.brakeTorque = BrakeTorque;
     }
-    public void SetPower(bool _hasPower)
+    public void SetPower(bool hasPower)
     {
-        hasPower = _hasPower;
+        this.hasPower = hasPower;
     }
 
-    public float getRpm()
-    {
-        return wheelCollider.rpm;
-    }
-
+    public float Rpm => wheelCollider.rpm;
     public bool isGrounded()
     {
         return wheelCollider.isGrounded;
     }
 
-    public float Radius => wheelCollider.radius;
+    // public float Radius => wheelCollider.radius;
 }

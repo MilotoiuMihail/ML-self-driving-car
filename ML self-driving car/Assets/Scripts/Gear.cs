@@ -22,16 +22,23 @@ public class Gear
         {
             case 0:
                 return "R";
+            // case 1:
+            //     return "N";
+            // case 2:
+            //     return "1st";
+            // case 3:
+            //     return "2nd";
+            // case 4:
+            //     return "3rd";
             case 1:
-                return "N";
-            case 2:
                 return "1st";
-            case 3:
+            case 2:
                 return "2nd";
-            case 4:
+            case 3:
                 return "3rd";
             default:
-                return $"{gearIndex - 1}th";
+                // return $"{gearIndex - 1}th";
+                return $"{gearIndex}th";
         }
     }
 }

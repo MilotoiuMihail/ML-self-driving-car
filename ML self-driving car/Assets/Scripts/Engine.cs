@@ -5,11 +5,15 @@ using UnityEngine;
 public class Engine
 {
     private AnimationCurve curve;
+
     public float IdleRpm { get; private set; }
     public float RedlineRpm { get; private set; }
     public float Rpm { get; private set; }
     private const float RpmNeutralIncreaseRate = 1500;
     private const float RpmNeutralDecreaseRate = 2000;
+    private const float SmoothTime = 0.1f;
+    private const float RpmMultiplier = 1000f;
+    private const float RpmRatio = 1f / RpmMultiplier;
 
     public Engine(AnimationCurve engineCurve)
     {
@@ -21,18 +25,19 @@ public class Engine
 
     private float DetermineIdleRpm()
     {
-        return curve.keys[0].time * 1000;
+        return curve.keys[0].time * RpmMultiplier;
     }
 
     private float DetermineRedlineRpm()
     {
-        return curve.keys[curve.keys.Length - 1].time * 1000;
+        return curve.keys[curve.keys.Length - 1].time * RpmMultiplier;
     }
     public void ComputeRpmInGear(float wheelRpm, float gearRatio)
     {
         float desiredEngineRpm = IdleRpm + Mathf.Abs(wheelRpm) * gearRatio;
         float v = 0;
-        Rpm = Mathf.SmoothDamp(Rpm, desiredEngineRpm, ref v, 0.1f);
+        // Rpm = Mathf.SmoothDamp(Rpm, desiredEngineRpm, ref v, SmoothTime);
+        Rpm = Mathf.SmoothDamp(Rpm, desiredEngineRpm, ref v, Time.deltaTime);
     }
     public void ComputeNeutralRpm(float throttle)
     {
@@ -51,6 +56,6 @@ public class Engine
     {
         // divided to keep curve x values small
         // limits rpm and speed indirectly
-        return Rpm < RedlineRpm ? curve.Evaluate(Rpm / 1000f) : 0;
+        return Rpm < RedlineRpm ? curve.Evaluate(Rpm * RpmRatio) : 0;
     }
 }

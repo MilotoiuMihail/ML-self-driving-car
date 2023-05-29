@@ -9,7 +9,6 @@ public class CarSpecs : ScriptableObject
     [field: SerializeField] public float TurnRadius { get; private set; }
     [field: SerializeField] public float RearTrack { get; private set; }
 
-    // should contain keyframe with max torque?
     // first value should correspond to idle RPM
     // last value should correspond to redline RPM
     [field: SerializeField] public AnimationCurve EngineCurve { get; private set; }
@@ -17,7 +16,7 @@ public class CarSpecs : ScriptableObject
     [field: SerializeField] private float[] gearRatios;
     [field: SerializeField] private float finalDrive;
 
-    public float[] FinalGearRatios { get; private set; }
+    public float[] EffectiveGearRatios { get; private set; }
 
     private void OnEnable()
     {
@@ -25,13 +24,14 @@ public class CarSpecs : ScriptableObject
     }
     private void ComputeFinalGearRatios()
     {
-        // check if gear ratios null or length 0 or final drive null
         if (gearRatios == null)
+        {
             return;
-        FinalGearRatios = new float[gearRatios.Length];
+        }
+        EffectiveGearRatios = new float[gearRatios.Length];
         for (int i = 0; i < gearRatios.Length; i++)
         {
-            FinalGearRatios[i] = gearRatios[i] * finalDrive;
+            EffectiveGearRatios[i] = gearRatios[i] * finalDrive;
         }
     }
 }

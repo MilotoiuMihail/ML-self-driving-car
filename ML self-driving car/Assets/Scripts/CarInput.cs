@@ -18,6 +18,6 @@ public class CarInput : MonoBehaviour
         ThrottleInput = Input.GetAxis(inputY);
         GearUp = Input.GetKeyDown(KeyCode.E);
         GearDown = Input.GetKeyDown(KeyCode.Q);
-        HandBrake = Input.GetKey(KeyCode.Space);
+        HandBrake = Input.GetKeyDown(KeyCode.Space);
     }
 }
