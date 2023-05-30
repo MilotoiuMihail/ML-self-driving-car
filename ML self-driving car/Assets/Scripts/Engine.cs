@@ -11,7 +11,6 @@ public class Engine
     public float Rpm { get; private set; }
     private const float RpmNeutralIncreaseRate = 1500;
     private const float RpmNeutralDecreaseRate = 2000;
-    private const float SmoothTime = 0.1f;
     private const float RpmMultiplier = 1000f;
     private const float RpmRatio = 1f / RpmMultiplier;
 
@@ -36,7 +35,6 @@ public class Engine
     {
         float desiredEngineRpm = IdleRpm + Mathf.Abs(wheelRpm) * gearRatio;
         float v = 0;
-        // Rpm = Mathf.SmoothDamp(Rpm, desiredEngineRpm, ref v, SmoothTime);
         Rpm = Mathf.SmoothDamp(Rpm, desiredEngineRpm, ref v, Time.deltaTime);
     }
     public void ComputeNeutralRpm(float throttle)
