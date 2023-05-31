@@ -220,6 +220,37 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &163857527 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3686793258455755451, guid: cfdfde9ea1a804c45877b4b6ccec0e20,
+    type: 3}
+  m_PrefabInstance: {fileID: 3686793257420399974}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &163857528 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3686793258455755399, guid: cfdfde9ea1a804c45877b4b6ccec0e20,
+    type: 3}
+  m_PrefabInstance: {fileID: 3686793257420399974}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 163857527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 749682f766bcb6d409401ea132029daa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &163857532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 163857527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c54ea4c52117886479083f51e6e24178, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  steeringSmoothness: 2
 --- !u!1 &250494373
 GameObject:
   m_ObjectHideFlags: 0
@@ -1398,6 +1429,27 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1753186601 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8590861582408218661, guid: cfdfde9ea1a804c45877b4b6ccec0e20,
+    type: 3}
+  m_PrefabInstance: {fileID: 3686793257420399974}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1753186605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1753186601}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6ce2a2545632ae4a9dfc197ae96d06b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxSteeringWheelAngle: 30
+  steeringSmoothness: 2
+  carInput: {fileID: 163857528}
 --- !u!1 &1903228527
 GameObject:
   m_ObjectHideFlags: 0

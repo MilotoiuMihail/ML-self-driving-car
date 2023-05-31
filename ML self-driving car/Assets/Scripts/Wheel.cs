@@ -12,13 +12,10 @@ public class Wheel : MonoBehaviour
     public float Torque { get; set; }
     public float BrakeTorque { get; set; }
 
-    void Start()
+    void Awake()
     {
         wheelCollider = GetComponent<WheelCollider>();
         wheelTransform = GetComponentInChildren<MeshRenderer>().transform;
-
-        // hasPower = false;
-        // SteeringAngle = 0;
     }
 
     void LateUpdate()
@@ -64,6 +61,4 @@ public class Wheel : MonoBehaviour
     {
         return wheelCollider.isGrounded;
     }
-
-    // public float Radius => wheelCollider.radius;
 }

@@ -20,9 +20,9 @@ public class CarSpecs : ScriptableObject
 
     private void OnEnable()
     {
-        ComputeFinalGearRatios();
+        ComputeEffectiveGearRatios();
     }
-    private void ComputeFinalGearRatios()
+    private void ComputeEffectiveGearRatios()
     {
         if (gearRatios == null)
         {

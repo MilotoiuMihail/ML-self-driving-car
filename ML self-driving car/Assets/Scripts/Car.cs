@@ -6,27 +6,15 @@ using System.Linq;
 // STEERING IS DONE ONLY WITH FRONT WHEELS
 public class Car : MonoBehaviour
 {
-    private enum DriverType
-    {
-        PLAYER,
-        AI
-    }
+    private const float MeterpsToKph = 3.6f;
+    private const float MeterpsToMph = 2.23694f;
     [SerializeField] private CarSpecs specs;
-    private enum GearBox
-    {
-        MANUAL,
-        AUTOMATIC
-    }
-    private DriverType driver;
-    [SerializeField] private GearBox gearBox;
+    public CarSpecs Specs => specs;
+    [SerializeField] private bool hasManualGearBox;
     private CarInput input;
 
-    private Wheel[] wheels;
-    [SerializeField] private Transform steeringWheel;
-
-    private float steer;
     [SerializeField] private float steeringSmoothness;
-    [SerializeField] private float maxSteeringWheelAngle;
+    public Wheel[] Wheels { get; private set; }
 
     [SerializeField] private float downforce;
     [SerializeField] private float brakeTorque;
@@ -39,70 +27,48 @@ public class Car : MonoBehaviour
     private int currentGear;
 
     private Gear[] gears;
-    private Engine engine;
+    private CarEngine engine;
+    private void Awake()
+    {
+        Wheels = GetComponentsInChildren<Wheel>();
+        input = GetComponent<CarInput>();
+        rb = GetComponent<Rigidbody>();
+    }
     void Start()
     {
         currentGear = 1;
-        wheels = GetComponentsInChildren<Wheel>();
-        input = GetComponent<CarInput>();
-        rb = GetComponent<Rigidbody>();
         rb.centerOfMass = centreOfMass.localPosition;
-        engine = new Engine(specs.EngineCurve);
         ApplyDriveType();
         InitializeGears();
     }
 
     void Update()
     {
-        TakeInputFromDriver();
-        Steering();
+        TakeInput();
         engine.ComputeRpmInGear(GetWheelsRpm(), gears[currentGear].Ratio);
         currentEngineTorque = throttle * engine.GetCurrentMaxTorque();
         Movement();
         Shifting();
-        AnimateSteeringWheel();
         ApplyDownforce();
         Debug.Log($"speed: {Mathf.Round(GetSpeedKph())}; RPM: {engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {currentEngineTorque}");
 
     }
     private void InitializeGears()
     {
-        gears = new Gear[specs.EffectiveGearRatios.Length];
-        gears[0] = new Gear(specs.EffectiveGearRatios[0], 0, 1000, 8500);
-        for (int i = 1; i < specs.EffectiveGearRatios.Length; i++)
+        gears = new Gear[Specs.EffectiveGearRatios.Length];
+        gears[0] = new Gear(Specs.EffectiveGearRatios[0], 0, engine.IdleRpm, engine.RedlineRpm);
+        for (int i = 1; i < Specs.EffectiveGearRatios.Length; i++)
         {
-            gears[i] = new Gear(specs.EffectiveGearRatios[i], i, 4500, 7000);
+            gears[i] = new Gear(Specs.EffectiveGearRatios[i], i, 4500, 7000);
         }
     }
-    private void ToggleReverse()
+    private void TakeInput()
     {
-        if (currentGear == 0)
-        {
-            ShiftUp();
-        }
-        else if (currentGear == 1)
-        {
-            ShiftDown();
-        }
+        throttle = input.ThrottleInput;
     }
-    private float GetWheelsRpm()
-    {
-        switch (specs.Drive)
-        {
-            case DriveType.REAR:
-                return (wheels[2].Rpm + wheels[3].Rpm) * .5f;
-            case DriveType.FRONT:
-                return (wheels[0].Rpm + wheels[1].Rpm) * .5f;
-            case DriveType.FULL:
-                return wheels.Average(wheel => wheel.Rpm);
-            default:
-                return 0;
-        }
-    }
-
     private void Movement()
     {
-        foreach (var wheel in wheels)
+        foreach (var wheel in Wheels)
         {
             wheel.Torque = GetTorque();
             wheel.BrakeTorque = GetBrakeTorque();
@@ -124,16 +90,25 @@ public class Car : MonoBehaviour
         }
         return currentGear != 0 ? brakeTorque : 0;
     }
+    public void SetLeftSteering(float desiredSteerAngle)
+    {
+        Wheels[0].SteeringAngle = Mathf.Lerp(Wheels[0].SteeringAngle, desiredSteerAngle, steeringSmoothness * Time.deltaTime);
+
+    }
+    public void SetRightSteering(float desireedSteerAngle)
+    {
+        Wheels[1].SteeringAngle = Mathf.Lerp(Wheels[1].SteeringAngle, desireedSteerAngle, steeringSmoothness * Time.deltaTime);
+
+    }
     private void Shifting()
     {
-        switch (gearBox)
+        if (hasManualGearBox)
         {
-            case GearBox.MANUAL:
-                ManualShift();
-                break;
-            case GearBox.AUTOMATIC:
-                AutomaticShift();
-                break;
+            ManualShift();
+        }
+        else
+        {
+            AutomaticShift();
         }
     }
     private void ManualShift()
@@ -166,6 +141,17 @@ public class Car : MonoBehaviour
             ShiftDown();
         }
     }
+    private void ToggleReverse()
+    {
+        if (currentGear == 0)
+        {
+            ShiftUp();
+        }
+        else if (currentGear == 1)
+        {
+            ShiftDown();
+        }
+    }
     private void ShiftUp()
     {
         currentGear = Mathf.Min(currentGear + 1, gears.Length - 1);
@@ -174,42 +160,13 @@ public class Car : MonoBehaviour
     {
         currentGear = Mathf.Max(currentGear - 1, 0);
     }
-    private void Steering()
-    {
-        float leftSteerAngle = 0;
-        float rightSteerAngle = 0;
-        if (steer != 0)
-        {
-            leftSteerAngle = steer > 0 ? GetLeftSteerAngle() : GetRightSteerAngle();
-            rightSteerAngle = steer > 0 ? GetRightSteerAngle() : GetLeftSteerAngle();
-        }
-        wheels[0].SteeringAngle = Mathf.Lerp(wheels[0].SteeringAngle, leftSteerAngle, steeringSmoothness * Time.deltaTime);
-        wheels[1].SteeringAngle = Mathf.Lerp(wheels[1].SteeringAngle, rightSteerAngle, steeringSmoothness * Time.deltaTime);
-    }
-
-    private float GetLeftSteerAngle()
-    {
-        return Mathf.Rad2Deg * Mathf.Atan(specs.WheelBase / (specs.TurnRadius + specs.RearTrack * .5f)) * steer;
-    }
-
-    private float GetRightSteerAngle()
-    {
-        return Mathf.Rad2Deg * Mathf.Atan(specs.WheelBase / (specs.TurnRadius - specs.RearTrack * .5f)) * steer;
-    }
-
-    private void AnimateSteeringWheel()
-    {
-        var desiredRotation = Quaternion.Euler(steeringWheel.localEulerAngles.x, steeringWheel.localEulerAngles.y, -steer * maxSteeringWheelAngle);
-        steeringWheel.localRotation = Quaternion.Lerp(steeringWheel.localRotation, desiredRotation, steeringSmoothness * Time.deltaTime);
-    }
-
     private float GetSpeedKph()
     {
-        return rb.velocity.magnitude * 3.6f;
+        return rb.velocity.magnitude * MeterpsToKph;
     }
     private float GetSpeedMph()
     {
-        return rb.velocity.magnitude * 2.23694f;
+        return rb.velocity.magnitude * MeterpsToMph;
     }
     private void ApplyDownforce()
     {
@@ -219,7 +176,7 @@ public class Car : MonoBehaviour
     {
         bool rear = false;
         bool front = false;
-        switch (specs.Drive)
+        switch (Specs.Drive)
         {
             case DriveType.REAR:
                 rear = true;
@@ -234,26 +191,23 @@ public class Car : MonoBehaviour
             default:
                 break;
         }
-        wheels[0].SetPower(front);
-        wheels[1].SetPower(front);
-        wheels[2].SetPower(rear);
-        wheels[3].SetPower(rear);
+        Wheels[0].SetPower(front);
+        Wheels[1].SetPower(front);
+        Wheels[2].SetPower(rear);
+        Wheels[3].SetPower(rear);
     }
-
-    private void TakeInputFromDriver()
+    private float GetWheelsRpm()
     {
-        if (!input) return; //momentan
-        switch (driver)
+        switch (Specs.Drive)
         {
-            case DriverType.PLAYER:
-                steer = input.SteerInput;
-                throttle = input.ThrottleInput;
-                break;
-            case DriverType.AI:
-                break;
+            case DriveType.REAR:
+                return (Wheels[2].Rpm + Wheels[3].Rpm) * .5f;
+            case DriveType.FRONT:
+                return (Wheels[0].Rpm + Wheels[1].Rpm) * .5f;
+            case DriveType.FULL:
+                return Wheels.Average(wheel => wheel.Rpm);
             default:
-                break;
+                return 0;
         }
     }
-
 }
