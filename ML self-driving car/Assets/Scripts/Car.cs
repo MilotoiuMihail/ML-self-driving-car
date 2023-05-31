@@ -18,6 +18,7 @@ public class Car : MonoBehaviour
     private CarInput input;
     private float throttle;
     private int currentGear;
+    private bool isSwitchingGears;
     private Gear[] gears;
 
     private void Awake()
@@ -88,9 +89,9 @@ public class Car : MonoBehaviour
     {
         if (throttle > 0)
         {
-            return currentGear != 0 ? 0 : brakeTorque;
+            return currentGear != 0 ? 0 : brakeTorque * throttle;
         }
-        return currentGear != 0 ? brakeTorque : 0;
+        return currentGear != 0 ? brakeTorque * -throttle : 0;
     }
 
     public void SetLeftSteering(float desiredSteerAngle)
@@ -135,7 +136,7 @@ public class Car : MonoBehaviour
         {
             ToggleReverse();
         }
-        if (currentGear == 0 || GetSpeedKph() <= 5)
+        if (currentGear == 0)
         {
             return;
         }

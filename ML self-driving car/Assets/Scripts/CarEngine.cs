@@ -52,7 +52,7 @@ public class CarEngine : MonoBehaviour
 
     private void ComputeRpmInGear(float wheelRpm, float gearRatio)
     {
-        float desiredEngineRpm = IdleRpm + Mathf.Abs(wheelRpm) * gearRatio;
+        float desiredEngineRpm = Mathf.Abs(wheelRpm) * gearRatio;
         float v = 0;
         Rpm = Mathf.SmoothDamp(Rpm, desiredEngineRpm, ref v, Time.deltaTime);
     }
