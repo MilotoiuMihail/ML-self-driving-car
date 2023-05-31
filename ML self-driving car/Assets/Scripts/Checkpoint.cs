@@ -6,9 +6,9 @@ public class Checkpoint : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<Player>(out Player player))
+        if (other.TryGetComponent<Car>(out Car car))
         {
-            CheckpointManager.Instance.PassedCheckpoint(this);
+            CheckpointManager.Instance.PassedCheckpoint(car, this);
         }
     }
 }

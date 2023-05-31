@@ -6,17 +6,17 @@ public class CheckpointManager : Singleton<CheckpointManager>
 {
     private Track track;
     private List<Checkpoint> checkpoints;
-    private int nextCheckpointIndex;
+    private Dictionary<Car, int> checkpointTracker = new Dictionary<Car, int>();
     private void Start()
     {
         checkpoints = track.GetCheckpoints();
     }
-    public void PassedCheckpoint(Checkpoint checkpoint)
+    public void PassedCheckpoint(Car car, Checkpoint checkpoint)
     {
-        if (checkpoints.IndexOf(checkpoint) == nextCheckpointIndex)
+        if (checkpoints.IndexOf(checkpoint) == checkpointTracker[car])
         {
             Debug.Log("Correct");
-            nextCheckpointIndex = (nextCheckpointIndex + 1) % checkpoints.Count;
+            checkpointTracker[car] = (checkpointTracker[car] + 1) % checkpoints.Count;
         }
         else
         {
@@ -25,6 +25,9 @@ public class CheckpointManager : Singleton<CheckpointManager>
     }
     private void Reset()
     {
-        nextCheckpointIndex = 0;
+        foreach (Car car in checkpointTracker.Keys)
+        {
+            checkpointTracker[car] = 0;
+        }
     }
 }

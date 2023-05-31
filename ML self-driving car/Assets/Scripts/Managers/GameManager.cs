@@ -23,8 +23,14 @@ public class GameManager : Singleton<GameManager>
     }
     private void Start()
     {
+        ResetCarPosition();
+    }
+
+    public void ResetCarPosition()
+    {
         car.transform.position = track.StartPiece ? track.StartPiece.transform.position : cameraRig.transform.position;
     }
+
     public void ChangeGameState(GameState state)
     {
         previousState = currentState;
