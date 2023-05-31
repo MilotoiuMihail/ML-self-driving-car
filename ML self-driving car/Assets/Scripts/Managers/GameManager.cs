@@ -13,10 +13,17 @@ public class GameManager : Singleton<GameManager>
     public event Action ExitViewState;
     public event Action ExitEditState;
     public event Action ExitPausedState;
+    [SerializeField] private Car car;
+    [SerializeField] private Track track;
+    [SerializeField] private TopDownCameraRig cameraRig;
     protected override void Awake()
     {
         base.Awake();
         ChangeGameState(GameState.VIEW);
+    }
+    private void Start()
+    {
+        car.transform.position = track.StartPiece ? track.StartPiece.transform.position : cameraRig.transform.position;
     }
     public void ChangeGameState(GameState state)
     {

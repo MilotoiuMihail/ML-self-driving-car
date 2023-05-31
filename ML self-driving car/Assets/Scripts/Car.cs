@@ -53,7 +53,7 @@ public class Car : MonoBehaviour
         gears[0] = new Gear(Specs.EffectiveGearRatios[0], 0, engine.IdleRpm, engine.RedlineRpm);
         for (int i = 1; i < Specs.EffectiveGearRatios.Length; i++)
         {
-            gears[i] = new Gear(Specs.EffectiveGearRatios[i], i, 4500, 7000);
+            gears[i] = new Gear(Specs.EffectiveGearRatios[i], i, 3500, 6500);
         }
     }
 

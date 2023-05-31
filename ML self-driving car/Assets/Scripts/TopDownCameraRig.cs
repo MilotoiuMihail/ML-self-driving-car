@@ -41,10 +41,8 @@ public class TopDownCameraRig : MonoBehaviour
     {
         minBounds = boundsRenderer.bounds.min;
         maxBounds = boundsRenderer.bounds.max;
-
-        followTarget = true;
-
         transform.position = boundsRenderer.bounds.center;
+        followTarget = true;
         desiredPosition = transform.position;
         desiredRotation = transform.rotation;
         float defaultZoom = (ZoomBounds.x + ZoomBounds.y) * .5f;
@@ -59,6 +57,7 @@ public class TopDownCameraRig : MonoBehaviour
     }
     void LateUpdate()
     {
+        HandleZoom();
         if (followTarget)
         {
             FollowTarget();
@@ -67,7 +66,6 @@ public class TopDownCameraRig : MonoBehaviour
         Vector2 mousePosition = Input.mousePosition;
         HandleMovement(mousePosition);
         HandleRotation(mousePosition);
-        HandleZoom();
     }
     private void UnsetFollowTarget()
     {
