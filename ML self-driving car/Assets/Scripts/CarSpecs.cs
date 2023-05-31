@@ -8,20 +8,16 @@ public class CarSpecs : ScriptableObject
     [field: SerializeField] public float WheelBase { get; private set; }
     [field: SerializeField] public float TurnRadius { get; private set; }
     [field: SerializeField] public float RearTrack { get; private set; }
-
-    // first value should correspond to idle RPM
-    // last value should correspond to redline RPM
     [field: SerializeField] public AnimationCurve EngineCurve { get; private set; }
-    // reverse at index 0
-    [field: SerializeField] private float[] gearRatios;
-    [field: SerializeField] private float finalDrive;
-
+    [SerializeField] private float[] gearRatios;
+    [SerializeField] private float finalDrive;
     public float[] EffectiveGearRatios { get; private set; }
 
     private void OnEnable()
     {
         ComputeEffectiveGearRatios();
     }
+
     private void ComputeEffectiveGearRatios()
     {
         if (gearRatios == null)

@@ -16,6 +16,7 @@ public class Gear
         MinRpm = minRpm;
         MaxRpm = maxRpm;
     }
+
     private string ConvertGearIndexToName(int gearIndex)
     {
         switch (gearIndex)

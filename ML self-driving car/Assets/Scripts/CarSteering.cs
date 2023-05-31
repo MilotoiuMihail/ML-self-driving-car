@@ -8,21 +8,25 @@ public class CarSteering : MonoBehaviour
     private Car car;
     private CarInput carInput;
     private float steer;
+
     private void Awake()
     {
         car = GetComponent<Car>();
         carInput = GetComponent<CarInput>();
     }
+
     private void Update()
     {
         steer = carInput.SteerInput;
         ManageSteering();
     }
+
     private void ManageSteering()
     {
         car.SetLeftSteering(ComputeLeftSteerAngle());
         car.SetRightSteering(ComputeRightSteerAngle());
     }
+
     private float ComputeLeftSteerAngle()
     {
         float desiredLeftSteerAngle = 0;
@@ -32,6 +36,7 @@ public class CarSteering : MonoBehaviour
         }
         return desiredLeftSteerAngle;
     }
+
     private float ComputeRightSteerAngle()
     {
         float desiredRightSteerAngle = 0;

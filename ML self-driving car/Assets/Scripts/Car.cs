@@ -1,39 +1,32 @@
 using UnityEngine;
 using System.Linq;
 
-// CAR IS ASSUMED TO HAVE 4 WHEELS
-// NOTED WITH FL - 0, FR - 1, RL - 2, RR - 3
-// STEERING IS DONE ONLY WITH FRONT WHEELS
+[RequireComponent(typeof(CarInput))]
 public class Car : MonoBehaviour
 {
     private const float MeterpsToKph = 3.6f;
     private const float MeterpsToMph = 2.23694f;
-    [SerializeField] private CarSpecs specs;
-    public CarSpecs Specs => specs;
+    [field: SerializeField] public CarSpecs Specs { get; private set; }
     [SerializeField] private bool hasManualGearBox;
-    private CarInput input;
-
     [SerializeField] private float steeringSmoothness;
-    public Wheel[] Wheels { get; private set; }
-
     [SerializeField] private float downforce;
     [SerializeField] private float brakeTorque;
-
-    private Rigidbody rb;
     [SerializeField] private Transform centreOfMass;
-
-    private float throttle;
-    private float currentEngineTorque;
-    private int currentGear;
-
-    private Gear[] gears;
+    public Wheel[] Wheels { get; private set; }
+    private Rigidbody rb;
     private CarEngine engine;
+    private CarInput input;
+    private float throttle;
+    private int currentGear;
+    private Gear[] gears;
+
     private void Awake()
     {
         Wheels = GetComponentsInChildren<Wheel>();
         input = GetComponent<CarInput>();
         rb = GetComponent<Rigidbody>();
     }
+
     void Start()
     {
         currentGear = 1;
@@ -45,14 +38,13 @@ public class Car : MonoBehaviour
     void Update()
     {
         TakeInput();
-        engine.ComputeRpmInGear(GetWheelsRpm(), gears[currentGear].Ratio);
-        currentEngineTorque = throttle * engine.GetCurrentMaxTorque();
         Movement();
         Shifting();
         ApplyDownforce();
-        Debug.Log($"speed: {Mathf.Round(GetSpeedKph())}; RPM: {engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {currentEngineTorque}");
+        Debug.Log($"speed: {Mathf.Round(GetSpeedKph())}; RPM: {engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {engine.CurrentEngineTorque}");
 
     }
+
     private void InitializeGears()
     {
         gears = new Gear[Specs.EffectiveGearRatios.Length];
@@ -62,10 +54,17 @@ public class Car : MonoBehaviour
             gears[i] = new Gear(Specs.EffectiveGearRatios[i], i, 4500, 7000);
         }
     }
+
+    public float GetCurrentGearRatio()
+    {
+        return gears[currentGear].Ratio;
+    }
+
     private void TakeInput()
     {
         throttle = input.ThrottleInput;
     }
+
     private void Movement()
     {
         foreach (var wheel in Wheels)
@@ -74,14 +73,16 @@ public class Car : MonoBehaviour
             wheel.BrakeTorque = GetBrakeTorque();
         }
     }
+
     private float GetTorque()
     {
         if (throttle > 0)
         {
-            return currentGear != 0 ? currentEngineTorque : 0;
+            return currentGear != 0 ? engine.CurrentEngineTorque : 0;
         }
-        return currentGear != 0 ? 0 : currentEngineTorque;
+        return currentGear != 0 ? 0 : engine.CurrentEngineTorque;
     }
+
     private float GetBrakeTorque()
     {
         if (throttle > 0)
@@ -90,16 +91,19 @@ public class Car : MonoBehaviour
         }
         return currentGear != 0 ? brakeTorque : 0;
     }
+
     public void SetLeftSteering(float desiredSteerAngle)
     {
         Wheels[0].SteeringAngle = Mathf.Lerp(Wheels[0].SteeringAngle, desiredSteerAngle, steeringSmoothness * Time.deltaTime);
 
     }
+
     public void SetRightSteering(float desireedSteerAngle)
     {
         Wheels[1].SteeringAngle = Mathf.Lerp(Wheels[1].SteeringAngle, desireedSteerAngle, steeringSmoothness * Time.deltaTime);
 
     }
+
     private void Shifting()
     {
         if (hasManualGearBox)
@@ -111,6 +115,7 @@ public class Car : MonoBehaviour
             AutomaticShift();
         }
     }
+
     private void ManualShift()
     {
         if (input.GearUp)
@@ -122,6 +127,7 @@ public class Car : MonoBehaviour
             ShiftDown();
         }
     }
+
     private void AutomaticShift()
     {
         if (input.Reverse)
@@ -141,6 +147,7 @@ public class Car : MonoBehaviour
             ShiftDown();
         }
     }
+
     private void ToggleReverse()
     {
         if (currentGear == 0)
@@ -152,26 +159,32 @@ public class Car : MonoBehaviour
             ShiftDown();
         }
     }
+
     private void ShiftUp()
     {
         currentGear = Mathf.Min(currentGear + 1, gears.Length - 1);
     }
+
     private void ShiftDown()
     {
         currentGear = Mathf.Max(currentGear - 1, 0);
     }
+
     private float GetSpeedKph()
     {
         return rb.velocity.magnitude * MeterpsToKph;
     }
+
     private float GetSpeedMph()
     {
         return rb.velocity.magnitude * MeterpsToMph;
     }
+
     private void ApplyDownforce()
     {
         rb.AddForce(-transform.up * downforce * rb.velocity.magnitude);
     }
+
     private void ApplyDriveType()
     {
         bool rear = false;
@@ -196,7 +209,8 @@ public class Car : MonoBehaviour
         Wheels[2].SetPower(rear);
         Wheels[3].SetPower(rear);
     }
-    private float GetWheelsRpm()
+
+    public float GetWheelsRpm()
     {
         switch (Specs.Drive)
         {

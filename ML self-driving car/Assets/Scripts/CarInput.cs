@@ -22,6 +22,7 @@ public class CarInput : MonoBehaviour
         HandBrake = Input.GetKeyDown(KeyCode.Space);
         Reverse = Input.GetKeyDown(KeyCode.R);
     }
+
     private void ManageInput()
     {
         SteerInput = isHumanDriver ? Input.GetAxis(inputX) : 0;
