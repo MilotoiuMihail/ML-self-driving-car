@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Wheel : MonoBehaviour
 {
-    [SerializeField] private WheelCollider wheelCollider;
-    [SerializeField] private Transform wheelTransform;
+    private WheelCollider wheelCollider;
+    private Transform wheelTransform;
     private bool hasPower;
     public float SteeringAngle { get; set; }
     public float Torque { get; set; }
