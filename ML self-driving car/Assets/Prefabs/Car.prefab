@@ -179,14 +179,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3686793257009240207}
-  m_LocalRotation: {x: 0.043619405, y: 0, z: 0, w: 0.9990483}
-  m_LocalPosition: {x: 0, y: 3.5, z: -7}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 15, z: -7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3686793258455755449}
   m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 5, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3686793257340937925
 GameObject:
   m_ObjectHideFlags: 0
@@ -343,6 +343,8 @@ GameObject:
   - component: {fileID: 3686793258455755448}
   - component: {fileID: 3686793258455755398}
   - component: {fileID: 3686793258455755399}
+  - component: {fileID: 163857532}
+  - component: {fileID: 163857533}
   m_Layer: 0
   m_Name: Car
   m_TagString: Untagged
@@ -398,17 +400,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f8e7d0470fc99e40b5056bc93f4481d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  centreOfMass: {fileID: 3686793257715399872}
-  steeringWheel: {fileID: 8589275994047881627}
-  motorTorque: 1000
-  wheelBase: 2.55
-  turnRadius: 6
-  rearTrack: 1.5
+  <Specs>k__BackingField: {fileID: 11400000, guid: c379840b5a6b61f4c88d22aaf45ebdf8,
+    type: 2}
+  hasManualGearBox: 0
   steeringSmoothness: 2
-  maxSteeringWheelAngle: 30
   downforce: 50
-  brakeTorque: 2000
-  deceleration: 100
+  brakeTorque: 200
+  centreOfMass: {fileID: 3686793257715399872}
 --- !u!114 &3686793258455755399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -419,6 +417,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 749682f766bcb6d409401ea132029daa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &163857532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3686793258455755451}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c54ea4c52117886479083f51e6e24178, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &163857533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3686793258455755451}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f6cd4eeecd372845aaf6e57557b69a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &3686793258687344929
@@ -707,6 +729,7 @@ GameObject:
   - component: {fileID: 8589275994047881627}
   - component: {fileID: 8594191912183927083}
   - component: {fileID: 8606297260881500311}
+  - component: {fileID: 1753186605}
   m_Layer: 0
   m_Name: Steering Wheel
   m_TagString: Untagged
@@ -779,6 +802,21 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1753186605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8590861582408218661}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6ce2a2545632ae4a9dfc197ae96d06b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  carInput: {fileID: 3686793258455755399}
+  maxSteeringWheelAngle: 30
+  steeringSmoothness: 2
 --- !u!1 &8590882579295699131
 GameObject:
   m_ObjectHideFlags: 0

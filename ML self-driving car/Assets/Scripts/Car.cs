@@ -23,6 +23,7 @@ public class Car : MonoBehaviour
     private void Awake()
     {
         Wheels = GetComponentsInChildren<Wheel>();
+        engine = GetComponent<CarEngine>();
         input = GetComponent<CarInput>();
         rb = GetComponent<Rigidbody>();
     }

@@ -18,6 +18,7 @@ public class CarEngine : MonoBehaviour
     private void Awake()
     {
         car = GetComponent<Car>();
+        carInput = GetComponent<CarInput>();
     }
 
     private void Start()
