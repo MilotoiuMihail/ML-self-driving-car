@@ -43,9 +43,12 @@ public class Car : MonoBehaviour
         Movement();
         Shifting();
         ApplyDownforce();
-        Debug.Log($"speed: {Mathf.Round(GetSpeedKph())}; RPM: {engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {engine.CurrentEngineTorque}");
-
     }
+    public void DebugInfo()
+    {
+        Debug.Log($"speed: {Mathf.Round(GetSpeedKph())}; RPM: {engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {engine.CurrentEngineTorque}");
+    }
+
 
     private void InitializeGears()
     {
@@ -172,7 +175,7 @@ public class Car : MonoBehaviour
         currentGear = Mathf.Max(currentGear - 1, 0);
     }
 
-    private float GetSpeedKph()
+    public float GetSpeedKph()
     {
         return rb.velocity.magnitude * MeterpsToKph;
     }

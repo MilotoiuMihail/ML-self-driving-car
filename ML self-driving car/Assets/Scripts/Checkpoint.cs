@@ -6,9 +6,9 @@ public class Checkpoint : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<Car>(out Car car))
+        if (other.transform.parent.TryGetComponent<CarAgent>(out CarAgent car))
         {
-            CheckpointManager.Instance.PassedCheckpoint(car, this);
+            CheckpointManager.Instance.PassedCheckpoint(car.transform, this);
         }
     }
 }

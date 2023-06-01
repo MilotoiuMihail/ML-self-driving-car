@@ -1,33 +1,47 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class CheckpointManager : Singleton<CheckpointManager>
 {
-    private Track track;
-    private List<Checkpoint> checkpoints;
-    private Dictionary<Car, int> checkpointTracker = new Dictionary<Car, int>();
+    [SerializeField] private Transform carsParent;
+    [SerializeField] private Track track;
+    private List<Checkpoint> checkpoints = new List<Checkpoint>();
+    private Dictionary<Transform, int> checkpointTracker = new Dictionary<Transform, int>();
+    public event Action<Transform> CorrectCheckpointPassed;
+    public event Action<Transform> WrongCheckpointPassed;
+    protected override void Awake()
+    {
+        base.Awake();
+        foreach (CarAgent car in carsParent.GetComponentsInChildren<CarAgent>())
+        {
+            ResetCheckpoint(car.transform);
+        }
+    }
     private void Start()
     {
         checkpoints = track.GetCheckpoints();
     }
-    public void PassedCheckpoint(Car car, Checkpoint checkpoint)
+    public void PassedCheckpoint(Transform carTransform, Checkpoint checkpoint)
     {
-        if (checkpoints.IndexOf(checkpoint) == checkpointTracker[car])
+        if (checkpoints.IndexOf(checkpoint) == checkpointTracker[carTransform])
         {
-            Debug.Log("Correct");
-            checkpointTracker[car] = (checkpointTracker[car] + 1) % checkpoints.Count;
+            checkpointTracker[carTransform] = (checkpointTracker[carTransform] + 1) % checkpoints.Count;
+            CorrectCheckpointPassed?.Invoke(carTransform);
         }
         else
         {
-            Debug.Log("Wrong");
+            WrongCheckpointPassed?.Invoke(carTransform);
         }
     }
-    private void Reset()
+    public Checkpoint GetNextCheckpoint(Transform carTransform)
     {
-        foreach (Car car in checkpointTracker.Keys)
-        {
-            checkpointTracker[car] = 0;
-        }
+        return checkpoints[checkpointTracker[carTransform]];
+    }
+    public void ResetCheckpoint(Transform carTransform)
+    {
+        //until i resolve car position on start piece
+        checkpointTracker[carTransform] = 1;
     }
 }
