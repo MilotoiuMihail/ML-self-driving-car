@@ -89,10 +89,6 @@ public class Track : MonoBehaviour
             SelectStart = false;
         }
     }
-    public void SetTrackDirection(bool trackDirection)
-    {
-        IsTrackDirectionClockwise = trackDirection;
-    }
     public void ToggleTrackDirection()
     {
         IsTrackDirectionClockwise = !isTrackDirectionClockwise;
