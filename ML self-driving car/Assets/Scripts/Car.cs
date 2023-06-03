@@ -20,6 +20,7 @@ public class Car : MonoBehaviour
     private int currentGear;
     private bool isSwitchingGears;
     private Gear[] gears;
+    private bool isStopped;
 
     private void Awake()
     {
@@ -49,6 +50,12 @@ public class Car : MonoBehaviour
         Debug.Log($"speed: {Mathf.Round(GetSpeedKph())}; RPM: {engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {engine.CurrentEngineTorque}");
     }
 
+    public void StopCompletely()
+    {
+        isStopped = true;
+        rb.velocity = Vector3.zero;
+        currentGear = 1;
+    }
 
     private void InitializeGears()
     {
@@ -72,6 +79,10 @@ public class Car : MonoBehaviour
 
     private void Movement()
     {
+        if (throttle != 0)
+        {
+            isStopped = false;
+        }
         foreach (var wheel in Wheels)
         {
             wheel.Torque = GetTorque();
@@ -81,6 +92,10 @@ public class Car : MonoBehaviour
 
     private float GetTorque()
     {
+        if (isStopped)
+        {
+            return 0;
+        }
         if (throttle > 0)
         {
             return currentGear != 0 ? engine.CurrentEngineTorque : 0;
@@ -90,6 +105,10 @@ public class Car : MonoBehaviour
 
     private float GetBrakeTorque()
     {
+        if (isStopped)
+        {
+            return Mathf.Infinity;
+        }
         if (throttle > 0)
         {
             return currentGear != 0 ? 0 : brakeTorque * throttle;

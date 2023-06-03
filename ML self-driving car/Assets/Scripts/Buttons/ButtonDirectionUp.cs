@@ -7,21 +7,21 @@ using UnityEngine.UI;
 public class ButtonDirectionUp : MonoBehaviour
 {
     [SerializeField] private Track track;
-    private Toggle toggle;
+    // private Toggle toggle;
+    private void Awake()
+    {
+        // toggle = GetComponent<Toggle>();
+    }
     private void Start()
     {
-        track.IsTrackDirectionClockwiseChanged += SetToggle;
+        track.HasTrackDirectionChanged += SetToggle;
     }
     private void OnDestroy()
     {
-        track.IsTrackDirectionClockwiseChanged -= SetToggle;
-    }
-    private void Awake()
-    {
-        toggle = GetComponent<Toggle>();
+        track.HasTrackDirectionChanged -= SetToggle;
     }
     private void SetToggle(bool isOn)
     {
-        toggle.isOn = isOn;
+        // toggle.isOn = isOn;
     }
 }

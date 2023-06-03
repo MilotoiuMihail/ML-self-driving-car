@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 405434}
   - component: {fileID: 3330580}
   - component: {fileID: 2339526}
+  - component: {fileID: 7654158207040302602}
   m_Layer: 0
   m_Name: SR_Env_Concrete_Track_Straight_01
   m_TagString: Untagged
@@ -83,3 +84,17 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &7654158207040302602
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 141498}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4300000, guid: 662b546f330a06e488c34bfe6c77cccd, type: 3}

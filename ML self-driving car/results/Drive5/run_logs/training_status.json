@@ -1,0 +1,65 @@
+{
+    "Drive": {
+        "checkpoints": [
+            {
+                "steps": 499948,
+                "file_path": "results\\Drive5\\Drive\\Drive-499948.onnx",
+                "reward": 10.432863530533558,
+                "creation_time": 1685689445.4265032,
+                "auxillary_file_paths": [
+                    "results\\Drive5\\Drive\\Drive-499948.pt"
+                ]
+            },
+            {
+                "steps": 999972,
+                "file_path": "results\\Drive5\\Drive\\Drive-999972.onnx",
+                "reward": 8.578443634013249,
+                "creation_time": 1685689779.0797405,
+                "auxillary_file_paths": [
+                    "results\\Drive5\\Drive\\Drive-999972.pt"
+                ]
+            },
+            {
+                "steps": 1499945,
+                "file_path": "results\\Drive5\\Drive\\Drive-1499945.onnx",
+                "reward": null,
+                "creation_time": 1685690103.3003395,
+                "auxillary_file_paths": [
+                    "results\\Drive5\\Drive\\Drive-1499945.pt"
+                ]
+            },
+            {
+                "steps": 1999976,
+                "file_path": "results\\Drive5\\Drive\\Drive-1999976.onnx",
+                "reward": 13.188651672874888,
+                "creation_time": 1685690418.754238,
+                "auxillary_file_paths": [
+                    "results\\Drive5\\Drive\\Drive-1999976.pt"
+                ]
+            },
+            {
+                "steps": 2320119,
+                "file_path": "results\\Drive5\\Drive\\Drive-2320119.onnx",
+                "reward": 7.23701471905224,
+                "creation_time": 1685690623.097467,
+                "auxillary_file_paths": [
+                    "results\\Drive5\\Drive\\Drive-2320119.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 2320119,
+            "file_path": "results\\Drive5\\Drive.onnx",
+            "reward": 7.23701471905224,
+            "creation_time": 1685690623.097467,
+            "auxillary_file_paths": [
+                "results\\Drive5\\Drive\\Drive-2320119.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.30.0",
+        "torch_version": "2.0.1+cpu"
+    }
+}

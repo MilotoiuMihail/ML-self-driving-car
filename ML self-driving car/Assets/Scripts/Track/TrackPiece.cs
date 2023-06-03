@@ -1,10 +1,12 @@
 using UnityEngine;
 
-public class TrackPiece : MonoBehaviour
+public abstract class TrackPiece : MonoBehaviour
 {
     private bool isPlaced;
-    private Quaternion rotation = Quaternion.identity;
-    private Checkpoint[] checkpoints;
+    [SerializeField] private Transform spawn;
+    [SerializeField] private Transform alternateSpawn;
+    protected Quaternion rotation = Quaternion.identity;
+    protected Checkpoint[] checkpoints;
     private void Awake()
     {
         checkpoints = GetComponentsInChildren<Checkpoint>();
@@ -19,14 +21,19 @@ public class TrackPiece : MonoBehaviour
         FollowMouse();
         RotateTowards(rotation);
     }
+    public Transform GetSpawnPoint(bool isTrackDirectionClockwise)
+    {
+        return isTrackDirectionClockwise ? spawn : alternateSpawn;
+    }
     public TrackPieceData ToData()
     {
         TrackPieceData data = new TrackPieceData();
         data.Position = transform.position;
         data.Rotation = transform.rotation;
-        data.Type = IsStraight() ? TrackPieceType.STRAIGHT : TrackPieceType.CORNER;
+        data.Type = GetTrackPieceType();
         return data;
     }
+    protected abstract TrackPieceType GetTrackPieceType();
     private void FollowMouse()
     {
         MoveTowards(InputManager.Instance.MousePosition);
@@ -47,19 +54,11 @@ public class TrackPiece : MonoBehaviour
     {
         this.rotation = rotation;
     }
-    public void Place(Vector3 position)
+    public virtual void Place(Vector3 position)
     {
         isPlaced = true;
         transform.position = position;
         transform.rotation = rotation;
-        if (IsStraight())
-        {
-            if (HasRotation(180) || HasRotation(270))
-            {
-                RotateBy(-180);
-                transform.rotation = rotation;
-            }
-        }
     }
     public bool IsStraight()
     {
@@ -73,4 +72,5 @@ public class TrackPiece : MonoBehaviour
     {
         return checkpoints;
     }
+    public abstract int GetFirstCheckpointIndex();
 }

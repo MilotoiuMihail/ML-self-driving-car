@@ -13,32 +13,11 @@ public class GameManager : Singleton<GameManager>
     public event Action ExitViewState;
     public event Action ExitEditState;
     public event Action ExitPausedState;
-    [SerializeField] private Track track;
-    [SerializeField] private Car car;
-    [SerializeField] private TopDownCameraRig cameraRig;
-
-    private void OnEnable()
-    {
-        track.SelectStartChanged += HandleSelectStartChanged;
-    }
-
-    private void OnDisable()
-    {
-        track.SelectStartChanged -= HandleSelectStartChanged;
-    }
 
     protected override void Awake()
     {
         base.Awake();
         ChangeGameState(GameState.VIEW);
-    }
-    private void Update()
-    {
-        car.DebugInfo();
-    }
-    public void ResetCarPosition(Transform carTransform)
-    {
-        carTransform.position = track.StartPiece ? track.StartPiece.transform.position : cameraRig.transform.position;
     }
 
     public void ChangeGameState(GameState state)
@@ -90,13 +69,7 @@ public class GameManager : Singleton<GameManager>
                 break;
         }
     }
-    private void HandleSelectStartChanged(bool value)
-    {
-        if (!value)
-        {
-            ResetCarPosition(car.transform);
-        }
-    }
+
     // used by buttons in inspector
     public void ExitApplication()
     {

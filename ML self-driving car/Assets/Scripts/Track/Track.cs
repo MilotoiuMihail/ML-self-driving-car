@@ -6,10 +6,21 @@ using System;
 
 public class Track : MonoBehaviour
 {
-    private List<TrackPiece> track = new List<TrackPiece>();
-    private List<Checkpoint> checkpoints = new List<Checkpoint>();
-    public TrackPiece StartPiece { get; set; }
-    public event Action<bool> IsTrackDirectionClockwiseChanged;
+    public event Action StartPieceChanged;
+    private TrackPiece startPiece;
+    public TrackPiece StartPiece
+    {
+        get { return startPiece; }
+        set
+        {
+            if (startPiece != value)
+            {
+                startPiece = value;
+                StartPieceChanged?.Invoke();
+            }
+        }
+    }
+    public event Action<bool> HasTrackDirectionChanged;
     private bool isTrackDirectionClockwise = true;
     public bool IsTrackDirectionClockwise
     {
@@ -19,7 +30,7 @@ public class Track : MonoBehaviour
             if (isTrackDirectionClockwise != value)
             {
                 isTrackDirectionClockwise = value;
-                IsTrackDirectionClockwiseChanged?.Invoke(value);
+                HasTrackDirectionChanged?.Invoke(value);
             }
         }
     }
@@ -37,9 +48,13 @@ public class Track : MonoBehaviour
             }
         }
     }
+    private List<TrackPiece> track = new List<TrackPiece>();
+    private List<Checkpoint> checkpoints = new List<Checkpoint>();
+    public bool IsCircular { get; private set; }
     private Grid grid;
     [SerializeField] private TrackEditor trackEditor;
     public TrackEditor TrackEditor => trackEditor;
+
     private void OnEnable()
     {
         TrackEditor.PiecePlaced += SelectStartPiece;
@@ -58,6 +73,12 @@ public class Track : MonoBehaviour
     }
     public List<Checkpoint> GetCheckpoints()
     {
+        Checkpoint firstCheckpoint = checkpoints[0];
+        checkpoints.Remove(firstCheckpoint);
+        if (IsCircular)
+        {
+            checkpoints.Add(firstCheckpoint);
+        }
         return checkpoints;
     }
     public void SelectStartPiece()
@@ -71,6 +92,10 @@ public class Track : MonoBehaviour
     public void SetTrackDirection(bool trackDirection)
     {
         IsTrackDirectionClockwise = trackDirection;
+    }
+    public void ToggleTrackDirection()
+    {
+        IsTrackDirectionClockwise = !isTrackDirectionClockwise;
     }
     public void ComputeTrack()
     {
@@ -86,6 +111,7 @@ public class Track : MonoBehaviour
             track.Add(piece);
             piece = GetCurrentNextTrackPiece(piece);
         }
+        IsCircular = piece == StartPiece;
     }
     private void ResetTrack()
     {
@@ -119,5 +145,9 @@ public class Track : MonoBehaviour
     public bool HasValidTrackLength()
     {
         return track.Count > 3;
+    }
+    public TrackPiece GetRandomTrackPiece()
+    {
+        return track[UnityEngine.Random.Range(0, track.Count)];
     }
 }

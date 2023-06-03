@@ -61,6 +61,7 @@ public class TopDownCameraRig : MonoBehaviour
         if (followTarget)
         {
             FollowTarget();
+            desiredPosition = transform.position;
             return;
         }
         Vector2 mousePosition = Input.mousePosition;

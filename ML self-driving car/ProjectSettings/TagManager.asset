@@ -7,6 +7,7 @@ TagManager:
   - Ground
   - Checkpoint
   - Wall
+  - Track
   layers:
   - Default
   - TransparentFX
@@ -18,7 +19,7 @@ TagManager:
   - Checkpoints
   - Walls
   - Car
-  - 
+  - Track
   - 
   - 
   - 
