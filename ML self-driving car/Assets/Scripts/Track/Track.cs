@@ -160,9 +160,9 @@ public class Track : MonoBehaviour
     }
     private bool IsConnectedToPreviousPiece(TrackPiece piece)
     {
-        piece.IsFacingForward = true;
+        piece.IsFacingForward = !piece.IsFacingForward;
         TrackPiece backTrackPiece = GetNextTrackPiece(piece);
-        piece.IsFacingForward = false;
+        piece.IsFacingForward = !piece.IsFacingForward;
         return backTrackPiece == track[track.Count - 1];
     }
     private bool DetermineTrackPieceFacingForward(TrackPiece piece)
