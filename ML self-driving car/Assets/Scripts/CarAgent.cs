@@ -9,18 +9,19 @@ using Unity.MLAgents.Policies;
 public class CarAgent : Agent
 {
     [SerializeField] private CarInput carInput;
-    [SerializeField] private LayerMask layerMask;
+    // [SerializeField] private LayerMask layerMask;
     private bool isHeuristic;
     private Transform nextCheckpoint;
-    private float totalDistanceToNextCheckpoint;
+    // private float totalDistanceToNextCheckpoint;
     private Car car;
     private Rigidbody rb;
     private Vector3 lastLocalVelocity;
     private Vector3 lastLocalAngularVelocity;
     private int baseCheckpointIndex;
     private bool hasManualGearBox;
-    private int wrongCheckpointsPassed;
-    private int lastWrongCheckpointIndex;
+    // private int wrongCheckpointsPassed;
+    // private int lastWrongCheckpointIndex;
+    [SerializeField] private bool hasRandomReset;
     private void Start()
     {
         CheckpointManager.Instance.CorrectCheckpointPassed += OnCorrectCheckpointPassed;
@@ -34,7 +35,6 @@ public class CarAgent : Agent
         car = GetComponent<Car>();
         hasManualGearBox = car.HasManualGearBox;
         rb = GetComponent<Rigidbody>();
-        // baseCheckpointIndex = CheckpointManager.Instance.CheckpointTracker[transform];
     }
     private void OnDestroy()
     {
@@ -48,13 +48,8 @@ public class CarAgent : Agent
     }
     public override void OnEpisodeBegin()
     {
-        lastLocalVelocity = GetLocalVelocity();
-        lastLocalAngularVelocity = GetLocalAngularVelocity();
-        wrongCheckpointsPassed = 0;
-        lastWrongCheckpointIndex = 0;
-        // Reset();
-        CheckpointManager.Instance.ResetProgress(transform);
-        RandomReset();
+        SetReward(-0.5f);
+        Reset(hasRandomReset);
         GetNextCheckpoint();
     }
     private void Update()
@@ -142,8 +137,8 @@ public class CarAgent : Agent
     {
         if (carTransform == transform)
         {
-            wrongCheckpointsPassed += 1;
-            float passedCheckpointsRatio = (float)wrongCheckpointsPassed / (wrongCheckpointsPassed + CheckpointManager.Instance.CheckpointTracker[transform]);
+            // wrongCheckpointsPassed += 1;
+            // float passedCheckpointsRatio = (float)wrongCheckpointsPassed / (wrongCheckpointsPassed + CheckpointManager.Instance.CheckpointTracker[transform]);
             Debug.Log("Checkpoint Wrong");
             // AddReward(0f - (1f - (float)StepCount / MaxStep) * passedCheckpointsRatio);
         }
@@ -165,39 +160,53 @@ public class CarAgent : Agent
             EndEpisode();
         }
     }
-    private void StayOnGroundReward()
-    {
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, -transform.up, out hit, .5f, layerMask.value))
-        {
-            if (hit.transform.tag.Equals("Ground"))
-            {
-                AddReward(-0.1f);
-            }
-        }
-    }
-    private void DistanceToNextCheckpointReward()
-    {
-        float distanceToCheckpoint = Vector3.Distance(transform.position, nextCheckpoint.position);
-        float checkpointReward = (totalDistanceToNextCheckpoint - distanceToCheckpoint) / totalDistanceToNextCheckpoint * .005f;
-        AddReward(checkpointReward);
-    }
+    // private void StayOnGroundReward()
+    // {
+    //     RaycastHit hit;
+    //     if (Physics.Raycast(transform.position, -transform.up, out hit, .5f, layerMask.value))
+    //     {
+    //         if (hit.transform.tag.Equals("Ground"))
+    //         {
+    //             AddReward(-0.1f);
+    //         }
+    //     }
+    // }
+    // private void DistanceToNextCheckpointReward()
+    // {
+    //     float distanceToCheckpoint = Vector3.Distance(transform.position, nextCheckpoint.position);
+    //     float checkpointReward = (totalDistanceToNextCheckpoint - distanceToCheckpoint) / totalDistanceToNextCheckpoint * .005f;
+    //     AddReward(checkpointReward);
+    // }
     private void GetNextCheckpoint()
     {
         nextCheckpoint = CheckpointManager.Instance.GetNextCheckpoint(transform).transform;
-        totalDistanceToNextCheckpoint = Vector3.Distance(transform.position, nextCheckpoint.position);
+        // totalDistanceToNextCheckpoint = Vector3.Distance(transform.position, nextCheckpoint.position);
     }
-    private void Reset()
+    private void Reset(bool randomReset)
     {
         Stop();
-        baseCheckpointIndex = 0;
-        CarManager.Instance.ResetCar(transform);
-    }
-    private void RandomReset()
-    {
-        Stop();
-        CarManager.Instance.RandomResetCar(transform);
+        ResetVariables();
+        if (randomReset)
+        {
+            CarManager.Instance.RandomResetCar(transform);
+            if (CheckpointManager.Instance.CheckpointTracker[transform] > 0)
+            {
+                CheckpointManager.Instance.LapTracker[transform] = 1;
+            }
+        }
+        else
+        {
+            CarManager.Instance.ResetCar(transform);
+        }
         baseCheckpointIndex = CheckpointManager.Instance.CheckpointTracker[transform];
+    }
+    private void ResetVariables()
+    {
+        lastLocalVelocity = GetLocalVelocity();
+        lastLocalAngularVelocity = GetLocalAngularVelocity();
+        // wrongCheckpointsPassed = 0;
+        // lastWrongCheckpointIndex = 0;
+        CheckpointManager.Instance.ResetProgress(transform);
     }
     private void Stop()
     {
@@ -208,11 +217,11 @@ public class CarAgent : Agent
     private void EnableCar()
     {
         this.enabled = true;
-        Reset();
+        Reset(false);
     }
     private void DisableCar()
     {
-        Reset();
+        Reset(false);
         this.enabled = false;
     }
     private void OnTriggerEnter(Collider other)

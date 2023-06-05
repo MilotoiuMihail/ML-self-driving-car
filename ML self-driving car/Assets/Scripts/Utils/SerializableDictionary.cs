@@ -32,7 +32,7 @@ public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IS
         data.Clear();
         foreach (var pair in this)
         {
-            if (!addedFirstItem)
+            if (!addedFirstItem && defaultItem == null)
             {
                 defaultItem = new KeyValue(pair.Key, pair.Value);
                 addedFirstItem = true;

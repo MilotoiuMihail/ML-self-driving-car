@@ -8,8 +8,8 @@ public class CheckpointManager : Singleton<CheckpointManager>
     [SerializeField] private Transform carsParent;
     [SerializeField] private Track track;
     private List<Checkpoint> checkpoints = new List<Checkpoint>();
-    public Dictionary<Transform, int> CheckpointTracker { get; set; } = new Dictionary<Transform, int>();
-    private Dictionary<Transform, int> lapTracker = new Dictionary<Transform, int>();
+    public Dictionary<Transform, int> CheckpointTracker { get; private set; } = new Dictionary<Transform, int>();
+    public Dictionary<Transform, int> LapTracker { get; private set; } = new Dictionary<Transform, int>();
     [SerializeField] private int laps;
     public event Action<Transform> CorrectCheckpointPassed;
     public event Action<Transform, int> WrongCheckpointPassed;
@@ -32,7 +32,6 @@ public class CheckpointManager : Singleton<CheckpointManager>
         int carCurrentCheckpointIndex = CheckpointTracker[carTransform];
         if (checkpoints.IndexOf(checkpoint) == carCurrentCheckpointIndex)
         {
-            Debug.Log("Correct");
             CheckpointTracker[carTransform] = (carCurrentCheckpointIndex + 1) % checkpoints.Count;
             CorrectCheckpointPassed?.Invoke(carTransform);
             if (!track.IsCircular && CheckpointTracker[carTransform] == 0)
@@ -45,8 +44,8 @@ public class CheckpointManager : Singleton<CheckpointManager>
             {
                 return;
             }
-            lapTracker[carTransform] += 1;
-            int currentLap = lapTracker[carTransform];
+            LapTracker[carTransform] += 1;
+            int currentLap = LapTracker[carTransform];
             if (currentLap == 1)
             {
                 return;
@@ -69,7 +68,7 @@ public class CheckpointManager : Singleton<CheckpointManager>
     public void ResetProgress(Transform carTransform)
     {
         CheckpointTracker[carTransform] = 0;
-        lapTracker[carTransform] = 0;
+        LapTracker[carTransform] = 0;
     }
     public int GetCheckpointIndex(Checkpoint checkpoint)
     {

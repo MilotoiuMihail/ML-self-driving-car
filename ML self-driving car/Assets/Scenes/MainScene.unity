@@ -2216,13 +2216,22 @@ PrefabInstance:
       propertyPath: m_DetectableTags.Array.data[1]
       value: Wall
       objectReference: {fileID: 0}
+    - target: {fileID: 407706700, guid: cfdfde9ea1a804c45877b4b6ccec0e20, type: 3}
+      propertyPath: hasRandomReset
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 407706701, guid: cfdfde9ea1a804c45877b4b6ccec0e20, type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: c7f94cbcb1ab78940bef7717703549d1,
+        type: 3}
     - target: {fileID: 407706701, guid: cfdfde9ea1a804c45877b4b6ccec0e20, type: 3}
       propertyPath: m_BehaviorType
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 407706701, guid: cfdfde9ea1a804c45877b4b6ccec0e20, type: 3}
       propertyPath: m_BrainParameters.VectorObservationSize
-      value: 23
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 407706701, guid: cfdfde9ea1a804c45877b4b6ccec0e20, type: 3}
       propertyPath: m_BrainParameters.m_ActionSpec.BranchSizes.Array.data[0]

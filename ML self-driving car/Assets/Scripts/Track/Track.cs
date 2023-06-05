@@ -130,6 +130,24 @@ public class Track : MonoBehaviour
         IsCircular = piece == StartPiece;
         ProcessCheckpoints();
     }
+    private bool DetermineTrackPieceFacingForward(TrackPiece piece)
+    {
+        TrackPiece previousPiece = track[track.Count - 2];
+        TrackPiece backPiece = grid.GetNeighbor(piece, -piece.transform.forward);
+        return previousPiece == backPiece;
+    }
+    private TrackPiece GetNextTrackPiece(TrackPiece piece)
+    {
+        if (piece.IsFacingForward)
+        {
+            if (piece.IsStraight())
+            {
+                return grid.GetNeighbor(piece, piece.transform.forward);
+            }
+            return grid.GetNeighbor(piece, piece.transform.right);
+        }
+        return grid.GetNeighbor(piece, -piece.transform.forward);
+    }
     private void ProcessCheckpoints()
     {
         Checkpoint firstCheckpoint = checkpoints[0];
@@ -158,18 +176,6 @@ public class Track : MonoBehaviour
         checkpoints.AddRange(piece.GetCheckpoints().Reverse());
         return grid.GetNeighbor(piece, -piece.transform.forward);
     }
-    private TrackPiece GetNextTrackPiece(TrackPiece piece)
-    {
-        if (piece.IsFacingForward)
-        {
-            if (piece.IsStraight())
-            {
-                return grid.GetNeighbor(piece, piece.transform.forward);
-            }
-            return grid.GetNeighbor(piece, piece.transform.right);
-        }
-        return grid.GetNeighbor(piece, -piece.transform.forward);
-    }
     private void AddTrackPieceCheckpoints(TrackPiece piece)
     {
         if (piece.IsFacingForward)
@@ -195,12 +201,7 @@ public class Track : MonoBehaviour
         TrackPiece backPiece = grid.GetNeighbor(piece, -piece.transform.forward);
         return GetNextTrackPiece(piece, previousPiece == backPiece);
     }
-    private bool DetermineTrackPieceFacingForward(TrackPiece piece)
-    {
-        TrackPiece previousPiece = track[track.Count - 2];
-        TrackPiece backPiece = grid.GetNeighbor(piece, -piece.transform.forward);
-        return previousPiece == backPiece;
-    }
+
     public bool IsValidStartPiece()
     {
         return StartPiece;
