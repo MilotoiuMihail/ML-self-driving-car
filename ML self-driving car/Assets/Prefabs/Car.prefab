@@ -461,7 +461,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Specs>k__BackingField: {fileID: 11400000, guid: c379840b5a6b61f4c88d22aaf45ebdf8,
     type: 2}
-  hasManualGearBox: 0
+  <HasManualGearBox>k__BackingField: 0
   steeringSmoothness: 2
   downforce: 50
   brakeTorque: 200
@@ -1127,7 +1127,7 @@ MeshRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
+  m_SelectedEditorRenderState: 2
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89

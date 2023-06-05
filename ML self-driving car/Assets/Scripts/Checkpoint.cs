@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
 {
+    public Vector3 InitialForward { get; private set; }
+    public void LockForward()
+    {
+        InitialForward = transform.forward;
+    }
     private void OnTriggerEnter(Collider other)
     {
         if (other.transform.parent.TryGetComponent<CarAgent>(out CarAgent car))

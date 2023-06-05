@@ -12,7 +12,7 @@ public class CheckpointManager : Singleton<CheckpointManager>
     private Dictionary<Transform, int> lapTracker = new Dictionary<Transform, int>();
     [SerializeField] private int laps;
     public event Action<Transform> CorrectCheckpointPassed;
-    public event Action<Transform> WrongCheckpointPassed;
+    public event Action<Transform, int> WrongCheckpointPassed;
     public event Action<Transform> CompletedLap;
     public event Action<Transform> FinishedRace;
     protected override void Awake()
@@ -29,12 +29,19 @@ public class CheckpointManager : Singleton<CheckpointManager>
     }
     public void PassedCheckpoint(Transform carTransform, Checkpoint checkpoint)
     {
-        int carNextCheckpointIndex = CheckpointTracker[carTransform];
-        if (checkpoints.IndexOf(checkpoint) == carNextCheckpointIndex)
+        int carCurrentCheckpointIndex = CheckpointTracker[carTransform];
+        if (checkpoints.IndexOf(checkpoint) == carCurrentCheckpointIndex)
         {
-            CheckpointTracker[carTransform] = (carNextCheckpointIndex + 1) % checkpoints.Count;
+            Debug.Log("Correct");
+            CheckpointTracker[carTransform] = (carCurrentCheckpointIndex + 1) % checkpoints.Count;
             CorrectCheckpointPassed?.Invoke(carTransform);
-            if (checkpoints.IndexOf(checkpoint) != 0)
+            if (!track.IsCircular && CheckpointTracker[carTransform] == 0)
+            {
+                CompletedLap?.Invoke(carTransform);
+                FinishedRace?.Invoke(carTransform);
+                return;
+            }
+            if (carCurrentCheckpointIndex != 0)
             {
                 return;
             }
@@ -44,18 +51,15 @@ public class CheckpointManager : Singleton<CheckpointManager>
             {
                 return;
             }
+            CompletedLap?.Invoke(carTransform);
             if (currentLap > laps)
             {
                 FinishedRace?.Invoke(carTransform);
             }
-            else
-            {
-                CompletedLap?.Invoke(carTransform);
-            }
         }
         else
         {
-            WrongCheckpointPassed?.Invoke(carTransform);
+            WrongCheckpointPassed?.Invoke(carTransform, checkpoints.IndexOf(checkpoint));
         }
     }
     public Checkpoint GetNextCheckpoint(Transform carTransform)

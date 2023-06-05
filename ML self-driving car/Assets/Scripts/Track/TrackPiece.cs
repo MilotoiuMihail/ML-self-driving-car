@@ -7,6 +7,7 @@ public abstract class TrackPiece : MonoBehaviour
     [SerializeField] private Transform alternateSpawn;
     protected Quaternion rotation = Quaternion.identity;
     protected Checkpoint[] checkpoints;
+    public bool IsFacingForward { get; set; } = true;
     private void Awake()
     {
         checkpoints = GetComponentsInChildren<Checkpoint>();
@@ -21,9 +22,9 @@ public abstract class TrackPiece : MonoBehaviour
         FollowMouse();
         RotateTowards(rotation);
     }
-    public Transform GetSpawnPoint(bool isTrackDirectionClockwise)
+    public Transform GetSpawnPoint()
     {
-        return isTrackDirectionClockwise ? spawn : alternateSpawn;
+        return IsFacingForward ? spawn : alternateSpawn;
     }
     public TrackPieceData ToData()
     {
@@ -60,6 +61,13 @@ public abstract class TrackPiece : MonoBehaviour
         transform.position = position;
         transform.rotation = rotation;
     }
+    protected void LockCheckpointsDirection()
+    {
+        foreach (Checkpoint checkpoint in checkpoints)
+        {
+            checkpoint.LockForward();
+        }
+    }
     public bool IsStraight()
     {
         return GetComponent<Straight>();
@@ -72,5 +80,10 @@ public abstract class TrackPiece : MonoBehaviour
     {
         return checkpoints;
     }
-    public abstract int GetFirstCheckpointIndex();
+    public int GetFirstCheckpointIndex()
+    {
+        int checkpoint1 = CheckpointManager.Instance.GetCheckpointIndex(checkpoints[1]);
+        int checkpoint2 = CheckpointManager.Instance.GetCheckpointIndex(checkpoints[checkpoints.Length - 2]);
+        return Mathf.Min(checkpoint1, checkpoint2);
+    }
 }

@@ -47,19 +47,20 @@ public class CarManager : Singleton<CarManager>
     {
         TrackPiece startPiece = track.GetRandomTrackPiece();
         ResetCarPosition(carTransform, GetSpawnPoint(startPiece));
-        RandomResetCarDirection(carTransform);
-        SetCarCurrentCheckpointIndex(carTransform, startPiece);
+        ResetCarDirection(carTransform, GetSpawnPoint(startPiece));
+        // RandomResetCarDirection(carTransform);
+        SetCarStartingCheckpointIndex(carTransform, startPiece);
     }
 
-    private void SetCarCurrentCheckpointIndex(Transform carTransform, TrackPiece startPiece)
+    private void SetCarStartingCheckpointIndex(Transform carTransform, TrackPiece startPiece)
     {
 
-        int currentCheckpointIndex = startPiece.GetFirstCheckpointIndex();
-        if (currentCheckpointIndex == CheckpointManager.Instance.GetCheckpointsCount() - 1)
-        {
-            currentCheckpointIndex = 0;
-        }
-        CheckpointManager.Instance.CheckpointTracker[carTransform] = currentCheckpointIndex;
+        int nextCheckpointIndex = startPiece.GetFirstCheckpointIndex();
+        // if (track.IsCircular && nextCheckpointIndex == CheckpointManager.Instance.GetCheckpointsCount() - 1)
+        // {
+        //     nextCheckpointIndex = 0;
+        // }
+        CheckpointManager.Instance.CheckpointTracker[carTransform] = nextCheckpointIndex;
     }
 
     private void RandomResetCarDirection(Transform carTransform)
@@ -69,13 +70,13 @@ public class CarManager : Singleton<CarManager>
     }
     private Transform GetSpawnPoint(TrackPiece piece)
     {
-        return piece ? piece.GetSpawnPoint(track.IsTrackDirectionClockwise) : null;
+        return piece ? piece.GetSpawnPoint() : null;
     }
     private void HandleStartPieceChanged()
     {
         ResetCar(car.transform);
     }
-    private void HandleTrackDirectionChanged(bool value)
+    private void HandleTrackDirectionChanged()
     {
         ResetCar(car.transform);
     }

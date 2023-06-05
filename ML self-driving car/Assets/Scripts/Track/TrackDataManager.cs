@@ -49,9 +49,18 @@ public static class TrackDataManager
             }
             if (trackData != null)
             {
+                // if (trackData.StartPiece != null)
+                // {
+                //     track.StartPiece = track.TrackEditor.Grid.GetPiece(trackData.StartPiece.Position);
+                //     track.StartPiece.IsFacingForward = track.IsTrackDirectionClockwise;
+                // }
+                // else
+                // {
+                //     track.StartPiece = null;
+                // }
                 track.StartPiece = trackData.StartPiece != null ? track.TrackEditor.Grid.GetPiece(trackData.StartPiece.Position) : null;
             }
-            track.ComputeTrack();
+            // track.ComputeTrack();
         }
     }
 }

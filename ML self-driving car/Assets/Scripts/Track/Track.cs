@@ -13,24 +13,43 @@ public class Track : MonoBehaviour
         get { return startPiece; }
         set
         {
-            if (startPiece != value)
+            if (startPiece == value)
             {
-                startPiece = value;
-                StartPieceChanged?.Invoke();
+                return;
             }
+            if (StartPiece && StartPiece.IsFacingForward != isTrackDirectionClockwise)
+            {
+                isTrackDirectionClockwise = StartPiece.IsFacingForward;
+            }
+            startPiece = value;
+            if (!track.Contains(StartPiece))
+            {
+                ComputeTrack();
+            }
+            // StartPiece.IsFacingForward = IsTrackDirectionClockwise;
+            StartPieceChanged?.Invoke();
         }
+
     }
-    public event Action<bool> HasTrackDirectionChanged;
+    public event Action HasTrackDirectionChanged;
     private bool isTrackDirectionClockwise = true;
     public bool IsTrackDirectionClockwise
     {
         get { return isTrackDirectionClockwise; }
         set
         {
+            // if (StartPiece)
+            // {
+            //     StartPiece.IsFacingForward = value;
+            // }
             if (isTrackDirectionClockwise != value)
             {
+                foreach (TrackPiece piece in track)
+                {
+                    piece.IsFacingForward = !piece.IsFacingForward;
+                }
                 isTrackDirectionClockwise = value;
-                HasTrackDirectionChanged?.Invoke(value);
+                HasTrackDirectionChanged?.Invoke();
             }
         }
     }
@@ -73,25 +92,20 @@ public class Track : MonoBehaviour
     }
     public List<Checkpoint> GetCheckpoints()
     {
-        Checkpoint firstCheckpoint = checkpoints[0];
-        checkpoints.Remove(firstCheckpoint);
-        if (IsCircular)
-        {
-            checkpoints.Add(firstCheckpoint);
-        }
         return checkpoints;
     }
     public void SelectStartPiece()
     {
         if (!StartPiece || SelectStart)
         {
+            // StartPiece.IsFacingForward = !StartPiece.IsFacingForward;
             StartPiece = grid.GetPiece(InputManager.Instance.MousePosition);
             SelectStart = false;
         }
     }
     public void ToggleTrackDirection()
     {
-        IsTrackDirectionClockwise = !isTrackDirectionClockwise;
+        IsTrackDirectionClockwise = !IsTrackDirectionClockwise;
     }
     public void ComputeTrack()
     {
@@ -101,13 +115,29 @@ public class Track : MonoBehaviour
         }
         ResetTrack();
         track.Add(StartPiece);
-        TrackPiece piece = GetNextTrackPiece(StartPiece, IsTrackDirectionClockwise);
+        // TrackPiece piece = GetNextTrackPiece(StartPiece, IsTrackDirectionClockwise);
+        StartPiece.IsFacingForward = IsTrackDirectionClockwise;
+        AddTrackPieceCheckpoints(StartPiece);
+        TrackPiece piece = GetNextTrackPiece(StartPiece);
         while (piece != StartPiece && piece != null)
         {
             track.Add(piece);
-            piece = GetCurrentNextTrackPiece(piece);
+            // piece = GetCurrentNextTrackPiece(piece);
+            piece.IsFacingForward = DetermineTrackPieceFacingForward(piece);
+            AddTrackPieceCheckpoints(piece);
+            piece = GetNextTrackPiece(piece);
         }
         IsCircular = piece == StartPiece;
+        ProcessCheckpoints();
+    }
+    private void ProcessCheckpoints()
+    {
+        Checkpoint firstCheckpoint = checkpoints[0];
+        checkpoints.Remove(firstCheckpoint);
+        if (IsCircular)
+        {
+            checkpoints.Add(firstCheckpoint);
+        }
     }
     private void ResetTrack()
     {
@@ -128,11 +158,48 @@ public class Track : MonoBehaviour
         checkpoints.AddRange(piece.GetCheckpoints().Reverse());
         return grid.GetNeighbor(piece, -piece.transform.forward);
     }
+    private TrackPiece GetNextTrackPiece(TrackPiece piece)
+    {
+        if (piece.IsFacingForward)
+        {
+            if (piece.IsStraight())
+            {
+                return grid.GetNeighbor(piece, piece.transform.forward);
+            }
+            return grid.GetNeighbor(piece, piece.transform.right);
+        }
+        return grid.GetNeighbor(piece, -piece.transform.forward);
+    }
+    private void AddTrackPieceCheckpoints(TrackPiece piece)
+    {
+        if (piece.IsFacingForward)
+        {
+            foreach (Checkpoint checkpoint in piece.GetCheckpoints())
+            {
+                checkpoint.transform.forward = checkpoint.InitialForward;
+                checkpoints.Add(checkpoint);
+            }
+        }
+        else
+        {
+            foreach (Checkpoint checkpoint in piece.GetCheckpoints().Reverse())
+            {
+                checkpoint.transform.forward = -checkpoint.InitialForward;
+                checkpoints.Add(checkpoint);
+            }
+        }
+    }
     private TrackPiece GetCurrentNextTrackPiece(TrackPiece piece)
     {
         TrackPiece previousPiece = track[track.Count - 2];
         TrackPiece backPiece = grid.GetNeighbor(piece, -piece.transform.forward);
         return GetNextTrackPiece(piece, previousPiece == backPiece);
+    }
+    private bool DetermineTrackPieceFacingForward(TrackPiece piece)
+    {
+        TrackPiece previousPiece = track[track.Count - 2];
+        TrackPiece backPiece = grid.GetNeighbor(piece, -piece.transform.forward);
+        return previousPiece == backPiece;
     }
     public bool IsValidStartPiece()
     {
@@ -145,5 +212,14 @@ public class Track : MonoBehaviour
     public TrackPiece GetRandomTrackPiece()
     {
         return track[UnityEngine.Random.Range(0, track.Count)];
+    }
+    public TrackPiece GetNextPieceFromTrack(TrackPiece trackPiece)
+    {
+        int index = track.IndexOf(trackPiece) + 1;
+        if (index < 0 || index > track.Count - 1)
+        {
+            return null;
+        }
+        return track[index];
     }
 }

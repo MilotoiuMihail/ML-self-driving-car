@@ -1,13 +1,11 @@
 using UnityEngine;
 public class Corner : TrackPiece
 {
-    public override int GetFirstCheckpointIndex()
+    public override void Place(Vector3 position)
     {
-        int checkpoint1 = CheckpointManager.Instance.GetCheckpointIndex(base.checkpoints[1]);
-        int checkpoint2 = CheckpointManager.Instance.GetCheckpointIndex(base.checkpoints[3]);
-        return Mathf.Min(checkpoint1, checkpoint2);
+        base.Place(position);
+        base.LockCheckpointsDirection();
     }
-
     protected override TrackPieceType GetTrackPieceType()
     {
         return TrackPieceType.CORNER;

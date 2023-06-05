@@ -7,7 +7,7 @@ public class Car : MonoBehaviour
     private const float MeterpsToKph = 3.6f;
     private const float MeterpsToMph = 2.23694f;
     [field: SerializeField] public CarSpecs Specs { get; private set; }
-    [SerializeField] private bool hasManualGearBox;
+    [field: SerializeField] public bool HasManualGearBox { get; private set; }
     [SerializeField] private float steeringSmoothness;
     [SerializeField] private float downforce;
     [SerializeField] private float brakeTorque;
@@ -18,7 +18,6 @@ public class Car : MonoBehaviour
     private CarInput input;
     private float throttle;
     private int currentGear;
-    private bool isSwitchingGears;
     private Gear[] gears;
     private bool isStopped;
 
@@ -72,6 +71,10 @@ public class Car : MonoBehaviour
         return gears[currentGear].Ratio;
     }
 
+    public int GetCurrentGearIndex()
+    {
+        return currentGear;
+    }
     private void TakeInput()
     {
         throttle = input.ThrottleInput;
@@ -98,9 +101,9 @@ public class Car : MonoBehaviour
         }
         if (throttle > 0)
         {
-            return currentGear != 0 ? engine.CurrentEngineTorque : 0;
+            return IsInReverse() ? 0 : engine.CurrentEngineTorque;
         }
-        return currentGear != 0 ? 0 : engine.CurrentEngineTorque;
+        return IsInReverse() ? engine.CurrentEngineTorque : 0;
     }
 
     private float GetBrakeTorque()
@@ -111,9 +114,9 @@ public class Car : MonoBehaviour
         }
         if (throttle > 0)
         {
-            return currentGear != 0 ? 0 : brakeTorque * throttle;
+            return IsInReverse() ? brakeTorque * throttle : 0;
         }
-        return currentGear != 0 ? brakeTorque * -throttle : 0;
+        return IsInReverse() ? 0 : brakeTorque * -throttle;
     }
 
     public void SetLeftSteering(float desiredSteerAngle)
@@ -128,9 +131,14 @@ public class Car : MonoBehaviour
 
     }
 
+    private bool IsInReverse()
+    {
+        return currentGear == 0;
+    }
+
     private void Shifting()
     {
-        if (hasManualGearBox)
+        if (HasManualGearBox)
         {
             ManualShift();
         }
@@ -158,7 +166,7 @@ public class Car : MonoBehaviour
         {
             ToggleReverse();
         }
-        if (currentGear == 0)
+        if (IsInReverse())
         {
             return;
         }
@@ -174,7 +182,7 @@ public class Car : MonoBehaviour
 
     private void ToggleReverse()
     {
-        if (currentGear == 0)
+        if (IsInReverse())
         {
             ShiftUp();
         }
