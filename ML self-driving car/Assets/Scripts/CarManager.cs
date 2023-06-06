@@ -47,8 +47,8 @@ public class CarManager : Singleton<CarManager>
     {
         TrackPiece startPiece = track.GetRandomTrackPiece();
         ResetCarPosition(carTransform, GetSpawnPoint(startPiece));
-        ResetCarDirection(carTransform, GetSpawnPoint(startPiece));
-        // RandomResetCarDirection(carTransform);
+        // ResetCarDirection(carTransform, GetSpawnPoint(startPiece));
+        RandomResetCarDirection(carTransform);
         SetCarStartingCheckpointIndex(carTransform, startPiece);
     }
 

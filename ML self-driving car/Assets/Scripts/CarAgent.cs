@@ -48,7 +48,7 @@ public class CarAgent : Agent
     }
     public override void OnEpisodeBegin()
     {
-        SetReward(-0.05f);
+        SetReward(-0.5f);
         Reset(hasRandomReset);
         GetNextCheckpoint();
     }
