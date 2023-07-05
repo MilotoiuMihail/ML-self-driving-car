@@ -46,4 +46,8 @@ public class ModalWindowSystem : Singleton<ModalWindowSystem>
     {
         modalWindow.Show(data);
     }
+    public bool IsVisible()
+    {
+        return modalWindow.gameObject.activeInHierarchy;
+    }
 }

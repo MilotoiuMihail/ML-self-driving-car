@@ -6,6 +6,8 @@ using System;
 
 public class Track : MonoBehaviour
 {
+    private const int MinLaps = 1;
+    private const int MaxLaps = 100;
     public event Action StartPieceChanged;
     private TrackPiece startPiece;
     public TrackPiece StartPiece
@@ -66,9 +68,20 @@ public class Track : MonoBehaviour
     private List<TrackPiece> track = new List<TrackPiece>();
     private List<Checkpoint> checkpoints = new List<Checkpoint>();
     public bool IsCircular { get; private set; }
-    private Grid grid;
-    [SerializeField] private TrackEditor trackEditor;
-    public TrackEditor TrackEditor => trackEditor;
+    private int laps;
+    public int Laps
+    {
+        get
+        {
+            return laps;
+        }
+        set
+        {
+            laps = Mathf.Clamp(value, MinLaps, MaxLaps);
+        }
+    }
+    [SerializeField] private Grid grid;
+    [field: SerializeField] public TrackEditor TrackEditor { get; private set; }
 
     private void OnEnable()
     {
@@ -77,14 +90,6 @@ public class Track : MonoBehaviour
     private void OnDisable()
     {
         TrackEditor.PiecePlaced -= SelectStartPiece;
-    }
-    private void Awake()
-    {
-        grid = TrackEditor.Grid;
-    }
-    private void Start()
-    {
-        TrackDataManager.LoadTrack(this);
     }
     public List<Checkpoint> GetCheckpoints()
     {
@@ -102,29 +107,6 @@ public class Track : MonoBehaviour
     {
         IsTrackDirectionClockwise = !IsTrackDirectionClockwise;
     }
-    // public void ComputeTrack()
-    // {
-    //     if (!StartPiece)
-    //     {
-    //         return;
-    //     }
-    //     ResetTrack();
-    //     track.Add(StartPiece);
-    //     // TrackPiece piece = GetNextTrackPiece(StartPiece, IsTrackDirectionClockwise);
-    //     StartPiece.IsFacingForward = IsTrackDirectionClockwise;
-    //     AddTrackPieceCheckpoints(StartPiece);
-    //     TrackPiece piece = GetNextTrackPiece(StartPiece);
-    //     while (piece != StartPiece && piece != null)
-    //     {
-    //         track.Add(piece);
-    //         // piece = GetCurrentNextTrackPiece(piece);
-    //         piece.IsFacingForward = DetermineTrackPieceFacingForward(piece);
-    //         AddTrackPieceCheckpoints(piece);
-    //         piece = GetNextTrackPiece(piece);
-    //     }
-    //     IsCircular = piece == StartPiece;
-    //     ProcessCheckpoints();
-    // }
     public void ComputeTrack()
     {
         if (!StartPiece)
@@ -227,6 +209,25 @@ public class Track : MonoBehaviour
     }
     public TrackPiece GetRandomTrackPiece()
     {
-        return track[UnityEngine.Random.Range(0, track.Count)];
+        return track.Count > 0 ? track[UnityEngine.Random.Range(0, track.Count)] : null;
+    }
+
+    public TrackData ToData()
+    {
+        TrackData trackData = new TrackData();
+        trackData.IsTrackDirectionClockwise = IsTrackDirectionClockwise;
+        trackData.StartPiece = StartPiece != null ? StartPiece.ToData() : null;
+        trackData.Laps = Laps;
+        return trackData;
+    }
+    public void Load(TrackData data)
+    {
+        if (data == null)
+        {
+            return;
+        }
+        IsTrackDirectionClockwise = data.IsTrackDirectionClockwise;
+        Laps = data.Laps;
+        StartPiece = data.StartPiece != null ? grid.GetPiece(data.StartPiece.Position) : null;
     }
 }

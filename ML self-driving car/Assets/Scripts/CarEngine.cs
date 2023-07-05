@@ -7,6 +7,9 @@ public class CarEngine : MonoBehaviour
 {
     private const float RpmMultiplier = 1000f;
     private const float RpmRatio = 1f / RpmMultiplier;
+    private const float LowerRpmRatio = .6f;
+    private const float UpperRpmRatio = .9f;
+    private const float TransmissionEfficiency = .9f;
     private Car car;
     private CarInput carInput;
     private AnimationCurve curve;
@@ -19,14 +22,14 @@ public class CarEngine : MonoBehaviour
     {
         car = GetComponent<Car>();
         carInput = GetComponent<CarInput>();
-    }
-
-    private void Start()
-    {
         curve = car.Specs.EngineCurve;
         IdleRpm = DetermineIdleRpm();
         RedlineRpm = DetermineRedlineRpm();
         Rpm = IdleRpm;
+    }
+
+    private void Start()
+    {
     }
 
     private void Update()
@@ -49,16 +52,24 @@ public class CarEngine : MonoBehaviour
     {
         return curve.keys[curve.keys.Length - 1].time * RpmMultiplier;
     }
-
+    public float GetLowerRpm()
+    {
+        return RedlineRpm * LowerRpmRatio;
+    }
+    public float GetUpperRpm()
+    {
+        return RedlineRpm * UpperRpmRatio;
+    }
     private void ComputeRpmInGear(float wheelRpm, float gearRatio)
     {
+        // float desiredEngineRpm = Mathf.Max(IdleRpm, Mathf.Abs(wheelRpm) * gearRatio);
         float desiredEngineRpm = Mathf.Abs(wheelRpm) * gearRatio;
         float v = 0;
-        Rpm = Mathf.SmoothDamp(Rpm, desiredEngineRpm, ref v, Time.deltaTime);
+        Rpm = Mathf.SmoothDamp(Rpm, desiredEngineRpm, ref v, Time.fixedDeltaTime);
     }
 
-    public float GetCurrentMaxTorque()
+    private float GetCurrentMaxTorque()
     {
-        return Rpm < RedlineRpm ? curve.Evaluate(Rpm * RpmRatio) : 0;
+        return Rpm < RedlineRpm ? curve.Evaluate(Rpm * RpmRatio) * TransmissionEfficiency : 0;
     }
 }

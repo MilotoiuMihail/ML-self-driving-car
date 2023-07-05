@@ -46,13 +46,14 @@ public class Car : MonoBehaviour
     }
     public void DebugInfo()
     {
-        Debug.Log($"speed: {Mathf.Round(GetSpeedKph())}; RPM: {engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {engine.CurrentEngineTorque}");
+        // Debug.Log($"speed: {Mathf.Round(GetSpeedKph())}; RPM: {engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {engine.CurrentEngineTorque}");
     }
 
     public void StopCompletely()
     {
-        isStopped = true;
         rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.isKinematic = true;
         currentGear = 1;
     }
 
@@ -62,7 +63,7 @@ public class Car : MonoBehaviour
         gears[0] = new Gear(Specs.EffectiveGearRatios[0], 0, engine.IdleRpm, engine.RedlineRpm);
         for (int i = 1; i < Specs.EffectiveGearRatios.Length; i++)
         {
-            gears[i] = new Gear(Specs.EffectiveGearRatios[i], i, 3500, 6500);
+            gears[i] = new Gear(Specs.EffectiveGearRatios[i], i, engine.GetLowerRpm(), engine.GetUpperRpm());
         }
     }
 
@@ -82,9 +83,9 @@ public class Car : MonoBehaviour
 
     private void Movement()
     {
-        if (throttle != 0)
+        if (rb.isKinematic && throttle != 0)
         {
-            isStopped = false;
+            rb.isKinematic = false;
         }
         foreach (var wheel in Wheels)
         {
@@ -95,10 +96,6 @@ public class Car : MonoBehaviour
 
     private float GetTorque()
     {
-        if (isStopped)
-        {
-            return 0;
-        }
         if (throttle > 0)
         {
             return IsInReverse() ? 0 : engine.CurrentEngineTorque;
@@ -108,10 +105,6 @@ public class Car : MonoBehaviour
 
     private float GetBrakeTorque()
     {
-        if (isStopped)
-        {
-            return Mathf.Infinity;
-        }
         if (throttle > 0)
         {
             return IsInReverse() ? brakeTorque * throttle : 0;
@@ -236,24 +229,14 @@ public class Car : MonoBehaviour
             default:
                 break;
         }
-        Wheels[0].SetPower(front);
-        Wheels[1].SetPower(front);
-        Wheels[2].SetPower(rear);
-        Wheels[3].SetPower(rear);
+        Wheels[0].HasPower = front;
+        Wheels[1].HasPower = front;
+        Wheels[2].HasPower = rear;
+        Wheels[3].HasPower = rear;
     }
 
     public float GetWheelsRpm()
     {
-        switch (Specs.Drive)
-        {
-            case DriveType.REAR:
-                return (Wheels[2].Rpm + Wheels[3].Rpm) * .5f;
-            case DriveType.FRONT:
-                return (Wheels[0].Rpm + Wheels[1].Rpm) * .5f;
-            case DriveType.FULL:
-                return Wheels.Average(wheel => wheel.Rpm);
-            default:
-                return 0;
-        }
+        return Wheels.Where(wheel => wheel.HasPower).Average(wheel => wheel.Rpm);
     }
 }

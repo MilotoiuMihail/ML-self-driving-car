@@ -58,15 +58,15 @@ public class TopDownCameraRig : MonoBehaviour
     void LateUpdate()
     {
         HandleZoom();
+        Vector2 mousePosition = Input.mousePosition;
+        HandleRotation(mousePosition);
         if (followTarget)
         {
             FollowTarget();
             desiredPosition = transform.position;
             return;
         }
-        Vector2 mousePosition = Input.mousePosition;
         HandleMovement(mousePosition);
-        HandleRotation(mousePosition);
     }
     private void UnsetFollowTarget()
     {

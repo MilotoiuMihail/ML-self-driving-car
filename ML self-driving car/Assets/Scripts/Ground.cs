@@ -11,6 +11,7 @@ public class Ground : MonoBehaviour
     {
         float value = grid.transform.localScale.x + (cameraRig.ZoomBounds.y - transform.position.y) * scaleFactor;
         transform.localScale = new Vector3(value, 1, value);
-        transform.position = grid.GetComponentInChildren<Renderer>().bounds.center;
+        Vector3 desiredPosition = grid.GetComponentInChildren<Renderer>().bounds.center;
+        transform.position = new Vector3(desiredPosition.x, transform.position.y, desiredPosition.z);
     }
 }

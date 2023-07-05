@@ -1,7 +1,7 @@
 using UnityEngine;
 
 
-[CreateAssetMenu(fileName = "CarSpecifications", menuName = "ScriptableObjects/CarSpecs")]
+[CreateAssetMenu(fileName = "CarSpecifications", menuName = "Custom/Car Specs")]
 public class CarSpecs : ScriptableObject
 {
     [field: SerializeField] public DriveType Drive { get; private set; }

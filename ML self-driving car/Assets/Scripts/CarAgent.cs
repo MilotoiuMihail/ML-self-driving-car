@@ -11,46 +11,58 @@ public class CarAgent : Agent
     [SerializeField] private CarInput carInput;
     // [SerializeField] private LayerMask layerMask;
     private bool isHeuristic;
-    private Transform nextCheckpoint;
-    // private float totalDistanceToNextCheckpoint;
+    private Transform nextCheckpointTransform;
+    private List<Checkpoint> nextCheckpoints = new List<Checkpoint>();
     private Car car;
     private Rigidbody rb;
     private Vector3 lastLocalVelocity;
     private Vector3 lastLocalAngularVelocity;
     private int baseCheckpointIndex;
     private bool hasManualGearBox;
+    private float maxStepRatio;
     // private int wrongCheckpointsPassed;
     // private int lastWrongCheckpointIndex;
     [SerializeField] private bool hasRandomReset;
     private void Start()
     {
-        CheckpointManager.Instance.CorrectCheckpointPassed += OnCorrectCheckpointPassed;
-        CheckpointManager.Instance.WrongCheckpointPassed += OnWrongCheckpointPassed;
-        CheckpointManager.Instance.CompletedLap += OnCompletedLap;
-        CheckpointManager.Instance.FinishedRace += OnFinishedRace;
-        GameManager.Instance.EnterViewState += GetNextCheckpoint;
+        GameManager.Instance.EnterViewState += GetNextCheckpointTransform;
         GameManager.Instance.EnterViewState += EnableCar;
         GameManager.Instance.ExitViewState += DisableCar;
         isHeuristic = GetComponent<BehaviorParameters>().BehaviorType == BehaviorType.HeuristicOnly;
         car = GetComponent<Car>();
         hasManualGearBox = car.HasManualGearBox;
         rb = GetComponent<Rigidbody>();
+        maxStepRatio = 1f / MaxStep;
     }
     private void OnDestroy()
     {
+        GameManager.Instance.EnterViewState -= GetNextCheckpointTransform;
+        GameManager.Instance.EnterViewState -= EnableCar;
+        GameManager.Instance.ExitViewState -= DisableCar;
+    }
+    protected async override void OnEnable()
+    {
+        base.OnEnable();
+        await System.Threading.Tasks.Task.Yield();
+        CheckpointManager.Instance.CorrectCheckpointPassed += OnCorrectCheckpointPassed;
+        CheckpointManager.Instance.WrongCheckpointPassed += OnWrongCheckpointPassed;
+        CheckpointManager.Instance.CompletedLap += OnCompletedLap;
+        CheckpointManager.Instance.FinishedRace += OnFinishedRace;
+        GetNextCheckpointTransform();
+    }
+    protected override void OnDisable()
+    {
+        base.OnDisable();
         CheckpointManager.Instance.CorrectCheckpointPassed -= OnCorrectCheckpointPassed;
         CheckpointManager.Instance.WrongCheckpointPassed -= OnWrongCheckpointPassed;
         CheckpointManager.Instance.CompletedLap -= OnCompletedLap;
         CheckpointManager.Instance.FinishedRace -= OnFinishedRace;
-        GameManager.Instance.EnterViewState -= GetNextCheckpoint;
-        GameManager.Instance.EnterViewState -= EnableCar;
-        GameManager.Instance.ExitViewState -= DisableCar;
     }
     public override void OnEpisodeBegin()
     {
-        SetReward(-0.5f);
+        SetReward(-0.25f);
         Reset(hasRandomReset);
-        GetNextCheckpoint();
+        GetNextCheckpointTransform();
     }
     private void Update()
     {
@@ -61,10 +73,20 @@ public class CarAgent : Agent
     }
     public override void CollectObservations(VectorSensor sensor)
     {
-        float forwardAlignment = Vector3.Dot(transform.forward, nextCheckpoint.forward);
+        // foreach (Checkpoint checkpoint in nextCheckpoints)
+        // {
+        //     float forwardAlignment = Vector3.Dot(transform.forward, checkpoint.transform.forward);
+        //     sensor.AddObservation(forwardAlignment);
+        //     float rightAlignment = Vector3.Dot(transform.right, checkpoint.transform.right);
+        //     sensor.AddObservation(rightAlignment);
+        // }
+        float forwardAlignment = Vector3.Dot(transform.forward, nextCheckpointTransform.forward);
         sensor.AddObservation(forwardAlignment);
-        float rightAlignment = Vector3.Dot(transform.right, nextCheckpoint.right);
+        float rightAlignment = Vector3.Dot(transform.right, nextCheckpointTransform.right);
         sensor.AddObservation(rightAlignment);
+        float distanceToCheckpoint = Vector3.Distance(transform.position, nextCheckpointTransform.position);
+        sensor.AddObservation(distanceToCheckpoint);
+
         // sensor.AddObservation(transform.localPosition);
         // sensor.AddObservation(transform.localRotation);
         Vector3 localVelocity = GetLocalVelocity();
@@ -78,7 +100,7 @@ public class CarAgent : Agent
         sensor.AddObservation(localAngularAcceleration);
         lastLocalAngularVelocity = localAngularVelocity;
         sensor.AddObservation(car.GetCurrentGearIndex());
-        sensor.AddObservation(hasManualGearBox);
+        // sensor.AddObservation(hasManualGearBox);
     }
     public override void Heuristic(in ActionBuffers actionsOut)
     {
@@ -105,18 +127,18 @@ public class CarAgent : Agent
     }
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
-        actionMask.SetActionEnabled(0, 1, false);
         if (hasManualGearBox || car.GetCurrentGearIndex() > 1)
         {
+            actionMask.SetActionEnabled(0, 1, false);
         }
     }
     private void OnCorrectCheckpointPassed(Transform carTransform)
     {
         if (carTransform == transform)
         {
-            Debug.Log("Checkpoint Correct");
-            AddReward((1f - (float)StepCount / MaxStep) * NormalizeCurrentCheckpoint());
-            GetNextCheckpoint();
+            // Debug.Log("Checkpoint Correct");
+            AddReward((1f - (float)StepCount * maxStepRatio) * (1f - NormalizeCurrentCheckpoint()));
+            GetNextCheckpointTransform();
         }
     }
     private Vector3 GetLocalVelocity()
@@ -139,7 +161,7 @@ public class CarAgent : Agent
         {
             // wrongCheckpointsPassed += 1;
             // float passedCheckpointsRatio = (float)wrongCheckpointsPassed / (wrongCheckpointsPassed + CheckpointManager.Instance.CheckpointTracker[transform]);
-            Debug.Log("Checkpoint Wrong");
+            // Debug.Log("Checkpoint Wrong");
             // AddReward(0f - (1f - (float)StepCount / MaxStep) * passedCheckpointsRatio);
         }
     }
@@ -147,7 +169,7 @@ public class CarAgent : Agent
     {
         if (carTransform == transform)
         {
-            Debug.Log("Completed Lap");
+            // Debug.Log("Completed Lap");
             SetReward(1f);
         }
     }
@@ -155,9 +177,37 @@ public class CarAgent : Agent
     {
         if (carTransform == transform)
         {
-            Debug.Log("Finished Race");
+            // Debug.Log("Finished Race");
             SetReward(1f);
             EndEpisode();
+        }
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!this.enabled)
+        {
+            return;
+        }
+        if (other.tag.Equals("Wall"))
+        {
+            // SetReward(-1f);
+            // Debug.Log("Reward: " + GetCumulativeReward());
+            // Debug.Log("Wall");
+            AddReward(-.025f);
+            EndEpisode();
+        }
+
+    }
+    private void OnCollisionStay(Collision other)
+    {
+        if (!this.enabled)
+        {
+            return;
+        }
+        if (other.collider.tag.Equals("Obstacle"))
+        {
+            // Debug.Log("Obstacle");
+            AddReward(-.001f);
         }
     }
     // private void StayOnGroundReward()
@@ -177,10 +227,18 @@ public class CarAgent : Agent
     //     float checkpointReward = (totalDistanceToNextCheckpoint - distanceToCheckpoint) / totalDistanceToNextCheckpoint * .005f;
     //     AddReward(checkpointReward);
     // }
-    private void GetNextCheckpoint()
+    private void GetNextCheckpointTransform()
     {
-        nextCheckpoint = CheckpointManager.Instance.GetNextCheckpoint(transform).transform;
         // totalDistanceToNextCheckpoint = Vector3.Distance(transform.position, nextCheckpoint.position);
+        Checkpoint nextCheckpoint = CheckpointManager.Instance.GetNextCheckpoint(transform);
+        nextCheckpointTransform = nextCheckpoint ? nextCheckpoint.transform : this.transform;
+        // int length = 5;
+        // nextCheckpoints = CheckpointManager.Instance.GetNextCheckpoints(transform, length);
+        // Checkpoint lastCheckpoint = nextCheckpoints[nextCheckpoints.Count - 1];
+        // for (int i = nextCheckpoints.Count; i < length; i++)
+        // {
+        //     nextCheckpoints.Add(lastCheckpoint);
+        // }
     }
     private void Reset(bool randomReset)
     {
@@ -223,18 +281,5 @@ public class CarAgent : Agent
     {
         Reset(false);
         this.enabled = false;
-    }
-    private void OnTriggerEnter(Collider other)
-    {
-        if (!this.enabled)
-        {
-            return;
-        }
-        if (other.tag.Equals("Wall"))
-        {
-            SetReward(-1f);
-            Debug.Log("Reward: " + GetCumulativeReward());
-            EndEpisode();
-        }
     }
 }

@@ -5,5 +5,6 @@ using System.Collections.Generic;
 public class SaveData
 {
     public TrackData Track = new TrackData();
-    public List<TrackPieceData> Grid = new List<TrackPieceData>();
+    public List<PlaceableData> TrackPieces = new List<PlaceableData>();
+    public List<PlaceableData> Obstacles = new List<PlaceableData>();
 }

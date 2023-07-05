@@ -6,9 +6,9 @@ using Newtonsoft.Json;
 
 public static class SaveManager
 {
-    public static SaveData CurrentSaveData { get; private set; } = new SaveData();
     public const string SaveDirectory = "Saves";
-    public const string FileName = "Save.game";
+    public const string FileName = "Save.json";
+    public static SaveData CurrentSaveData { get; private set; } = new SaveData();
     public static void Save()
     {
         string directory = Path.Combine(Application.persistentDataPath, SaveDirectory);
@@ -23,25 +23,36 @@ public static class SaveManager
     {
         string filePath = Path.Combine(Application.persistentDataPath, SaveDirectory, FileName);
         SaveData data = null;
-
         try
         {
             if (File.Exists(filePath))
             {
-                string json = File.ReadAllText(filePath);
-                data = JsonConvert.DeserializeObject<SaveData>(json);
+                data = LoadFromFile(filePath);
             }
             else
             {
-                Debug.LogError("Save file does not exist!");
+                CreateDefaultSaveFile(filePath);
+                data = LoadFromFile(filePath);
+                Debug.LogWarning("Save file does not exist! Using default.");
             }
         }
         catch (System.Exception e)
         {
-            Debug.LogError("An error occurred while loading the save file: " + e.Message);
+            Debug.LogWarning("An error occurred while loading the save file. Using default. Error message: " + e.Message);
+            CreateDefaultSaveFile(filePath);
+            data = LoadFromFile(filePath);
         }
 
         CurrentSaveData = data != null ? data : new SaveData();
     }
-
+    private static void CreateDefaultSaveFile(string saveFilePath)
+    {
+        TextAsset defaultSaveFile = Resources.Load<TextAsset>("DefaultSave");
+        File.WriteAllText(saveFilePath, defaultSaveFile.text);
+    }
+    private static SaveData LoadFromFile(string filePath)
+    {
+        string json = File.ReadAllText(filePath);
+        return JsonConvert.DeserializeObject<SaveData>(json);
+    }
 }

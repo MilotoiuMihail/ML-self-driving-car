@@ -6,8 +6,8 @@ public class Corner : TrackPiece
         base.Place(position);
         base.LockCheckpointsDirection();
     }
-    protected override TrackPieceType GetTrackPieceType()
+    protected override PlaceableItemType GetItemType()
     {
-        return TrackPieceType.CORNER;
+        return PlaceableItemType.ITEM2;
     }
 }

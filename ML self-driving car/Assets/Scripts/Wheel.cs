@@ -6,7 +6,7 @@ public class Wheel : MonoBehaviour
 {
     private WheelCollider wheelCollider;
     private Transform wheelTransform;
-    private bool hasPower;
+    public bool HasPower { get; set; }
     public float SteeringAngle { get; set; }
     public float Torque { get; set; }
     public float BrakeTorque { get; set; }
@@ -26,7 +26,7 @@ public class Wheel : MonoBehaviour
     void FixedUpdate()
     {
         Steer();
-        if (hasPower)
+        if (HasPower)
         {
             Accelerate();
         }
@@ -53,10 +53,5 @@ public class Wheel : MonoBehaviour
     private void Brake()
     {
         wheelCollider.brakeTorque = BrakeTorque;
-    }
-
-    public void SetPower(bool hasPower)
-    {
-        this.hasPower = hasPower;
     }
 }

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Color Palette", menuName = "Custom/Color Palette")]
+[CreateAssetMenu(fileName = "NewColorPalette", menuName = "Custom/Color Palette")]
 public class ColorPalette : ScriptableObject
 {
     [SerializeField] private Color32 _default;
@@ -14,9 +14,5 @@ public class ColorPalette : ScriptableObject
     public Color32 Warning => _warning;
     public Color32 Info => _info;
     public Color32 Success => _success;
-
-    [SerializeField]
-    private SerializableDictionary<string, Color32> _colors = new SerializableDictionary<string, Color32>();
-    public SerializableDictionary<string, Color32> Colors => _colors;
 }
 

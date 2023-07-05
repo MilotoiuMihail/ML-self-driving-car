@@ -11,17 +11,6 @@ public class Grid : MonoBehaviour
     private Renderer gridRenderer;
     private TrackPiece[,] pieces;
 
-    private async void OnEnable()
-    {
-        await System.Threading.Tasks.Task.Yield();
-        GameManager.Instance.EnterEditState += Show;
-        GameManager.Instance.ExitEditState += Hide;
-    }
-    private void OnDisable()
-    {
-        GameManager.Instance.EnterEditState -= Show;
-        GameManager.Instance.ExitEditState -= Hide;
-    }
     private void Awake()
     {
         pieces = new TrackPiece[Width, Height];
@@ -31,7 +20,14 @@ public class Grid : MonoBehaviour
     }
     private void Start()
     {
+        GameManager.Instance.EnterEditState += Show;
+        GameManager.Instance.ExitEditState += Hide;
         Hide();
+    }
+    private void OnDestroy()
+    {
+        GameManager.Instance.EnterEditState -= Show;
+        GameManager.Instance.ExitEditState -= Hide;
     }
     private void Show()
     {

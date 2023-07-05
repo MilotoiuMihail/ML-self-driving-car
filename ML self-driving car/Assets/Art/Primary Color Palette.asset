@@ -27,9 +27,3 @@ MonoBehaviour:
   _success:
     serializedVersion: 2
     rgba: 4282171453
-  _colors:
-    data:
-    - key: White
-      value:
-        serializedVersion: 2
-        rgba: 4294967295

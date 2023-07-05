@@ -69,7 +69,10 @@ public class GameManager : Singleton<GameManager>
                 break;
         }
     }
-
+    public bool IsGameState(GameState gameState)
+    {
+        return currentState == gameState;
+    }
     // used by buttons in inspector
     public void ExitApplication()
     {

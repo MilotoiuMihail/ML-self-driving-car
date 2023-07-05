@@ -24,8 +24,20 @@ public class InputManager : Singleton<InputManager>
     private bool isKey1Down => Input.GetKeyDown(KeyCode.Alpha1);
     public event Action Key2Down;
     private bool isKey2Down => Input.GetKeyDown(KeyCode.Alpha2);
+    public event Action EscDown;
+    private bool isEscDown => Input.GetKeyDown(KeyCode.Escape);
+    [SerializeField]
+    private LayerMask groundLayer;
     private void Update()
     {
+        if (isEscDown)
+        {
+            OnEscDown();
+        }
+        if (GameManager.Instance.IsGameState(GameState.PAUSED))
+        {
+            return;
+        }
         GetMouseWorldPosition();
         if (isLeftCtrlDown)
         {
@@ -60,10 +72,16 @@ public class InputManager : Singleton<InputManager>
             OnKey2Down();
         }
     }
+
+    private void OnEscDown()
+    {
+        EscDown?.Invoke();
+    }
+
     private void GetMouseWorldPosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit raycastHit))
+        if (Physics.Raycast(ray, out RaycastHit raycastHit, Mathf.Infinity, groundLayer.value))
         {
             MousePosition = new Vector3(raycastHit.point.x, 0, raycastHit.point.z);
         }

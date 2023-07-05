@@ -46,20 +46,20 @@ public class CarManager : Singleton<CarManager>
     public void RandomResetCar(Transform carTransform)
     {
         TrackPiece startPiece = track.GetRandomTrackPiece();
+        if (startPiece == null)
+        {
+            return;
+        }
         ResetCarPosition(carTransform, GetSpawnPoint(startPiece));
-        // ResetCarDirection(carTransform, GetSpawnPoint(startPiece));
-        RandomResetCarDirection(carTransform);
+        ResetCarDirection(carTransform, GetSpawnPoint(startPiece));
+        // RandomResetCarDirection(carTransform);
         SetCarStartingCheckpointIndex(carTransform, startPiece);
     }
 
     private void SetCarStartingCheckpointIndex(Transform carTransform, TrackPiece startPiece)
     {
 
-        int nextCheckpointIndex = startPiece.GetFirstCheckpointIndex();
-        // if (track.IsCircular && nextCheckpointIndex == CheckpointManager.Instance.GetCheckpointsCount() - 1)
-        // {
-        //     nextCheckpointIndex = 0;
-        // }
+        int nextCheckpointIndex = startPiece != null ? CheckpointManager.Instance.GetCheckpointIndex(startPiece.GetFirstCheckpoint()) : 0;
         CheckpointManager.Instance.CheckpointTracker[carTransform] = nextCheckpointIndex;
     }
 

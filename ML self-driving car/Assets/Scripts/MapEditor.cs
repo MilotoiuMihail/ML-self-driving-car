@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(TrackEditor), typeof(ObstaclesEditor))]
 public class MapEditor : MonoBehaviour, IEnvironmentEditor
 {
-    [SerializeField] private TrackEditor trackEditor;
-    // [SerializeField] private IEnvironmentEditor obstaclesEditor;
+    public TrackEditor TrackEditor { get; private set; }
+    public ObstaclesEditor ObstaclesEditor { get; private set; }
     private IEnvironmentEditor currentEditor;
     private async void OnEnable()
     {
@@ -19,8 +20,9 @@ public class MapEditor : MonoBehaviour, IEnvironmentEditor
         InputManager.Instance.RKeyDown += RotateItemClockwise;
         InputManager.Instance.EKeyDown += RotateItemCounterClockwise;
     }
-    private void OnDisable()
+    private async void OnDisable()
     {
+        await System.Threading.Tasks.Task.Yield();
         InputManager.Instance.LeftMouseButton -= PlaceItem;
         InputManager.Instance.LeftCtrlLeftMouseButton -= RemoveItem;
         InputManager.Instance.LeftControlDown -= RemoveCurrentItem;
@@ -30,35 +32,61 @@ public class MapEditor : MonoBehaviour, IEnvironmentEditor
         InputManager.Instance.RKeyDown -= RotateItemClockwise;
         InputManager.Instance.EKeyDown -= RotateItemCounterClockwise;
     }
-    private async void Start()
+    private void Awake()
     {
-        GameManager.Instance.EnterEditState += Show;
-        GameManager.Instance.ExitEditState += Hide;
-        GameManager.Instance.EnterEditState += EditTrack;
-        GameManager.Instance.EnterEditState += CreateType1Item;
-        GameManager.Instance.ExitEditState += RemoveCurrentItem;
-        await System.Threading.Tasks.Task.Yield();
+        TrackEditor = GetComponent<TrackEditor>();
+        ObstaclesEditor = GetComponent<ObstaclesEditor>();
+    }
+    private void Start()
+    {
+        GameManager.Instance.EnterEditState += HandleEnterEditState;
+        GameManager.Instance.ExitEditState += HandleExitEditState;
+        EditTrack();
         Hide();
     }
     private void OnDestroy()
     {
-        GameManager.Instance.EnterEditState -= Show;
-        GameManager.Instance.EnterEditState -= EditTrack;
-        GameManager.Instance.ExitEditState -= Hide;
-        GameManager.Instance.EnterEditState -= CreateType1Item;
-        GameManager.Instance.ExitEditState -= RemoveCurrentItem;
+        GameManager.Instance.EnterEditState -= HandleEnterEditState;
+        GameManager.Instance.ExitEditState -= HandleExitEditState;
+    }
+    private void HandleEnterEditState()
+    {
+        Show();
+        CreateType1Item();
+    }
+    private void HandleExitEditState()
+    {
+        RemoveCurrentItem();
+        Hide();
     }
     private void EditTrack()
     {
-        currentEditor = trackEditor;
+        currentEditor = TrackEditor;
+    }
+    private void EditObstacles()
+    {
+        currentEditor = ObstaclesEditor;
+    }
+    public void SwitchEditor(bool isEditingObstacles)
+    {
+        currentEditor.RemoveCurrentItem();
+        if (isEditingObstacles)
+        {
+            EditObstacles();
+        }
+        else
+        {
+            EditTrack();
+        }
+        currentEditor.CreateType1Item();
     }
     private void Show()
     {
-        this.enabled = true;
+        gameObject.SetActive(true);
     }
     private void Hide()
     {
-        this.enabled = false;
+        gameObject.SetActive(false);
     }
     public void CreateLastItem()
     {

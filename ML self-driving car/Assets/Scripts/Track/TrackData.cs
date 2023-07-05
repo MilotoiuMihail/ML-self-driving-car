@@ -4,6 +4,7 @@ using System.Collections.Generic;
 [System.Serializable]
 public class TrackData
 {
-    public TrackPieceData StartPiece;
+    public PlaceableData StartPiece;
     public bool IsTrackDirectionClockwise = true;
+    public int Laps;
 }
