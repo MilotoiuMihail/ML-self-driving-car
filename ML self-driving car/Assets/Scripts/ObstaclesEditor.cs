@@ -4,13 +4,9 @@ using UnityEngine;
 
 public class ObstaclesEditor : EnvironmentEditor<Obstacle>
 {
-    [SerializeField] Transform checkCircle;
+    [SerializeField] CheckCircle checkCircle;
     [SerializeField] private float removeRadius;
     [SerializeField] private LayerMask removeMask;
-    private void Awake()
-    {
-        SetCheckCircleVisibility(false);
-    }
 
     public override void CreateItem(Obstacle item)
     {
@@ -19,15 +15,11 @@ public class ObstaclesEditor : EnvironmentEditor<Obstacle>
     }
     private void MoveCheckCircle()
     {
-        checkCircle.localScale = new Vector3(1, 1, 1) * currentItem.CheckRadius * .22f;
-        checkCircle.parent = base.currentItem.transform;
-        checkCircle.localPosition = new Vector3(0, 0.1f, 0);
-        SetCheckCircleVisibility(true);
+        checkCircle.Show(base.currentItem);
     }
     protected override void RemoveCurrentItemLogic()
     {
-        checkCircle.parent = null;
-        SetCheckCircleVisibility(false);
+        checkCircle.Hide();
     }
     protected override void PlaceItemLogic()
     {
@@ -48,9 +40,5 @@ public class ObstaclesEditor : EnvironmentEditor<Obstacle>
             GameObject obstacle = colliders[0].gameObject;
             Destroy(obstacle);
         }
-    }
-    private void SetCheckCircleVisibility(bool isVisibile)
-    {
-        checkCircle.GetComponent<Renderer>().enabled = isVisibile;
     }
 }

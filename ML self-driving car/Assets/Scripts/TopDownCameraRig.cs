@@ -27,23 +27,25 @@ public class TopDownCameraRig : MonoBehaviour
     private Vector3 maxBounds;
     [SerializeField] private Vector2 zoomBounds;
     public Vector2 ZoomBounds => zoomBounds;
-    private void OnEnable()
+    private async void OnEnable()
     {
         GameManager.Instance.EnterEditState += UnsetFollowTarget;
         GameManager.Instance.ExitEditState += SetPreviousFollowTarget;
+        await System.Threading.Tasks.Task.Yield();
+        InputManager.Instance.LeftAltDown += SetRotationStartPosition;
     }
     private void OnDisable()
     {
         GameManager.Instance.EnterEditState -= UnsetFollowTarget;
         GameManager.Instance.ExitEditState += SetPreviousFollowTarget;
+        InputManager.Instance.LeftAltDown += SetRotationStartPosition;
     }
     private void Start()
     {
         minBounds = boundsRenderer.bounds.min;
         maxBounds = boundsRenderer.bounds.max;
-        transform.position = boundsRenderer.bounds.center;
+        MoveToMapCenter();
         followTarget = true;
-        desiredPosition = transform.position;
         desiredRotation = transform.rotation;
         float defaultZoom = (ZoomBounds.x + ZoomBounds.y) * .5f;
         cameraTransform.localPosition = new Vector3(
@@ -58,15 +60,13 @@ public class TopDownCameraRig : MonoBehaviour
     void LateUpdate()
     {
         HandleZoom();
-        Vector2 mousePosition = Input.mousePosition;
-        HandleRotation(mousePosition);
+        HandleRotation();
         if (followTarget)
         {
             FollowTarget();
-            desiredPosition = transform.position;
             return;
         }
-        HandleMovement(mousePosition);
+        HandleMovement();
     }
     private void UnsetFollowTarget()
     {
@@ -91,14 +91,24 @@ public class TopDownCameraRig : MonoBehaviour
         {
             return;
         }
-        transform.position = target.position;
+        SetPosition(target.position);
     }
-    private void HandleMovement(Vector2 mousePosition)
+    public void SetPosition(Vector3 position)
     {
-        if (Input.GetKey(KeyCode.LeftAlt))
+        transform.position = position;
+        desiredPosition = transform.position;
+    }
+    public void MoveToMapCenter()
+    {
+        SetPosition(boundsRenderer.bounds.center);
+    }
+    private void HandleMovement()
+    {
+        if (InputManager.Instance.IsLeftAltPressed)
         {
             return;
         }
+        Vector2 mousePosition = InputManager.Instance.ScreenMousePosition;
         if (mousePosition.y >= Screen.height - edgeSize)
         {
             float distanceFromEdge = mousePosition.y - (Screen.height - edgeSize);
@@ -122,24 +132,24 @@ public class TopDownCameraRig : MonoBehaviour
         ClampMovement();
         UpdatePosition();
     }
-    private void HandleRotation(Vector2 mousePosition)
+    private void HandleRotation()
     {
-        if (Input.GetKey(KeyCode.LeftAlt))
+        if (InputManager.Instance.IsLeftAltPressed)
         {
-            if (Input.GetKeyDown(KeyCode.LeftAlt))
-            {
-                rotateStartPosition = mousePosition;
-            }
-            rotateCurrentPosition = mousePosition;
+            rotateCurrentPosition = InputManager.Instance.ScreenMousePosition;
             Vector3 difference = rotateStartPosition - rotateCurrentPosition;
             rotateStartPosition = rotateCurrentPosition;
             desiredRotation *= CalculateRotationAmount(difference.x);
         }
         UpdateRotation();
     }
+    private void SetRotationStartPosition()
+    {
+        rotateStartPosition = InputManager.Instance.ScreenMousePosition;
+    }
     private void HandleZoom()
     {
-        float mouseScroll = Input.mouseScrollDelta.y;
+        float mouseScroll = InputManager.Instance.MouseScrollDelta;
         if (mouseScroll != 0)
         {
             desiredZoom += CalculateZoomAmount(mouseScroll);

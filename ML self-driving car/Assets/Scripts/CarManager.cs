@@ -27,7 +27,7 @@ public class CarManager : Singleton<CarManager>
 
     private void Update()
     {
-        car.DebugInfo();
+        // car.DebugInfo();
     }
     public void ResetCar(Transform carTransform)
     {

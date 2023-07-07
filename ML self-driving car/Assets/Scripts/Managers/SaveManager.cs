@@ -31,16 +31,14 @@ public static class SaveManager
             }
             else
             {
-                CreateDefaultSaveFile(filePath);
-                data = LoadFromFile(filePath);
+                data = LoadDefault(filePath);
                 Debug.LogWarning("Save file does not exist! Using default.");
             }
         }
         catch (System.Exception e)
         {
             Debug.LogWarning("An error occurred while loading the save file. Using default. Error message: " + e.Message);
-            CreateDefaultSaveFile(filePath);
-            data = LoadFromFile(filePath);
+            data = LoadDefault(filePath);
         }
 
         CurrentSaveData = data != null ? data : new SaveData();
@@ -54,5 +52,26 @@ public static class SaveManager
     {
         string json = File.ReadAllText(filePath);
         return JsonConvert.DeserializeObject<SaveData>(json);
+    }
+    private static SaveData LoadDefault(string filePath)
+    {
+        CreateDefaultSaveFile(filePath);
+        return LoadFromFile(filePath);
+    }
+    public static SaveData Import(string json)
+    {
+        try
+        {
+            return JsonConvert.DeserializeObject<SaveData>(json);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning("An error occurred while importing the save file. Error message: " + e.Message);
+        }
+        return new SaveData();
+    }
+    public static string Export(SaveData saveData)
+    {
+        return JsonConvert.SerializeObject(saveData);
     }
 }

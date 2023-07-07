@@ -6,8 +6,11 @@ using UnityEngine.EventSystems;
 
 public class InputManager : Singleton<InputManager>
 {
+    private Vector3 defaultScreenMousePosition { get { return new Vector3(Screen.width / 2f, Screen.height / 2f, 0); } }
     public bool IsMouseOverUI => EventSystem.current.IsPointerOverGameObject();
     public Vector3 MousePosition { get; private set; } = Vector3.zero;
+    public Vector3 ScreenMousePosition { get; private set; }
+    public float MouseScrollDelta { get; private set; } = 0;
     public event Action LeftMouseButton;
     private bool isLeftMouseButtonDown => Input.GetMouseButtonDown(0);
     public event Action LeftControlDown;
@@ -26,8 +29,17 @@ public class InputManager : Singleton<InputManager>
     private bool isKey2Down => Input.GetKeyDown(KeyCode.Alpha2);
     public event Action EscDown;
     private bool isEscDown => Input.GetKeyDown(KeyCode.Escape);
-    [SerializeField]
-    private LayerMask groundLayer;
+    private bool isLeftAltPressed => Input.GetKey(KeyCode.LeftAlt);
+    public bool IsLeftAltPressed
+    {
+        get
+        {
+            return GameManager.Instance.IsGameState(GameState.PAUSED) ? false : isLeftAltDown;
+        }
+    }
+    public event Action LeftAltDown;
+    private bool isLeftAltDown => Input.GetKeyDown(KeyCode.LeftAlt);
+    [SerializeField] private LayerMask groundLayer;
     private void Update()
     {
         if (isEscDown)
@@ -36,9 +48,13 @@ public class InputManager : Singleton<InputManager>
         }
         if (GameManager.Instance.IsGameState(GameState.PAUSED))
         {
+            ScreenMousePosition = defaultScreenMousePosition;
+            MouseScrollDelta = 0;
             return;
         }
         GetMouseWorldPosition();
+        ScreenMousePosition = Input.mousePosition;
+        MouseScrollDelta = Input.mouseScrollDelta.y;
         if (isLeftCtrlDown)
         {
             OnLeftControlDown();
@@ -71,8 +87,15 @@ public class InputManager : Singleton<InputManager>
         {
             OnKey2Down();
         }
+        if (isLeftAltDown)
+        {
+            OnLeftAltDown();
+        }
     }
-
+    private void OnLeftAltDown()
+    {
+        LeftAltDown?.Invoke();
+    }
     private void OnEscDown()
     {
         EscDown?.Invoke();

@@ -44,6 +44,6 @@ public class ButtonExitEdit : MonoBehaviour
     public void SaveChanges()
     {
         GameManager.Instance.ChangeToViewState();
-        SaveDataManager.Instance.SaveMap(map.Track);
+        SaveDataManager.Instance.SaveMap();
     }
 }

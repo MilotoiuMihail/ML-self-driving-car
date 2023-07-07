@@ -28,10 +28,6 @@ public class CarEngine : MonoBehaviour
         Rpm = IdleRpm;
     }
 
-    private void Start()
-    {
-    }
-
     private void Update()
     {
         ComputeRpmInGear(car.GetWheelsRpm(), car.GetCurrentGearRatio());

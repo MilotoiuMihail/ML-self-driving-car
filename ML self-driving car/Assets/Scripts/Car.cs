@@ -1,11 +1,10 @@
 using UnityEngine;
 using System.Linq;
+using System;
 
 [RequireComponent(typeof(CarInput))]
 public class Car : MonoBehaviour
 {
-    private const float MeterpsToKph = 3.6f;
-    private const float MeterpsToMph = 2.23694f;
     [field: SerializeField] public CarSpecs Specs { get; private set; }
     [field: SerializeField] public bool HasManualGearBox { get; private set; }
     [SerializeField] private float steeringSmoothness;
@@ -14,25 +13,26 @@ public class Car : MonoBehaviour
     [SerializeField] private Transform centreOfMass;
     public Wheel[] Wheels { get; private set; }
     private Rigidbody rb;
-    private CarEngine engine;
+    public CarEngine Engine;
     private CarInput input;
     private float throttle;
     private int currentGear;
     private Gear[] gears;
     private bool isStopped;
+    public event Action<int> GearShift;
 
     private void Awake()
     {
         Wheels = GetComponentsInChildren<Wheel>();
-        engine = GetComponent<CarEngine>();
+        Engine = GetComponent<CarEngine>();
         input = GetComponent<CarInput>();
         rb = GetComponent<Rigidbody>();
     }
 
     void Start()
     {
-        currentGear = 1;
         rb.centerOfMass = centreOfMass.localPosition;
+        StopCompletely();
         ApplyDriveType();
         InitializeGears();
     }
@@ -46,7 +46,7 @@ public class Car : MonoBehaviour
     }
     public void DebugInfo()
     {
-        // Debug.Log($"speed: {Mathf.Round(GetSpeedKph())}; RPM: {engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {engine.CurrentEngineTorque}");
+        Debug.Log($"speed: {Mathf.Round(GetSpeed())}; RPM: {Engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {Engine.CurrentEngineTorque}");
     }
 
     public void StopCompletely()
@@ -55,15 +55,16 @@ public class Car : MonoBehaviour
         rb.angularVelocity = Vector3.zero;
         rb.isKinematic = true;
         currentGear = 1;
+        OnGearShift();
     }
 
     private void InitializeGears()
     {
         gears = new Gear[Specs.EffectiveGearRatios.Length];
-        gears[0] = new Gear(Specs.EffectiveGearRatios[0], 0, engine.IdleRpm, engine.RedlineRpm);
+        gears[0] = new Gear(Specs.EffectiveGearRatios[0], 0, Engine.IdleRpm, Engine.RedlineRpm);
         for (int i = 1; i < Specs.EffectiveGearRatios.Length; i++)
         {
-            gears[i] = new Gear(Specs.EffectiveGearRatios[i], i, engine.GetLowerRpm(), engine.GetUpperRpm());
+            gears[i] = new Gear(Specs.EffectiveGearRatios[i], i, Engine.GetLowerRpm(), Engine.GetUpperRpm());
         }
     }
 
@@ -98,9 +99,9 @@ public class Car : MonoBehaviour
     {
         if (throttle > 0)
         {
-            return IsInReverse() ? 0 : engine.CurrentEngineTorque;
+            return IsInReverse() ? 0 : Engine.CurrentEngineTorque;
         }
-        return IsInReverse() ? engine.CurrentEngineTorque : 0;
+        return IsInReverse() ? Engine.CurrentEngineTorque : 0;
     }
 
     private float GetBrakeTorque()
@@ -163,11 +164,11 @@ public class Car : MonoBehaviour
         {
             return;
         }
-        if (engine.Rpm > gears[currentGear].MaxRpm && currentGear < gears.Length - 1)
+        if (Engine.Rpm > gears[currentGear].MaxRpm && currentGear < gears.Length - 1)
         {
             ShiftUp();
         }
-        if (engine.Rpm < gears[currentGear].MinRpm && currentGear > 1)
+        if (Engine.Rpm < gears[currentGear].MinRpm && currentGear > 1)
         {
             ShiftDown();
         }
@@ -184,25 +185,25 @@ public class Car : MonoBehaviour
             ShiftDown();
         }
     }
-
+    private void OnGearShift()
+    {
+        GearShift?.Invoke(currentGear);
+    }
     private void ShiftUp()
     {
         currentGear = Mathf.Min(currentGear + 1, gears.Length - 1);
+        OnGearShift();
     }
 
     private void ShiftDown()
     {
         currentGear = Mathf.Max(currentGear - 1, 0);
+        OnGearShift();
     }
 
-    public float GetSpeedKph()
+    public float GetSpeed()
     {
-        return rb.velocity.magnitude * MeterpsToKph;
-    }
-
-    private float GetSpeedMph()
-    {
-        return rb.velocity.magnitude * MeterpsToMph;
+        return rb.velocity.magnitude;
     }
 
     private void ApplyDownforce()

@@ -4,30 +4,30 @@ using UnityEngine;
 
 public class CameraManager : MonoBehaviour
 {
-    [SerializeField] private GameObject[] cameras;
-    private CameraInput input;
-    private int currentIndex;
-
-    void Awake()
+    [SerializeField] private TopDownCameraRig cameraRig;
+    [SerializeField] private Transform startGate;
+    [SerializeField] private SaveDataManager saveDataManager;
+    private async void OnEnable()
     {
-        cameras[0].SetActive(true);
-        for (int i = 1; i < cameras.Length; i++)
-            cameras[i].SetActive(false);
+        await System.Threading.Tasks.Task.Yield();
+        saveDataManager.MapLoaded += MoveToStartGate;
+        GameManager.Instance.EnterEditState += MoveToStartGate;
     }
-    void Start()
+    private void OnDisable()
     {
-        input = GetComponent<CameraInput>();
-    }
-
-    void Update()
-    {
-        if (input.SwitchCamera) SwitchCameras();
+        saveDataManager.MapLoaded -= MoveToStartGate;
+        GameManager.Instance.EnterEditState -= MoveToStartGate;
     }
 
-    private void SwitchCameras()
+    private void MoveToStartGate()
     {
-        cameras[currentIndex].SetActive(false);
-        currentIndex = ++currentIndex % cameras.Length;
-        cameras[currentIndex].SetActive(true);
+        if (startGate && startGate.gameObject.activeInHierarchy)
+        {
+            cameraRig.SetPosition(startGate.position);
+        }
+        else
+        {
+            cameraRig.MoveToMapCenter();
+        }
     }
 }

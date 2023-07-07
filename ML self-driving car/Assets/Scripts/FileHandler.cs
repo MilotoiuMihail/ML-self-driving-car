@@ -8,6 +8,7 @@ using System.IO;
 public class FileHandler : MonoBehaviour
 {
     private const string FileExtension = "json";
+    [SerializeField] private SaveDataManager saveDataManager;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
@@ -27,7 +28,7 @@ public class FileHandler : MonoBehaviour
     }
 
     private void SaveFileWebGL(){
-        var bytes = Encoding.UTF8.GetBytes("{}");
+        var bytes = Encoding.UTF8.GetBytes(MapToJson());
         DownloadFile(gameObject.name, "OnFileDownload", "", bytes, bytes.Length);
     }
 
@@ -57,8 +58,8 @@ public class FileHandler : MonoBehaviour
         }
         else
         {
-            string text = request.downloadHandler.text;
-            Debug.Log(text);
+            string json = request.downloadHandler.text;
+            saveDataManager.LoadMapData(SaveManager.Import(json));
         }
     }
     private void SaveFileStandalone()
@@ -66,8 +67,15 @@ public class FileHandler : MonoBehaviour
         var path = StandaloneFileBrowser.SaveFilePanel("Save as", "", "", FileExtension);
         if (!string.IsNullOrEmpty(path))
         {
-            File.WriteAllText(path, "{}");
+            File.WriteAllText(path, MapToJson());
         }
+    }
+    private string MapToJson()
+    {
+        SaveData saveData = new SaveData();
+        saveDataManager.UpdateMap();
+        saveDataManager.SaveMapData(saveData);
+        return SaveManager.Export(saveData);
     }
     public void OpenFile()
     {

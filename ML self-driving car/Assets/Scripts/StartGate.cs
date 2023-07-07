@@ -5,18 +5,28 @@ using UnityEngine;
 public class StartGate : MonoBehaviour
 {
     [SerializeField] private Track track;
-    private void OnEnable()
+    [SerializeField] private SaveDataManager saveDataManager;
+    private void Start()
     {
         track.StartPieceChanged += MoveToFirstCheckpoint;
         track.HasTrackDirectionChanged += MoveToFirstCheckpoint;
     }
-    private void OnDisable()
+    private void OnDestroy()
     {
         track.StartPieceChanged -= MoveToFirstCheckpoint;
         track.HasTrackDirectionChanged -= MoveToFirstCheckpoint;
     }
+    private void HandleVisibility()
+    {
+        if (track == null)
+        {
+            return;
+        }
+        gameObject.SetActive(track.StartPiece != null);
+    }
     private void MoveToFirstCheckpoint()
     {
+        HandleVisibility();
         if (track.StartPiece == null)
         {
             return;

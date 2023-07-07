@@ -6,7 +6,8 @@ using System;
 public class TrackEditor : EnvironmentEditor<TrackPiece>
 {
     [SerializeField] private Grid grid;
-    public Action PiecePlaced;
+    public event Action PiecePlaced;
+    public event Action<TrackPiece> PieceRemoved;
 
     private void PlacePieceOnGrid()
     {
@@ -28,6 +29,12 @@ public class TrackEditor : EnvironmentEditor<TrackPiece>
 
     protected override void RemoveItemLogic()
     {
-        Destroy(grid.RemovePiece(InputManager.Instance.MousePosition)?.gameObject);
+        TrackPiece piece = grid.RemovePiece(InputManager.Instance.MousePosition);
+        if (piece == null)
+        {
+            return;
+        }
+        Destroy(piece.gameObject);
+        PieceRemoved?.Invoke(piece);
     }
 }

@@ -1,59 +1,69 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using SFB;
+using System;
 
 public class SaveDataManager : Singleton<SaveDataManager>
 {
     [SerializeField] private Map map;
     [SerializeField] private MapEditor mapEditor;
+    public event Action MapLoaded;
 
     private void Start()
     {
-        GameManager.Instance.EnterEditState += LoadObstacles;
+        GameManager.Instance.EnterEditState += LoadObstaclesData;
         LoadMap();
     }
     private void OnDestroy()
     {
-        GameManager.Instance.EnterEditState -= LoadObstacles;
+        GameManager.Instance.EnterEditState -= LoadObstaclesData;
     }
-    public void SaveMap(Track track)
+    public void SaveMap()
     {
-        SaveTrack();
-        SaveTrackPieces();
-        SaveObstacles();
+        SaveMapData(SaveManager.CurrentSaveData);
         SaveManager.Save();
     }
-    private void SaveTrack()
+    public void SaveMapData(SaveData saveData)
     {
-        SaveManager.CurrentSaveData.Track = map.Track.ToData();
+        SaveTrack(saveData);
+        SaveTrackPieces(saveData);
+        SaveObstacles(saveData);
     }
-    private void SaveTrackPieces()
+    private void SaveTrack(SaveData saveData)
+    {
+        saveData.Track = map.Track.ToData();
+    }
+    private void SaveTrackPieces(SaveData saveData)
     {
         List<PlaceableData> trackPiecesData = new List<PlaceableData>();
         foreach (TrackPiece piece in map.TrackPieces)
         {
             trackPiecesData.Add(piece.ToData());
         }
-        SaveManager.CurrentSaveData.TrackPieces = trackPiecesData;
+        saveData.TrackPieces = trackPiecesData;
     }
-    private void SaveObstacles()
+    private void SaveObstacles(SaveData saveData)
     {
         List<PlaceableData> obstaclesData = new List<PlaceableData>();
         foreach (Obstacle piece in map.Obstacles)
         {
             obstaclesData.Add(piece.ToData());
         }
-        SaveManager.CurrentSaveData.Obstacles = obstaclesData;
+        saveData.Obstacles = obstaclesData;
     }
     public void LoadMap()
     {
         SaveManager.Load();
-        TrackData trackData = SaveManager.CurrentSaveData.Track;
-        List<PlaceableData> trackPiecesData = SaveManager.CurrentSaveData.TrackPieces;
+        LoadMapData(SaveManager.CurrentSaveData);
+    }
+    public void LoadMapData(SaveData saveData)
+    {
+        TrackData trackData = saveData.Track;
+        List<PlaceableData> trackPiecesData = saveData.TrackPieces;
         LoadTrackPieces(trackPiecesData);
         map.Track.Load(trackData);
-        LoadObstacles();
+        LoadObstacles(saveData);
+        MapLoaded?.Invoke();
     }
 
     private void LoadTrackPieces(List<PlaceableData> trackPiecesData)
@@ -74,10 +84,14 @@ public class SaveDataManager : Singleton<SaveDataManager>
             }
         }
     }
-    private void LoadObstacles()
+    private void LoadObstaclesData()
+    {
+        LoadObstacles(SaveManager.CurrentSaveData);
+    }
+    private void LoadObstacles(SaveData saveData)
     {
         map.ResetObstacles();
-        List<PlaceableData> obstaclesData = SaveManager.CurrentSaveData.Obstacles;
+        List<PlaceableData> obstaclesData = saveData.Obstacles;
         if (obstaclesData == null)
         {
             return;
@@ -89,6 +103,10 @@ public class SaveDataManager : Singleton<SaveDataManager>
                 map.Obstacles.Add(mapEditor.ObstaclesEditor.InstantiatePiece(obstacleData));
             }
         }
+    }
+    public void UpdateMap()
+    {
+        map.UpdateEnvironment();
     }
     private bool AreSameTrackPieces()
     {

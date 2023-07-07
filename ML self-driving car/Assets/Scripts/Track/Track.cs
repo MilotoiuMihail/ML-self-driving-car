@@ -81,15 +81,25 @@ public class Track : MonoBehaviour
         }
     }
     [SerializeField] private Grid grid;
-    [field: SerializeField] public TrackEditor TrackEditor { get; private set; }
+    [SerializeField] private TrackEditor trackEditor;
 
     private void OnEnable()
     {
-        TrackEditor.PiecePlaced += SelectStartPiece;
+        trackEditor.PiecePlaced += SelectStartPiece;
+        trackEditor.PieceRemoved += OnPieceRemoved;
     }
     private void OnDisable()
     {
-        TrackEditor.PiecePlaced -= SelectStartPiece;
+        trackEditor.PiecePlaced -= SelectStartPiece;
+        trackEditor.PieceRemoved -= OnPieceRemoved;
+    }
+    private void OnPieceRemoved(TrackPiece piece)
+    {
+        if (piece != StartPiece)
+        {
+            return;
+        }
+        StartPiece = null;
     }
     public List<Checkpoint> GetCheckpoints()
     {
