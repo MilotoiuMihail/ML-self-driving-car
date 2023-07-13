@@ -7,14 +7,12 @@ public class FinishLine : MonoBehaviour
     [SerializeField] private Track track;
     private void Start()
     {
-        track.StartPieceChanged += MoveToLastCheckpoint;
-        track.HasTrackDirectionChanged += MoveToLastCheckpoint;
+        track.TrackComputed += MoveToLastCheckpoint;
         MoveToLastCheckpoint();
     }
     private void OnDestroy()
     {
-        track.StartPieceChanged -= MoveToLastCheckpoint;
-        track.HasTrackDirectionChanged -= MoveToLastCheckpoint;
+        track.TrackComputed -= MoveToLastCheckpoint;
     }
     private void HandleVisibility()
     {

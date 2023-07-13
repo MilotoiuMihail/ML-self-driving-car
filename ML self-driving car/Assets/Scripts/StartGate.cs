@@ -7,14 +7,12 @@ public class StartGate : MonoBehaviour
     [SerializeField] private Track track;
     private void Start()
     {
-        track.StartPieceChanged += MoveToFirstCheckpoint;
-        track.HasTrackDirectionChanged += MoveToFirstCheckpoint;
+        track.TrackComputed += MoveToFirstCheckpoint;
         MoveToFirstCheckpoint();
     }
     private void OnDestroy()
     {
-        track.StartPieceChanged -= MoveToFirstCheckpoint;
-        track.HasTrackDirectionChanged -= MoveToFirstCheckpoint;
+        track.TrackComputed -= MoveToFirstCheckpoint;
     }
     private void HandleVisibility()
     {

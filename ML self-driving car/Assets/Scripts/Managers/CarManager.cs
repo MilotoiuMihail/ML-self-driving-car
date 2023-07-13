@@ -16,8 +16,7 @@ public class CarManager : Singleton<CarManager>
     public event Action CarInputUnblocked;
     private void OnEnable()
     {
-        track.StartPieceChanged += HandleStartPieceChanged;
-        track.HasTrackDirectionChanged += HandleTrackDirectionChanged;
+        track.TrackComputed += ResetDummyCar;
         GameManager.Instance.EnterEditState += HandleEnterEdit;
         GameManager.Instance.ExitEditState += HandleExitEdit;
         GameManager.Instance.EnterPlayState += HandleEnterPlay;
@@ -29,8 +28,7 @@ public class CarManager : Singleton<CarManager>
     }
     private void OnDisable()
     {
-        track.StartPieceChanged -= HandleStartPieceChanged;
-        track.HasTrackDirectionChanged -= HandleTrackDirectionChanged;
+        track.TrackComputed -= ResetDummyCar;
         GameManager.Instance.EnterEditState -= HandleEnterEdit;
         GameManager.Instance.ExitEditState -= HandleExitEdit;
         GameManager.Instance.EnterPlayState -= HandleEnterPlay;
@@ -65,7 +63,7 @@ public class CarManager : Singleton<CarManager>
     {
         npc.gameObject.SetActive(false);
         dummyCar.gameObject.SetActive(true);
-        ResetCar(dummyCar);
+        ResetDummyCar();
     }
     private void HandleExitEdit()
     {
@@ -97,11 +95,12 @@ public class CarManager : Singleton<CarManager>
         ResetCar(npc.Car);
         UnblockCarInput();
     }
-    public void ResetCar(Transform carTransform)
+    public void ResetDummyCar()
     {
+        dummyCar.gameObject.SetActive(true);
         Transform spawnPoint = GetSpawnPoint(track.StartPiece);
-        ResetCarPosition(carTransform, spawnPoint);
-        ResetCarDirection(carTransform, spawnPoint);
+        ResetCarPosition(dummyCar, spawnPoint);
+        ResetCarDirection(dummyCar, spawnPoint);
     }
     public void ResetCar(Car car)
     {
@@ -153,14 +152,6 @@ public class CarManager : Singleton<CarManager>
     private Transform GetSpawnPoint(TrackPiece piece)
     {
         return piece ? piece.GetSpawnPoint() : null;
-    }
-    private void HandleStartPieceChanged()
-    {
-        ResetCar(dummyCar);
-    }
-    private void HandleTrackDirectionChanged()
-    {
-        ResetCar(dummyCar);
     }
     public void BlockCarInput()
     {

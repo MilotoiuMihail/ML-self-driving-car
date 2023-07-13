@@ -8,7 +8,7 @@ public class Track : MonoBehaviour
 {
     private const int MinLaps = 1;
     private const int MaxLaps = 100;
-    public event Action StartPieceChanged;
+    // public event Action StartPieceChanged;
     private TrackPiece startPiece;
     public TrackPiece StartPiece
     {
@@ -16,17 +16,20 @@ public class Track : MonoBehaviour
         set
         {
             startPiece = value;
-            if (!track.Contains(StartPiece))
+            if (StartPiece != null)
             {
-                StartPiece.IsFacingForward = IsTrackDirectionClockwise;
+
+                if (!track.Contains(StartPiece))
+                {
+                    StartPiece.IsFacingForward = IsTrackDirectionClockwise;
+                }
             }
-            Debug.Log("Compute piece");
             ComputeTrack();
-            StartPieceChanged?.Invoke();
+            // StartPieceChanged?.Invoke();
         }
 
     }
-    public event Action HasTrackDirectionChanged;
+    // public event Action HasTrackDirectionChanged;
     private bool isTrackDirectionClockwise = true;
     public bool IsTrackDirectionClockwise
     {
@@ -41,9 +44,8 @@ public class Track : MonoBehaviour
                     piece.IsFacingForward = !piece.IsFacingForward;
                 }
                 isTrackDirectionClockwise = value;
-                Debug.Log("Compute direction");
                 ComputeTrack();
-                HasTrackDirectionChanged?.Invoke();
+                // HasTrackDirectionChanged?.Invoke();
             }
         }
     }
@@ -61,6 +63,7 @@ public class Track : MonoBehaviour
             }
         }
     }
+    public event Action TrackComputed;
     private List<TrackPiece> track = new List<TrackPiece>();
     private List<Checkpoint> checkpoints = new List<Checkpoint>();
     public bool IsCircular { get; private set; }
@@ -109,6 +112,10 @@ public class Track : MonoBehaviour
     {
         return checkpoints[0];
     }
+    public TrackPiece GetLastPiece()
+    {
+        return track[track.Count - 1];
+    }
     public void SelectStartPiece()
     {
         if (!StartPiece || SelectStart)
@@ -125,9 +132,9 @@ public class Track : MonoBehaviour
     {
         if (!StartPiece)
         {
+            TrackComputed?.Invoke();
             return;
         }
-        Debug.Log("compute");
         ResetTrack();
         AddTrackPieceWithCheckpoints(StartPiece);
         TrackPiece nextPiece = GetNextTrackPiece(StartPiece);
@@ -138,6 +145,7 @@ public class Track : MonoBehaviour
         }
         IsCircular = nextPiece == StartPiece;
         ProcessCheckpoints();
+        TrackComputed?.Invoke();
     }
 
     private bool IsValidNextPiece(TrackPiece nextPiece)
