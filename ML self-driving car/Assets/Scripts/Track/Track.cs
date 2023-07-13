@@ -15,19 +15,13 @@ public class Track : MonoBehaviour
         get { return startPiece; }
         set
         {
-            if (startPiece == value)
-            {
-                return;
-            }
-            if (StartPiece && StartPiece.IsFacingForward != isTrackDirectionClockwise)
-            {
-                isTrackDirectionClockwise = StartPiece.IsFacingForward;
-            }
             startPiece = value;
             if (!track.Contains(StartPiece))
             {
-                ComputeTrack();
+                StartPiece.IsFacingForward = IsTrackDirectionClockwise;
             }
+            Debug.Log("Compute piece");
+            ComputeTrack();
             StartPieceChanged?.Invoke();
         }
 
@@ -47,6 +41,8 @@ public class Track : MonoBehaviour
                     piece.IsFacingForward = !piece.IsFacingForward;
                 }
                 isTrackDirectionClockwise = value;
+                Debug.Log("Compute direction");
+                ComputeTrack();
                 HasTrackDirectionChanged?.Invoke();
             }
         }
@@ -131,9 +127,8 @@ public class Track : MonoBehaviour
         {
             return;
         }
+        Debug.Log("compute");
         ResetTrack();
-
-        StartPiece.IsFacingForward = IsTrackDirectionClockwise;
         AddTrackPieceWithCheckpoints(StartPiece);
         TrackPiece nextPiece = GetNextTrackPiece(StartPiece);
         while (IsValidNextPiece(nextPiece))
