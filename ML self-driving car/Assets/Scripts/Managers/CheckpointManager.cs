@@ -8,43 +8,54 @@ public class CheckpointManager : Singleton<CheckpointManager>
     [SerializeField] private Transform carsParent;
     [SerializeField] private Track track;
     private List<Checkpoint> checkpoints = new List<Checkpoint>();
-    public Dictionary<Transform, int> CheckpointTracker { get; private set; } = new Dictionary<Transform, int>();
-    public Dictionary<Transform, int> LapTracker { get; private set; } = new Dictionary<Transform, int>();
+    public Dictionary<Transform, TrackerData> Tracker { get; private set; } = new Dictionary<Transform, TrackerData>();
     public event Action<Transform> CorrectCheckpointPassed;
-    public event Action<Transform, int> WrongCheckpointPassed;
+    public event Action<Transform> WrongCheckpointPassed;
     public event Action<Transform> CompletedLap;
     public event Action<Transform> FinishedRace;
+    private void OnEnable()
+    {
+        GameManager.Instance.RaceStart += ResetProgressAll;
+    }
+    private void OnDisable()
+    {
+        GameManager.Instance.RaceStart -= ResetProgressAll;
+    }
     protected override void Awake()
     {
         base.Awake();
-        foreach (CarAgent car in carsParent.GetComponentsInChildren<CarAgent>())
-        {
-            ResetProgress(car.transform);
-        }
+        ResetProgressAll();
     }
     private void Start()
     {
         checkpoints = track.GetCheckpoints();
     }
+    private void ResetProgressAll()
+    {
+        foreach (Car car in carsParent.GetComponentsInChildren<Car>())
+        {
+            ResetProgress(car.transform);
+        }
+    }
     public void PassedCheckpoint(Transform carTransform, Checkpoint checkpoint)
     {
-        int carCurrentCheckpointIndex = CheckpointTracker[carTransform];
+        int carCurrentCheckpointIndex = Tracker[carTransform].NextCheckpointIndex;
         if (checkpoints.IndexOf(checkpoint) == carCurrentCheckpointIndex)
         {
-            CheckpointTracker[carTransform] = (carCurrentCheckpointIndex + 1) % checkpoints.Count;
+            Tracker[carTransform].NextCheckpointIndex = (carCurrentCheckpointIndex + 1) % checkpoints.Count;
             CorrectCheckpointPassed?.Invoke(carTransform);
-            if (!track.IsCircular && CheckpointTracker[carTransform] == 0)
+            if (!track.IsCircular && Tracker[carTransform].NextCheckpointIndex == 0)
             {
                 CompletedLap?.Invoke(carTransform);
-                FinishedRace?.Invoke(carTransform);
+                OnFinishRace(carTransform);
                 return;
             }
             if (carCurrentCheckpointIndex != 0)
             {
                 return;
             }
-            LapTracker[carTransform] += 1;
-            int currentLap = LapTracker[carTransform];
+            Tracker[carTransform].CompleteLap();
+            int currentLap = Tracker[carTransform].LapCount;
             if (currentLap == 1)
             {
                 return;
@@ -52,23 +63,28 @@ public class CheckpointManager : Singleton<CheckpointManager>
             CompletedLap?.Invoke(carTransform);
             if (currentLap > track.Laps)
             {
-                FinishedRace?.Invoke(carTransform);
+                OnFinishRace(carTransform);
             }
         }
         else
         {
-            WrongCheckpointPassed?.Invoke(carTransform, checkpoints.IndexOf(checkpoint));
+            WrongCheckpointPassed?.Invoke(carTransform);
         }
+    }
+    private void OnFinishRace(Transform carTransform)
+    {
+        FinishedRace?.Invoke(carTransform);
+        ResetProgress(carTransform);
     }
     public Checkpoint GetNextCheckpoint(Transform carTransform)
     {
-        return checkpoints.Count > 0 ? checkpoints[CheckpointTracker[carTransform]] : null;
+        return checkpoints.Count > 0 ? checkpoints[Tracker[carTransform].NextCheckpointIndex] : null;
     }
     public List<Checkpoint> GetNextCheckpoints(Transform carTransform, int n)
     {
         List<Checkpoint> nextCheckpoints = new List<Checkpoint>();
 
-        int currentCheckpointIndex = CheckpointTracker[carTransform];
+        int currentCheckpointIndex = Tracker[carTransform].NextCheckpointIndex;
         int totalCheckpoints = checkpoints.Count;
 
         int remainingCheckpoints = totalCheckpoints - currentCheckpointIndex;
@@ -84,8 +100,12 @@ public class CheckpointManager : Singleton<CheckpointManager>
     }
     public void ResetProgress(Transform carTransform)
     {
-        CheckpointTracker[carTransform] = 0;
-        LapTracker[carTransform] = 0;
+        if (!Tracker.ContainsKey(carTransform))
+        {
+            Tracker.Add(carTransform, new TrackerData());
+            return;
+        }
+        Tracker[carTransform].Reset();
     }
     public int GetCheckpointIndex(Checkpoint checkpoint)
     {

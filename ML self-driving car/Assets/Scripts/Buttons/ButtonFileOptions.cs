@@ -6,23 +6,23 @@ using UnityEngine.UI;
 public class ButtonFileOptions : MonoBehaviour
 {
     private Button button;
-    private void Start()
+    private void OnEnable()
     {
+        GameManager.Instance.EnterEditState += SetInteractable;
+        GameManager.Instance.ExitEditState += UnsetInteractable;
 
     }
-    private void OnDestroy()
+    private void OnDisable()
     {
+
         GameManager.Instance.EnterEditState -= SetInteractable;
         GameManager.Instance.ExitEditState -= UnsetInteractable;
     }
 
-    private async void Awake()
+    private void Awake()
     {
         button = GetComponent<Button>();
         UnsetInteractable();
-        await System.Threading.Tasks.Task.Yield();
-        GameManager.Instance.EnterEditState += SetInteractable;
-        GameManager.Instance.ExitEditState += UnsetInteractable;
     }
 
     private void SetInteractable()

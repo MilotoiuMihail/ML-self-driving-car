@@ -274,7 +274,6 @@ GameObject:
   - component: {fileID: 174397522535062245}
   - component: {fileID: 174397522535062242}
   - component: {fileID: 174397522535062240}
-  - component: {fileID: 174397522535062241}
   - component: {fileID: 174397522535062247}
   - component: {fileID: 174397522535062246}
   - component: {fileID: 1960961391500716282}
@@ -341,19 +340,6 @@ MonoBehaviour:
   downforce: 50
   brakeTorque: 300
   centreOfMass: {fileID: 1960961389928153417}
---- !u!114 &174397522535062241
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 174397522535062244}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 749682f766bcb6d409401ea132029daa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isHumanDriver: 1
 --- !u!114 &174397522535062247
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -408,7 +394,6 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 40000
-  carInput: {fileID: 174397522535062241}
   hasRandomReset: 1
 --- !u!114 &1960961391500716280
 MonoBehaviour:

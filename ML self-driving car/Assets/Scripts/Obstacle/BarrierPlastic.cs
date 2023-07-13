@@ -6,12 +6,12 @@ public class BarrierPlastic : Obstacle
 {
     private Rigidbody rb;
 
-    private void Start()
+    private void OnEnable()
     {
         GameManager.Instance.EnterEditState += DisableRigidbody;
         GameManager.Instance.ExitEditState += EnableRigidbody;
     }
-    private void OnDestroy()
+    private void OnDisable()
     {
         GameManager.Instance.EnterEditState -= DisableRigidbody;
         GameManager.Instance.ExitEditState -= EnableRigidbody;

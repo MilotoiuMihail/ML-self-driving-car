@@ -14,22 +14,38 @@ public class SettingsPanel : MonoBehaviour
     [SerializeField] private GameObject mainSection;
     [SerializeField] private GameObject playSection;
     [SerializeField] private TMP_Text title;
-    [SerializeField] private DifficultyPanel difficultyPanel;
+    [SerializeField] private CarPanel difficultyPanel;
+    [SerializeField] private FinishScreen finishScreen;
+    private void OnEnable()
+    {
+        GameManager.Instance.RaceStart += Hide;
+    }
+    private void OnDisable()
+    {
+        GameManager.Instance.RaceStart -= Hide;
+    }
     private void Start()
     {
+        GameManager.Instance.RaceStart += DisplayPlaySettings;
+        GameManager.Instance.RaceFinish += HidePlaySettings;
+        GameManager.Instance.ExitPlayState += HandleExitPlay;
         InputManager.Instance.EscDown += ToggleView;
+        HidePlaySettings();
         gameObject.SetActive(false);
     }
 
     private void OnDestroy()
     {
+        GameManager.Instance.RaceStart -= DisplayPlaySettings;
+        GameManager.Instance.RaceFinish -= HidePlaySettings;
+        GameManager.Instance.ExitPlayState -= HandleExitPlay;
         InputManager.Instance.EscDown -= ToggleView;
     }
     private void ToggleView()
     {
         if (GameManager.Instance.IsGameState(GameState.PAUSED))
         {
-            if (!ModalWindowSystem.Instance.IsVisible() && !difficultyPanel.IsVisible())
+            if (!ModalWindowSystem.Instance.IsVisible() && !difficultyPanel.IsVisible() && !finishScreen.IsVisible())
             {
                 Hide();
             }
@@ -44,7 +60,7 @@ public class SettingsPanel : MonoBehaviour
         GameManager.Instance.ChangeToPausedState();
         gameObject.SetActive(true);
         SetTitle(SettingsTitle);
-        mainSection.SetActive(true);
+        settingsSection.SetActive(true);
         optionsSection.SetActive(false);
         fileSection.SetActive(false);
     }
@@ -57,13 +73,13 @@ public class SettingsPanel : MonoBehaviour
     public void OptionsBack()
     {
         SetTitle(SettingsTitle);
-        mainSection.SetActive(true);
+        settingsSection.SetActive(true);
         optionsSection.SetActive(false);
     }
     public void ToOptions()
     {
         SetTitle(OptionsTitle);
-        mainSection.SetActive(false);
+        settingsSection.SetActive(false);
         optionsSection.SetActive(true);
     }
     public void ToFileOptions()
@@ -78,7 +94,23 @@ public class SettingsPanel : MonoBehaviour
     }
     public void Hide()
     {
-        GameManager.Instance.ChangeToPreviousState();
+        if (!finishScreen.IsVisible())
+        {
+            GameManager.Instance.ChangeToPreviousState();
+        }
+        gameObject.SetActive(false);
+    }
+    private void DisplayPlaySettings()
+    {
+        playSection.gameObject.SetActive(true);
+    }
+    private void HidePlaySettings()
+    {
+        playSection.gameObject.SetActive(false);
+    }
+    private void HandleExitPlay()
+    {
+        HidePlaySettings();
         gameObject.SetActive(false);
     }
 }

@@ -8,9 +8,8 @@ public class MapEditor : MonoBehaviour, IEnvironmentEditor
     public TrackEditor TrackEditor { get; private set; }
     public ObstaclesEditor ObstaclesEditor { get; private set; }
     private IEnvironmentEditor currentEditor;
-    private async void OnEnable()
+    private void OnEnable()
     {
-        await System.Threading.Tasks.Task.Yield();
         InputManager.Instance.LeftMouseButton += PlaceItem;
         InputManager.Instance.LeftCtrlLeftMouseButton += RemoveItem;
         InputManager.Instance.LeftControlDown += RemoveCurrentItem;
@@ -20,9 +19,8 @@ public class MapEditor : MonoBehaviour, IEnvironmentEditor
         InputManager.Instance.RKeyDown += RotateItemClockwise;
         InputManager.Instance.EKeyDown += RotateItemCounterClockwise;
     }
-    private async void OnDisable()
+    private void OnDisable()
     {
-        await System.Threading.Tasks.Task.Yield();
         InputManager.Instance.LeftMouseButton -= PlaceItem;
         InputManager.Instance.LeftCtrlLeftMouseButton -= RemoveItem;
         InputManager.Instance.LeftControlDown -= RemoveCurrentItem;
@@ -39,22 +37,22 @@ public class MapEditor : MonoBehaviour, IEnvironmentEditor
     }
     private void Start()
     {
-        GameManager.Instance.EnterEditState += HandleEnterEditState;
-        GameManager.Instance.ExitEditState += HandleExitEditState;
+        GameManager.Instance.EnterEditState += HandleEnterEdit;
+        GameManager.Instance.ExitEditState += HandleExitEdit;
         EditTrack();
         Hide();
     }
     private void OnDestroy()
     {
-        GameManager.Instance.EnterEditState -= HandleEnterEditState;
-        GameManager.Instance.ExitEditState -= HandleExitEditState;
+        GameManager.Instance.EnterEditState -= HandleEnterEdit;
+        GameManager.Instance.ExitEditState -= HandleExitEdit;
     }
-    private void HandleEnterEditState()
+    private void HandleEnterEdit()
     {
         Show();
         CreateType1Item();
     }
-    private void HandleExitEditState()
+    private void HandleExitEdit()
     {
         RemoveCurrentItem();
         Hide();

@@ -12,9 +12,8 @@ public class ButtonEditMode : MonoBehaviour
     [SerializeField] private Transform trackButtons;
     private Toggle toggle;
     private TMP_Text textComponent;
-    private async void OnEnable()
+    private void OnEnable()
     {
-        await System.Threading.Tasks.Task.Yield();
         GameManager.Instance.EnterEditState += SetTrackEditMode;
     }
     private void OnDisable()

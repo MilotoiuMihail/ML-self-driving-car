@@ -23,6 +23,10 @@ public class CarSteering : MonoBehaviour
 
     private void ManageSteering()
     {
+        if (CarManager.Instance.BlockInput)
+        {
+            return;
+        }
         car.SetLeftSteering(ComputeLeftSteerAngle());
         car.SetRightSteering(ComputeRightSteerAngle());
     }

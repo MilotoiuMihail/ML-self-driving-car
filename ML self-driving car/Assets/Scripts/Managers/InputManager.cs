@@ -6,6 +6,8 @@ using UnityEngine.EventSystems;
 
 public class InputManager : Singleton<InputManager>
 {
+    private const string HorizontalInput = "Horizontal";
+    private const string VerticalInput = "Vertical";
     private Vector3 defaultScreenMousePosition { get { return new Vector3(Screen.width / 2f, Screen.height / 2f, 0); } }
     public bool IsMouseOverUI => EventSystem.current.IsPointerOverGameObject();
     public Vector3 MousePosition { get; private set; } = Vector3.zero;
@@ -20,7 +22,7 @@ public class InputManager : Singleton<InputManager>
     public event Action LeftControlUp;
     private bool isLeftCtrlUp => Input.GetKeyUp(KeyCode.LeftControl);
     public event Action RKeyDown;
-    private bool isRKeyDown => Input.GetKeyDown(KeyCode.R);
+    public bool IsRKeyDown => Input.GetKeyDown(KeyCode.R);
     public event Action EKeyDown;
     private bool isEKeyDown => Input.GetKeyDown(KeyCode.E);
     public event Action Key1Down;
@@ -34,11 +36,15 @@ public class InputManager : Singleton<InputManager>
     {
         get
         {
-            return GameManager.Instance.IsGameState(GameState.PAUSED) ? false : isLeftAltDown;
+            return GameManager.Instance.IsGameState(GameState.PAUSED) ? false : isLeftAltPressed;
         }
     }
     public event Action LeftAltDown;
     private bool isLeftAltDown => Input.GetKeyDown(KeyCode.LeftAlt);
+    public bool IsCKeyDown => Input.GetKeyDown(KeyCode.C);
+    public bool IsVKeyDown => Input.GetKeyDown(KeyCode.V);
+    public float InputX => Input.GetAxis(HorizontalInput);
+    public float InputY => Input.GetAxis(VerticalInput);
     [SerializeField] private LayerMask groundLayer;
     private void Update()
     {
@@ -71,7 +77,7 @@ public class InputManager : Singleton<InputManager>
         {
             OnLeftMouseButton();
         }
-        if (isRKeyDown)
+        if (IsRKeyDown)
         {
             OnRKeyDown();
         }

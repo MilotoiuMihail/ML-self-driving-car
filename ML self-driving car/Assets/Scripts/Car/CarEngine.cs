@@ -30,6 +30,10 @@ public class CarEngine : MonoBehaviour
 
     private void Update()
     {
+        if (CarManager.Instance.BlockInput)
+        {
+            return;
+        }
         ComputeRpmInGear(car.GetWheelsRpm(), car.GetCurrentGearRatio());
         ComputeCurrentEngineTorque();
     }
@@ -67,5 +71,10 @@ public class CarEngine : MonoBehaviour
     private float GetCurrentMaxTorque()
     {
         return Rpm < RedlineRpm ? curve.Evaluate(Rpm * RpmRatio) * TransmissionEfficiency : 0;
+    }
+    public void StopEngine()
+    {
+        Rpm = IdleRpm;
+        CurrentEngineTorque = 0;
     }
 }

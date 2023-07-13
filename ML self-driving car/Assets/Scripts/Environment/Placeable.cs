@@ -45,7 +45,7 @@ public abstract class Placeable : MonoBehaviour
     {
         IsPlaced = true;
         transform.position = position;
-        transform.rotation = rotation;
+        transform.rotation = Quaternion.Euler(0, Mathf.Round(rotation.eulerAngles.y), 0);
     }
     public PlaceableData ToData()
     {

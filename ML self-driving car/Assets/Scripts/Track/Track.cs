@@ -105,6 +105,14 @@ public class Track : MonoBehaviour
     {
         return checkpoints;
     }
+    public Checkpoint GetLastCheckpoint()
+    {
+        return checkpoints[checkpoints.Count - 1];
+    }
+    public Checkpoint GetFirstCheckpoint()
+    {
+        return checkpoints[0];
+    }
     public void SelectStartPiece()
     {
         if (!StartPiece || SelectStart)

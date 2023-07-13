@@ -11,7 +11,7 @@ public class TopDownCameraRig : MonoBehaviour
     [SerializeField] private float maxMovementSpeed;
     [SerializeField] private float zoomSpeed;
     [SerializeField] private float rotationSpeed;
-    [SerializeField] private Transform target;
+    private Transform target;
     private bool followTarget;
     private bool previousFollowTarget;
     private float edgeSizeRatio;
@@ -27,11 +27,10 @@ public class TopDownCameraRig : MonoBehaviour
     private Vector3 maxBounds;
     [SerializeField] private Vector2 zoomBounds;
     public Vector2 ZoomBounds => zoomBounds;
-    private async void OnEnable()
+    private void OnEnable()
     {
         GameManager.Instance.EnterEditState += UnsetFollowTarget;
         GameManager.Instance.ExitEditState += SetPreviousFollowTarget;
-        await System.Threading.Tasks.Task.Yield();
         InputManager.Instance.LeftAltDown += SetRotationStartPosition;
     }
     private void OnDisable()
@@ -92,6 +91,10 @@ public class TopDownCameraRig : MonoBehaviour
             return;
         }
         SetPosition(target.position);
+    }
+    public void SetTarget(Transform newTarget)
+    {
+        target = newTarget;
     }
     public void SetPosition(Vector3 position)
     {

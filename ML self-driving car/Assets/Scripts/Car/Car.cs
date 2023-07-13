@@ -2,25 +2,48 @@ using UnityEngine;
 using System.Linq;
 using System;
 
-[RequireComponent(typeof(CarInput))]
 public class Car : MonoBehaviour
 {
     [field: SerializeField] public CarSpecs Specs { get; private set; }
-    [field: SerializeField] public bool HasManualGearBox { get; private set; }
+    [field: SerializeField] public bool HasManualGearBox { get; set; }
     [SerializeField] private float steeringSmoothness;
     [SerializeField] private float downforce;
     [SerializeField] private float brakeTorque;
     [SerializeField] private Transform centreOfMass;
     public Wheel[] Wheels { get; private set; }
     private Rigidbody rb;
-    public CarEngine Engine;
+    public CarEngine Engine { get; private set; }
     private CarInput input;
     private float throttle;
     private int currentGear;
     private Gear[] gears;
     private bool isStopped;
     public event Action<int> GearShift;
-
+    private Vector3 velocityOnSleep;
+    private Vector3 angularVelocityOnSleep;
+    private void OnEnable()
+    {
+        CarManager.Instance.CarInputBlocked += Sleep;
+        CarManager.Instance.CarInputUnblocked += WakeUp;
+    }
+    private void OnDisable()
+    {
+        CarManager.Instance.CarInputBlocked -= Sleep;
+        CarManager.Instance.CarInputUnblocked -= WakeUp;
+    }
+    private void Sleep()
+    {
+        velocityOnSleep = rb.velocity;
+        angularVelocityOnSleep = rb.angularVelocity;
+        rb.isKinematic = true;
+    }
+    private void WakeUp()
+    {
+        rb.velocity = velocityOnSleep;
+        rb.angularVelocity = angularVelocityOnSleep;
+        velocityOnSleep = Vector3.zero;
+        rb.isKinematic = false;
+    }
     private void Awake()
     {
         Wheels = GetComponentsInChildren<Wheel>();
@@ -32,32 +55,50 @@ public class Car : MonoBehaviour
     void Start()
     {
         rb.centerOfMass = centreOfMass.localPosition;
-        StopCompletely();
         ApplyDriveType();
         InitializeGears();
+        StopCompletely();
     }
 
     void Update()
     {
+        HandleFullStop();
         TakeInput();
         Movement();
         Shifting();
         ApplyDownforce();
     }
+
     public void DebugInfo()
     {
-        Debug.Log($"speed: {Mathf.Round(GetSpeed())}; RPM: {Engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {Engine.CurrentEngineTorque}");
+        Debug.Log($"speed: {Mathf.Round(GetSpeed())}; RPM: {Engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {Engine.CurrentEngineTorque}; steering: {input.SteerInput}; steer angle: {Wheels[0].SteeringAngle}");
     }
 
     public void StopCompletely()
     {
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        rb.isKinematic = true;
+        isStopped = true;
+        Engine.StopEngine();
         currentGear = 1;
         OnGearShift();
     }
-
+    private void HandleFullStop()
+    {
+        if (isStopped)
+        {
+            if (throttle != 0)
+            {
+                isStopped = false;
+            }
+            foreach (Wheel wheel in Wheels)
+            {
+                wheel.SteeringAngle = 0;
+                wheel.Torque = 0;
+                wheel.BrakeTorque = float.MaxValue;
+            }
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+    }
     private void InitializeGears()
     {
         gears = new Gear[Specs.EffectiveGearRatios.Length];
@@ -84,10 +125,6 @@ public class Car : MonoBehaviour
 
     private void Movement()
     {
-        if (rb.isKinematic && throttle != 0)
-        {
-            rb.isKinematic = false;
-        }
         foreach (var wheel in Wheels)
         {
             wheel.Torque = GetTorque();
@@ -204,6 +241,7 @@ public class Car : MonoBehaviour
     public float GetSpeed()
     {
         return rb.velocity.magnitude;
+        // return !CarManager.Instance.BlockInput ? rb.velocity.magnitude : velocityOnSleep.magnitude;
     }
 
     private void ApplyDownforce()

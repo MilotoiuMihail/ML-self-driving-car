@@ -9,14 +9,18 @@ public class SaveDataManager : Singleton<SaveDataManager>
     [SerializeField] private MapEditor mapEditor;
     public event Action MapLoaded;
 
-    private void Start()
+    private void OnEnable()
     {
         GameManager.Instance.EnterEditState += LoadObstaclesData;
-        LoadMap();
     }
-    private void OnDestroy()
+    private void OnDisable()
     {
         GameManager.Instance.EnterEditState -= LoadObstaclesData;
+    }
+    protected override void Awake()
+    {
+        base.Awake();
+        LoadMap();
     }
     public void SaveMap()
     {

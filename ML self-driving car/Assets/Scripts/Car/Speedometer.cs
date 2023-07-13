@@ -11,7 +11,7 @@ public class Speedometer : MonoBehaviour
     private const float MeterpsToMph = 2.23694f;
     private const string kphMeasure = "KPH";
     private const string mphMeasure = "MPH";
-    [SerializeField] private Car car;
+    private Car car => CarManager.Instance.Car;
     [SerializeField] private Transform needle;
     private float minRpm;
     private float maxRpm;
@@ -31,25 +31,56 @@ public class Speedometer : MonoBehaviour
     private float currentSpeed;
     private void OnEnable()
     {
+        GameManager.Instance.RaceStart += Reset;
         car.GearShift += DisplayGear;
     }
     private void OnDisable()
     {
+        GameManager.Instance.RaceStart -= Reset;
         car.GearShift -= DisplayGear;
     }
     private void Start()
     {
-        DisplayGear(1);
-        speedDisplay.text = "0";
+        GameManager.Instance.EnterViewState += Show;
+        GameManager.Instance.ExitViewState += Hide;
+        GameManager.Instance.EnterPlayState += Show;
+        GameManager.Instance.ExitPlayState += Hide;
+        Reset();
         measureDisplay.text = kphMeasure;
         minRpm = car.Engine.IdleRpm;
         maxRpm = Mathf.CeilToInt(car.Engine.RedlineRpm * .001f) * 1000;
     }
+    private void OnDestroy()
+    {
+        GameManager.Instance.EnterViewState -= Show;
+        GameManager.Instance.ExitViewState -= Hide;
+        GameManager.Instance.EnterPlayState -= Show;
+        GameManager.Instance.ExitPlayState -= Hide;
+    }
+    private void Show()
+    {
+        gameObject.SetActive(true);
+        DisplayGear(1);
+    }
+    private void Hide()
+    {
+        gameObject.SetActive(false);
+    }
 
     private void Update()
     {
+        if (CarManager.Instance.BlockInput)
+        {
+            return;
+        }
         RotateNeedle();
         DisplaySpeed();
+    }
+    private void Reset()
+    {
+        DisplayGear(1);
+        speedDisplay.text = "0";
+        needle.localEulerAngles = new Vector3(0, minAngle, 0);
     }
     private void RotateNeedle()
     {

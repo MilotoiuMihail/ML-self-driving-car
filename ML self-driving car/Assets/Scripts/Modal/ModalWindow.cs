@@ -12,9 +12,8 @@ public class ModalWindow : MonoBehaviour
     private ModalButton[] buttons;
     private bool shouldPause;
     private const int SHOW_DELAY = 100;
-    private async void OnEnable()
+    private void OnEnable()
     {
-        await System.Threading.Tasks.Task.Yield();
         InputManager.Instance.EscDown += Close;
     }
     private void OnDisable()
