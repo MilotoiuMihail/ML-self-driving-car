@@ -24,15 +24,18 @@ public class Speedometer : MonoBehaviour
         get
         {
             if (car == null)
+            {
                 return 0;
+            }
             return isMph ? car.GetSpeed() * MeterpsToMph : car.GetSpeed() * MeterpsToKph;
         }
     }
     private float currentSpeed;
     private void OnEnable()
     {
+
         GameManager.Instance.RaceStart += Reset;
-        car.GearShift += DisplayGear;
+        // car.GearShift += DisplayGear;
     }
     private void OnDisable()
     {
@@ -41,10 +44,13 @@ public class Speedometer : MonoBehaviour
     }
     private void Start()
     {
-        GameManager.Instance.EnterViewState += Show;
-        GameManager.Instance.ExitViewState += Hide;
-        GameManager.Instance.EnterPlayState += Show;
-        GameManager.Instance.ExitPlayState += Hide;
+        // GameManager.Instance.EnterViewState += Show;
+        // GameManager.Instance.ExitViewState += Hide;
+        // GameManager.Instance.EnterPlayState += Show;
+        // GameManager.Instance.ExitPlayState += Hide;
+        GameManager.Instance.EnterEditState += Hide;
+        GameManager.Instance.ExitEditState += Show;
+        gameObject.SetActive(true);
         Reset();
         measureDisplay.text = kphMeasure;
         minRpm = car.Engine.IdleRpm;
@@ -52,34 +58,51 @@ public class Speedometer : MonoBehaviour
     }
     private void OnDestroy()
     {
-        GameManager.Instance.EnterViewState -= Show;
-        GameManager.Instance.ExitViewState -= Hide;
-        GameManager.Instance.EnterPlayState -= Show;
-        GameManager.Instance.ExitPlayState -= Hide;
+        // GameManager.Instance.EnterViewState -= Show;
+        // GameManager.Instance.ExitViewState -= Hide;
+        // GameManager.Instance.EnterPlayState -= Show;
+        // GameManager.Instance.ExitPlayState -= Hide;
+        GameManager.Instance.EnterEditState -= Hide;
+        GameManager.Instance.ExitEditState -= Show;
     }
     private void Show()
     {
         gameObject.SetActive(true);
-        DisplayGear(1);
+        // DisplayGear(1);
+        car.GearShift += DisplayGear;
+        Reset();
     }
     private void Hide()
     {
         gameObject.SetActive(false);
     }
-
+    public void BeforeCarChange()
+    {
+        if (car == null)
+        {
+            return;
+        }
+        car.GearShift -= DisplayGear;
+    }
+    public void AfterCarChange()
+    {
+        car.GearShift += DisplayGear;
+    }
     private void Update()
     {
+        RotateNeedle();
         if (CarManager.Instance.BlockInput)
         {
             return;
         }
-        RotateNeedle();
         DisplaySpeed();
     }
     private void Reset()
     {
         DisplayGear(1);
-        speedDisplay.text = "0";
+        currentSpeed = 0;
+        DisplaySpeed();
+        // speedDisplay.text = "0";
         needle.localEulerAngles = new Vector3(0, minAngle, 0);
     }
     private void RotateNeedle()

@@ -34,8 +34,23 @@ public class CarAgent : Agent, CarInput
     }
     private void Start()
     {
+        // GameManager.Instance.EnterEditState += Hide;
+        // GameManager.Instance.ExitEditState += Show;
+        // GameManager.Instance.EnterPlayState += Hide;
+        // GameManager.Instance.ExitPlayState += Show;
+        GameManager.Instance.EnterViewState += Show;
+        GameManager.Instance.ExitViewState += Hide;
         hasManualGearBox = Car.HasManualGearBox;
         maxStepRatio = 1f / MaxStep;
+    }
+    private void OnDestroy()
+    {
+        // GameManager.Instance.EnterEditState -= Hide;
+        // GameManager.Instance.ExitEditState -= Show;
+        // GameManager.Instance.EnterPlayState -= Hide;
+        // GameManager.Instance.ExitPlayState -= Show;
+        GameManager.Instance.EnterViewState -= Show;
+        GameManager.Instance.ExitViewState -= Hide;
     }
     protected override void OnEnable()
     {
@@ -44,8 +59,13 @@ public class CarAgent : Agent, CarInput
         CheckpointManager.Instance.WrongCheckpointPassed += OnWrongCheckpointPassed;
         CheckpointManager.Instance.CompletedLap += OnCompletedLap;
         CheckpointManager.Instance.FinishedRace += OnFinishedRace;
-        GameManager.Instance.EnterViewState += GetNextCheckpointTransform;
-        GetNextCheckpointTransform();
+        // GameManager.Instance.EnterViewState += GetNextCheckpointTransform; //? daca are end episode nu ii mai trebuie pentru ca il are in begin
+        GameManager.Instance.ExitPlayState += EndEpisode;
+        // GameManager.Instance.ExitEditState += EndEpisode;
+        // GameManager.Instance.EnterViewState += EndEpisode;
+        GameManager.Instance.ExitViewState += Stop;
+        // GameManager.Instance.RaceStart += EndEpisode;
+        // GetNextCheckpointTransform();
     }
     protected override void OnDisable()
     {
@@ -54,10 +74,24 @@ public class CarAgent : Agent, CarInput
         CheckpointManager.Instance.WrongCheckpointPassed -= OnWrongCheckpointPassed;
         CheckpointManager.Instance.CompletedLap -= OnCompletedLap;
         CheckpointManager.Instance.FinishedRace -= OnFinishedRace;
-        GameManager.Instance.EnterViewState -= GetNextCheckpointTransform;
+        // GameManager.Instance.EnterViewState -= GetNextCheckpointTransform;
+        GameManager.Instance.ExitPlayState -= EndEpisode;
+        // GameManager.Instance.ExitEditState -= EndEpisode;
+        // GameManager.Instance.EnterViewState -= EndEpisode;
+        GameManager.Instance.ExitViewState -= Stop;
+        // GameManager.Instance.RaceStart -= EndEpisode;
+    }
+    public void Show()
+    {
+        gameObject.SetActive(true);
+    }
+    private void Hide()
+    {
+        gameObject.SetActive(false);
     }
     public override void OnEpisodeBegin()
     {
+        Debug.Log($"Episode begin {name}");
         SetReward(-0.25f);
         Reset(hasRandomReset);
         GetNextCheckpointTransform();
@@ -152,7 +186,15 @@ public class CarAgent : Agent, CarInput
         {
             // Debug.Log("Finished Race");
             SetReward(1f);
-            EndEpisode();
+            if (GameManager.Instance.IsGameState(GameState.PLAY) || GameManager.Instance.IsGameState(GameState.PAUSED) && GameManager.Instance.IsPreviousGameState(GameState.PLAY))
+            {
+                Stop();
+                Car.Sleep();
+            }
+            else
+            {
+                EndEpisode();
+            }
         }
     }
     private void OnTriggerEnter(Collider other)
@@ -188,14 +230,14 @@ public class CarAgent : Agent, CarInput
     }
     private void Reset(bool randomReset)
     {
-        Stop();
+        StopInput();
         ResetVariables();
         if (randomReset)
         {
             CarManager.Instance.RandomResetCar(Car);
             if (CheckpointManager.Instance.Tracker[transform].NextCheckpointIndex > 0)
             {
-                CheckpointManager.Instance.Tracker[transform].CompleteLap();
+                CheckpointManager.Instance.Tracker[transform].IncreaseLap();
             }
         }
         else
@@ -208,11 +250,15 @@ public class CarAgent : Agent, CarInput
     {
         lastLocalVelocity = GetLocalVelocity();
         lastLocalAngularVelocity = GetLocalAngularVelocity();
-        CheckpointManager.Instance.ResetProgress(transform);
     }
-    private void Stop()
+    private void StopInput()
     {
         ThrottleInput = 0;
         SteerInput = 0;
+    }
+    private void Stop()
+    {
+        StopInput();
+        Car.Stop();
     }
 }

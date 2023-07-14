@@ -5,7 +5,7 @@ using System;
 
 public class GameManager : Singleton<GameManager>
 {
-    private GameState currentState = GameState.PAUSED;
+    private GameState currentState = GameState.VIEW;
     private GameState previousState;
     public event Action EnterViewState;
     public event Action EnterEditState;
@@ -25,12 +25,6 @@ public class GameManager : Singleton<GameManager>
     {
         CheckpointManager.Instance.FinishedRace -= OnRaceFinish;
     }
-    protected override void Awake()
-    {
-        base.Awake();
-        ChangeGameState(GameState.VIEW);
-    }
-
     public void ChangeGameState(GameState state)
     {
         if (currentState == state)

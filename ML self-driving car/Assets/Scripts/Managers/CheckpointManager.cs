@@ -15,16 +15,28 @@ public class CheckpointManager : Singleton<CheckpointManager>
     public event Action<Transform> FinishedRace;
     private void OnEnable()
     {
-        GameManager.Instance.RaceStart += ResetProgressAll;
+        // GameManager.Instance.RaceStart += ResetProgressAll;
+        GameManager.Instance.EnterPlayState += ClearTrackers;
+        GameManager.Instance.ExitPlayState += ClearTrackers;
     }
     private void OnDisable()
     {
-        GameManager.Instance.RaceStart -= ResetProgressAll;
+        // GameManager.Instance.RaceStart -= ResetProgressAll;
+        GameManager.Instance.EnterPlayState -= ClearTrackers;
+        GameManager.Instance.ExitPlayState -= ClearTrackers;
     }
     protected override void Awake()
     {
         base.Awake();
-        ResetProgressAll();
+        // ResetProgressAll();
+    }
+    private void ClearTrackers()
+    {
+        foreach (TrackerData tracker in Tracker.Values)
+        {
+            tracker.LapTimer.Dispose();
+        }
+        Tracker.Clear();
     }
     private void Start()
     {
@@ -46,7 +58,9 @@ public class CheckpointManager : Singleton<CheckpointManager>
             CorrectCheckpointPassed?.Invoke(carTransform);
             if (!track.IsCircular && Tracker[carTransform].NextCheckpointIndex == 0)
             {
-                CompletedLap?.Invoke(carTransform);
+
+                Tracker[carTransform].IncreaseLap();
+                OnCompletedLap(carTransform);
                 OnFinishRace(carTransform);
                 return;
             }
@@ -54,13 +68,13 @@ public class CheckpointManager : Singleton<CheckpointManager>
             {
                 return;
             }
-            Tracker[carTransform].CompleteLap();
+            Tracker[carTransform].IncreaseLap();
             int currentLap = Tracker[carTransform].LapCount;
             if (currentLap == 1)
             {
                 return;
             }
-            CompletedLap?.Invoke(carTransform);
+            OnCompletedLap(carTransform);
             if (currentLap > track.Laps)
             {
                 OnFinishRace(carTransform);
@@ -73,8 +87,15 @@ public class CheckpointManager : Singleton<CheckpointManager>
     }
     private void OnFinishRace(Transform carTransform)
     {
+        Tracker[carTransform].FinishRace();
+        Debug.Log(carTransform.name);
         FinishedRace?.Invoke(carTransform);
-        ResetProgress(carTransform);
+        // ResetProgress(carTransform);
+    }
+    private void OnCompletedLap(Transform carTransform)
+    {
+        Tracker[carTransform].CompleteLap();
+        CompletedLap?.Invoke(carTransform);
     }
     public Checkpoint GetNextCheckpoint(Transform carTransform)
     {
@@ -103,7 +124,6 @@ public class CheckpointManager : Singleton<CheckpointManager>
         if (!Tracker.ContainsKey(carTransform))
         {
             Tracker.Add(carTransform, new TrackerData());
-            return;
         }
         Tracker[carTransform].Reset();
     }
@@ -114,5 +134,9 @@ public class CheckpointManager : Singleton<CheckpointManager>
     public int GetCheckpointsCount()
     {
         return checkpoints.Count;
+    }
+    public bool HasFinishedRace(Transform carTransform)
+    {
+        return Tracker.ContainsKey(carTransform) && Tracker[carTransform].LapCount > (track.IsCircular ? track.Laps : 1);
     }
 }

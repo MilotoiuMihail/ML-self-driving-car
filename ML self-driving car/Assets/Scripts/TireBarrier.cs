@@ -54,47 +54,52 @@ public class TireBarrier : MonoBehaviour
         }
         MoveTireBarrierToStart();
         MoveTireBarrierToEnd();
-        // tireBarrierStart.position = (track.StartPiece.IsStraight() ? Vector3.forward : Vector3.right) * 20f;
-        // Transform firstCheckpoint = track.GetFirstCheckpoint().transform;
-        // transform.position = firstCheckpoint.position + Vector3.forward * (track.StartPiece.IsFacingForward ? 1 : (-1));
-        // transform.forward = firstCheckpoint.forward;
     }
     private void MoveTireBarrierToStart()
     {
         TrackPiece startPiece = track.StartPiece;
-        tireBarrierStart.position = startPiece.transform.position;
-        tireBarrierStart.forward = startPiece.transform.forward;
+        MoveToPiece(tireBarrierStart, startPiece);
         if (startPiece.IsFacingForward)
         {
-            tireBarrierStart.position += startPiece.transform.forward * -20f;
-        }
-        else if (track.StartPiece.IsStraight())
-        {
-            tireBarrierStart.position += startPiece.transform.forward * 20f;
+            MoveInDirection(tireBarrierStart, -startPiece.transform.forward);
         }
         else
         {
-            tireBarrierStart.position += startPiece.transform.right * 20f;
-            tireBarrierStart.forward = startPiece.transform.right;
+            MoveBasedOnShape(tireBarrierStart, startPiece);
         }
     }
     private void MoveTireBarrierToEnd()
     {
         TrackPiece lastPiece = track.GetLastPiece();
-        tireBarrierEnd.position = lastPiece.transform.position;
-        tireBarrierEnd.forward = lastPiece.transform.forward;
+        MoveToPiece(tireBarrierEnd, lastPiece);
         if (!lastPiece.IsFacingForward)
         {
-            tireBarrierEnd.position += lastPiece.transform.forward * -20f;
-        }
-        else if (lastPiece.IsStraight())
-        {
-            tireBarrierEnd.position += lastPiece.transform.forward * 20f;
+            MoveInDirection(tireBarrierEnd, -lastPiece.transform.forward);
         }
         else
         {
-            tireBarrierEnd.position += lastPiece.transform.right * 20f;
-            tireBarrierEnd.forward = lastPiece.transform.right;
+            MoveBasedOnShape(tireBarrierEnd, lastPiece);
         }
+    }
+    private void MoveInDirection(Transform barrier, Vector3 direction)
+    {
+        barrier.position += direction * 20f;
+    }
+    private void MoveBasedOnShape(Transform barrier, TrackPiece piece)
+    {
+        if (piece.IsStraight())
+        {
+            MoveInDirection(barrier, piece.transform.forward);
+        }
+        else
+        {
+            MoveInDirection(barrier, piece.transform.right);
+            barrier.forward = piece.transform.right;
+        }
+    }
+    private void MoveToPiece(Transform barrier, TrackPiece piece)
+    {
+        barrier.position = piece.transform.position;
+        barrier.forward = piece.transform.forward;
     }
 }

@@ -10,10 +10,24 @@ public class CarManager : Singleton<CarManager>
     [SerializeField] private Car playerCar;
     [SerializeField] private CarAgent npc;
     [SerializeField] private Transform dummyCar;
-    public Car Car { get; private set; }
+    private Car mainCar;
+    public Car Car
+    {
+        get
+        {
+            return mainCar;
+        }
+        private set
+        {
+            speedometer.BeforeCarChange();
+            mainCar = value;
+            speedometer.AfterCarChange();
+        }
+    }
     public bool BlockInput { get; private set; }
     public event Action CarInputBlocked;
     public event Action CarInputUnblocked;
+    [SerializeField] private Speedometer speedometer;
     private void OnEnable()
     {
         track.TrackComputed += ResetDummyCar;
@@ -24,7 +38,7 @@ public class CarManager : Singleton<CarManager>
         GameManager.Instance.EnterPausedState += BlockCarInput;
         GameManager.Instance.ExitPausedState += UnblockCarInput;
         GameManager.Instance.RaceStart += HandleRaceStart;
-        GameManager.Instance.ExitViewState += HandleExitView;
+        // GameManager.Instance.ExitViewState += HandleExitView;
     }
     private void OnDisable()
     {
@@ -35,9 +49,8 @@ public class CarManager : Singleton<CarManager>
         GameManager.Instance.ExitPlayState -= HandleExitPlay;
         GameManager.Instance.EnterPausedState -= BlockCarInput;
         GameManager.Instance.ExitPausedState -= UnblockCarInput;
-        GameManager.Instance.ExitPlayState -= UnblockCarInput;
         GameManager.Instance.RaceStart -= HandleRaceStart;
-        GameManager.Instance.ExitViewState -= HandleExitView;
+        // GameManager.Instance.ExitViewState -= HandleExitView;
     }
     protected override void Awake()
     {
@@ -49,7 +62,7 @@ public class CarManager : Singleton<CarManager>
         LoadPlayerCarGearbox();
         dummyCar.gameObject.SetActive(false);
         playerCar.gameObject.SetActive(false);
-        npc.gameObject.SetActive(true);
+        // npc.gameObject.SetActive(true);
         // ResetCar(npc.transform);
         // speedometer.ChangeCar(npc.Car);
     }
@@ -61,15 +74,15 @@ public class CarManager : Singleton<CarManager>
 
     private void HandleEnterEdit()
     {
-        npc.gameObject.SetActive(false);
+        // npc.gameObject.SetActive(false);
         dummyCar.gameObject.SetActive(true);
         ResetDummyCar();
     }
     private void HandleExitEdit()
     {
         dummyCar.gameObject.SetActive(false);
-        npc.gameObject.SetActive(true);
-        ResetCar(npc.Car);
+        // npc.gameObject.SetActive(true);
+        // ResetCar(npc.Car); //should be from on episode begin
     }
     private void HandleEnterPlay()
     {
@@ -80,22 +93,24 @@ public class CarManager : Singleton<CarManager>
     {
         ResetCar(playerCar);
         playerCar.transform.position += playerCar.transform.right * 4f;
-        ResetCar(npc.Car);
+        // ResetCar(npc.Car); //should be from on episode begin
+        npc.Show();
+        npc.EndEpisode();
         npc.transform.position += npc.transform.right * -4f;
     }
     private void HandleExitView()
     {
-        ResetCar(npc.Car);
-        npc.transform.position += npc.transform.right * -4f;
+        // ResetCar(npc.Car); //?
+        // npc.transform.position += npc.transform.right * -4f;
     }
     private void HandleExitPlay()
     {
         playerCar.gameObject.SetActive(false);
         Car = npc.Car;
-        ResetCar(npc.Car);
-        UnblockCarInput();
+        // ResetCar(npc.Car);//?
+        UnblockCarInput();//? nu e deja pe exit paused?
     }
-    public void ResetDummyCar()
+    private void ResetDummyCar()
     {
         dummyCar.gameObject.SetActive(true);
         Transform spawnPoint = GetSpawnPoint(track.StartPiece);
@@ -104,7 +119,8 @@ public class CarManager : Singleton<CarManager>
     }
     public void ResetCar(Car car)
     {
-        car.StopCompletely();
+        car.Stop();
+        CheckpointManager.Instance.ResetProgress(car.transform);
         Transform spawnPoint = GetSpawnPoint(track.StartPiece);
         ResetCarPosition(car.transform, spawnPoint);
         ResetCarDirection(car.transform, spawnPoint);
@@ -130,7 +146,8 @@ public class CarManager : Singleton<CarManager>
             car.gameObject.SetActive(false);
             return;
         }
-        car.StopCompletely();
+        car.Stop();
+        CheckpointManager.Instance.ResetProgress(car.transform);
         ResetCarPosition(car.transform, GetSpawnPoint(startPiece));
         ResetCarDirection(car.transform, GetSpawnPoint(startPiece));
         // RandomResetCarDirection(carTransform);
@@ -155,7 +172,7 @@ public class CarManager : Singleton<CarManager>
     }
     public void BlockCarInput()
     {
-        if (BlockInput)
+        if (BlockInput || GameManager.Instance.IsPreviousGameState(GameState.EDIT))
         {
             return;
         }
@@ -164,7 +181,7 @@ public class CarManager : Singleton<CarManager>
     }
     public void UnblockCarInput()
     {
-        if (GameManager.Instance.IsPreviousGameState(GameState.PLAY))
+        if (GameManager.Instance.IsPreviousGameState(GameState.PLAY) || GameManager.Instance.IsPreviousGameState(GameState.EDIT))
         {
             return;
         }

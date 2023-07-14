@@ -31,7 +31,7 @@ public class Car : MonoBehaviour
         CarManager.Instance.CarInputBlocked -= Sleep;
         CarManager.Instance.CarInputUnblocked -= WakeUp;
     }
-    private void Sleep()
+    public void Sleep()
     {
         velocityOnSleep = rb.velocity;
         angularVelocityOnSleep = rb.angularVelocity;
@@ -39,6 +39,11 @@ public class Car : MonoBehaviour
     }
     private void WakeUp()
     {
+        if (CheckpointManager.Instance.HasFinishedRace(transform))
+        {
+            Debug.Log("Go back to sleep");
+            return;
+        }
         rb.velocity = velocityOnSleep;
         rb.angularVelocity = angularVelocityOnSleep;
         velocityOnSleep = Vector3.zero;
@@ -57,7 +62,7 @@ public class Car : MonoBehaviour
         rb.centerOfMass = centreOfMass.localPosition;
         ApplyDriveType();
         InitializeGears();
-        StopCompletely();
+        Stop();
     }
 
     void Update()
@@ -74,9 +79,10 @@ public class Car : MonoBehaviour
         Debug.Log($"speed: {Mathf.Round(GetSpeed())}; RPM: {Engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {Engine.CurrentEngineTorque}; steering: {input.SteerInput}; steer angle: {Wheels[0].SteeringAngle}");
     }
 
-    public void StopCompletely()
+    public void Stop()
     {
         isStopped = true;
+        velocityOnSleep = Vector3.zero;
         Engine.StopEngine();
         currentGear = 1;
         OnGearShift();

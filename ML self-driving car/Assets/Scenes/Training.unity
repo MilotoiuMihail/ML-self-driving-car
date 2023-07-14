@@ -4724,8 +4724,13 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1592640974, guid: 08be51e040c78f64b95eaf0d8d1609b5, type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: c7f94cbcb1ab78940bef7717703549d1,
+        type: 3}
+    - target: {fileID: 1592640974, guid: 08be51e040c78f64b95eaf0d8d1609b5, type: 3}
       propertyPath: m_BehaviorType
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2142676987, guid: 08be51e040c78f64b95eaf0d8d1609b5, type: 3}
       propertyPath: m_RaysPerDirection
@@ -11304,7 +11309,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1592640973, guid: 08be51e040c78f64b95eaf0d8d1609b5, type: 3}
       propertyPath: hasRandomReset
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1592640974, guid: 08be51e040c78f64b95eaf0d8d1609b5, type: 3}
       propertyPath: m_Model
@@ -15455,7 +15460,6 @@ GameObject:
   - component: {fileID: 850422550}
   - component: {fileID: 850422552}
   - component: {fileID: 850422551}
-  - component: {fileID: 850422553}
   m_Layer: 5
   m_Name: Position
   m_TagString: Untagged
@@ -15582,19 +15586,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 850422549}
   m_CullTransparentMesh: 1
---- !u!114 &850422553
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 850422549}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8df3b95f307dd6c4cb1846639f26f06d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerPosition: {fileID: 1993107519}
 --- !u!1 &856573797
 GameObject:
   m_ObjectHideFlags: 0
@@ -18722,6 +18713,7 @@ MonoBehaviour:
   playerCar: {fileID: 6275437466674384128}
   npc: {fileID: 1109559058}
   dummyCar: {fileID: 1020801534}
+  speedometer: {fileID: 1644684856}
 --- !u!4 &1020801534 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1827668021219637203, guid: 454fdff7b7e149c468665e0205db05c5,
