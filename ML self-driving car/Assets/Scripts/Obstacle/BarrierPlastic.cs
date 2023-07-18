@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BarrierPlastic : Obstacle
@@ -33,7 +31,7 @@ public class BarrierPlastic : Obstacle
     public override void Place(Vector3 position)
     {
         base.Place(position);
-        if (GameManager.Instance.IsGameState(GameState.VIEW))
+        if (!GameManager.Instance.IsGameState(GameState.EDIT))
         {
             rb.isKinematic = false;
         }

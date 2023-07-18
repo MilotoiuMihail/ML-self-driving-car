@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Wheel : MonoBehaviour
@@ -11,6 +9,7 @@ public class Wheel : MonoBehaviour
     public float Torque { get; set; }
     public float BrakeTorque { get; set; }
     public float Rpm => wheelCollider.rpm;
+    [SerializeField] private LayerMask trackLayer;
 
     void Awake()
     {
@@ -53,5 +52,14 @@ public class Wheel : MonoBehaviour
     private void Brake()
     {
         wheelCollider.brakeTorque = BrakeTorque;
+    }
+    public bool IsOnTrack()
+    {
+        WheelHit hit;
+        if (!wheelCollider.GetGroundHit(out hit))
+        {
+            return false;
+        }
+        return (trackLayer.value & (1 << hit.collider.gameObject.layer)) != 0;
     }
 }

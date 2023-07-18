@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -98,6 +97,7 @@ public class PlayMode : MonoBehaviour
     }
     public void StartRace()
     {
+        settingsPanel.Hide();
         GameManager.Instance.OnRaceStart();
     }
     public void PromptReturnToMenu()
@@ -111,9 +111,7 @@ public class PlayMode : MonoBehaviour
     }
     private void ReturnToMenu()
     {
-        // settingsPanel.Hide();
         GameManager.Instance.ChangeToPreviousState();
-        // settingsPanel.gameObject.SetActive(false);
         GameManager.Instance.ChangeToViewState();
     }
 }

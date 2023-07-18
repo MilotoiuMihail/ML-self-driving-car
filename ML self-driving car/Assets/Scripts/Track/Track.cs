@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -8,7 +7,6 @@ public class Track : MonoBehaviour
 {
     private const int MinLaps = 1;
     private const int MaxLaps = 100;
-    // public event Action StartPieceChanged;
     private TrackPiece startPiece;
     public TrackPiece StartPiece
     {
@@ -25,11 +23,9 @@ public class Track : MonoBehaviour
                 }
             }
             ComputeTrack();
-            // StartPieceChanged?.Invoke();
         }
 
     }
-    // public event Action HasTrackDirectionChanged;
     private bool isTrackDirectionClockwise = true;
     public bool IsTrackDirectionClockwise
     {
@@ -45,7 +41,6 @@ public class Track : MonoBehaviour
                 }
                 isTrackDirectionClockwise = value;
                 ComputeTrack();
-                // HasTrackDirectionChanged?.Invoke();
             }
         }
     }

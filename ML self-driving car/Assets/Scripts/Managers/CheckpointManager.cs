@@ -1,7 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using TMPro;
 
 public class CheckpointManager : Singleton<CheckpointManager>
 {
@@ -13,22 +13,21 @@ public class CheckpointManager : Singleton<CheckpointManager>
     public event Action<Transform> WrongCheckpointPassed;
     public event Action<Transform> CompletedLap;
     public event Action<Transform> FinishedRace;
+    [SerializeField] private LayerMask wallMask;
+    [SerializeField] private TMP_Text wrongWay;
     private void OnEnable()
     {
-        // GameManager.Instance.RaceStart += ResetProgressAll;
         GameManager.Instance.EnterPlayState += ClearTrackers;
         GameManager.Instance.ExitPlayState += ClearTrackers;
     }
     private void OnDisable()
     {
-        // GameManager.Instance.RaceStart -= ResetProgressAll;
         GameManager.Instance.EnterPlayState -= ClearTrackers;
         GameManager.Instance.ExitPlayState -= ClearTrackers;
     }
     protected override void Awake()
     {
         base.Awake();
-        // ResetProgressAll();
     }
     private void ClearTrackers()
     {
@@ -41,16 +40,19 @@ public class CheckpointManager : Singleton<CheckpointManager>
     private void Start()
     {
         checkpoints = track.GetCheckpoints();
+        HideWrongWay();
     }
-    private void ResetProgressAll()
+    public void ShowWrongWay()
     {
-        foreach (Car car in carsParent.GetComponentsInChildren<Car>())
-        {
-            ResetProgress(car.transform);
-        }
+        wrongWay.gameObject.SetActive(true);
     }
-    public void PassedCheckpoint(Transform carTransform, Checkpoint checkpoint)
+    public void HideWrongWay()
     {
+        wrongWay.gameObject.SetActive(false);
+    }
+    public void PassedCheckpoint(Car car, Checkpoint checkpoint)
+    {
+        Transform carTransform = car.transform;
         int carCurrentCheckpointIndex = Tracker[carTransform].NextCheckpointIndex;
         if (checkpoints.IndexOf(checkpoint) == carCurrentCheckpointIndex)
         {
@@ -88,9 +90,7 @@ public class CheckpointManager : Singleton<CheckpointManager>
     private void OnFinishRace(Transform carTransform)
     {
         Tracker[carTransform].FinishRace();
-        Debug.Log(carTransform.name);
         FinishedRace?.Invoke(carTransform);
-        // ResetProgress(carTransform);
     }
     private void OnCompletedLap(Transform carTransform)
     {
@@ -100,6 +100,10 @@ public class CheckpointManager : Singleton<CheckpointManager>
     public Checkpoint GetNextCheckpoint(Transform carTransform)
     {
         return checkpoints.Count > 0 ? checkpoints[Tracker[carTransform].NextCheckpointIndex] : null;
+    }
+    public Checkpoint GetCurrentCheckpoint(Transform carTransform)
+    {
+        return checkpoints.Count > 0 ? checkpoints[Mathf.Max(Tracker[carTransform].NextCheckpointIndex - 1, 0)] : null;
     }
     public List<Checkpoint> GetNextCheckpoints(Transform carTransform, int n)
     {

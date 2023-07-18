@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Car))]
@@ -11,7 +9,6 @@ public class CarEngine : MonoBehaviour
     private const float UpperRpmRatio = .9f;
     private const float TransmissionEfficiency = .9f;
     private Car car;
-    private CarInput carInput;
     private AnimationCurve curve;
     public float IdleRpm { get; private set; }
     public float RedlineRpm { get; private set; }
@@ -21,7 +18,7 @@ public class CarEngine : MonoBehaviour
     private void Awake()
     {
         car = GetComponent<Car>();
-        carInput = GetComponent<CarInput>();
+        car.Input = GetComponent<CarInput>();
         curve = car.Specs.EngineCurve;
         IdleRpm = DetermineIdleRpm();
         RedlineRpm = DetermineRedlineRpm();
@@ -30,7 +27,7 @@ public class CarEngine : MonoBehaviour
 
     private void Update()
     {
-        if (CarManager.Instance.BlockInput)
+        if (car.Input.IsBlocked)
         {
             return;
         }
@@ -40,7 +37,7 @@ public class CarEngine : MonoBehaviour
 
     private void ComputeCurrentEngineTorque()
     {
-        CurrentEngineTorque = carInput.ThrottleInput * GetCurrentMaxTorque();
+        CurrentEngineTorque = car.Input.ThrottleInput * GetCurrentMaxTorque();
     }
 
     private float DetermineIdleRpm()
@@ -62,7 +59,6 @@ public class CarEngine : MonoBehaviour
     }
     private void ComputeRpmInGear(float wheelRpm, float gearRatio)
     {
-        // float desiredEngineRpm = Mathf.Max(IdleRpm, Mathf.Abs(wheelRpm) * gearRatio);
         float desiredEngineRpm = Mathf.Abs(wheelRpm) * gearRatio;
         float v = 0;
         Rpm = Mathf.SmoothDamp(Rpm, desiredEngineRpm, ref v, Time.fixedDeltaTime);

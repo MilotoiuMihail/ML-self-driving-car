@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
 
@@ -20,6 +18,8 @@ public class GameManager : Singleton<GameManager>
     private void Start()
     {
         CheckpointManager.Instance.FinishedRace += OnRaceFinish;
+        // QualitySettings.vSyncCount = 0;
+        // Application.targetFrameRate = 60;
     }
     private void OnDestroy()
     {
@@ -47,19 +47,15 @@ public class GameManager : Singleton<GameManager>
         switch (currentState)
         {
             case GameState.VIEW:
-                Debug.Log("exit view");
                 ExitViewState?.Invoke();
                 break;
             case GameState.EDIT:
-                Debug.Log("exit edit");
                 ExitEditState?.Invoke();
                 break;
             case GameState.PLAY:
-                Debug.Log("exit play");
                 ExitPlayState?.Invoke();
                 break;
             case GameState.PAUSED:
-                Debug.Log("exit pause");
                 ExitPausedState?.Invoke();
                 break;
             default:
@@ -72,20 +68,16 @@ public class GameManager : Singleton<GameManager>
         switch (currentState)
         {
             case GameState.VIEW:
-                Debug.Log("enter view");
                 EnterViewState?.Invoke();
                 break;
             case GameState.EDIT:
-                Debug.Log("enter edit");
                 EnterEditState?.Invoke();
                 break;
             case GameState.PLAY:
-                Debug.Log("enter play");
                 EnterPlayState?.Invoke();
                 OnRaceStart();
                 break;
             case GameState.PAUSED:
-                Debug.Log("enter pause");
                 EnterPausedState?.Invoke();
                 break;
             default:

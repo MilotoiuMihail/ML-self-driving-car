@@ -1,13 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
 public class FinishScreen : MonoBehaviour
 {
-    [SerializeField] private TMP_Text position;
-    [SerializeField] private TMP_Text suffix;
-    [SerializeField] private TMP_Text trackTime;
+    [SerializeField] private TMP_Text title;
+    [SerializeField] private TMP_Text carNames;
+    [SerializeField] private TMP_Text trackTimes;
     private void OnEnable()
     {
         GameManager.Instance.ExitPlayState += Hide;
@@ -31,7 +29,7 @@ public class FinishScreen : MonoBehaviour
     {
         gameObject.SetActive(true);
         GameManager.Instance.ChangeToPausedState();
-        UpdateTrackTimeText();
+        DecideWin();
     }
     private void Hide()
     {
@@ -41,13 +39,42 @@ public class FinishScreen : MonoBehaviour
     {
         return gameObject.activeInHierarchy;
     }
-    private void UpdateTrackTimeText()
+    private string GetTrackTimeText(float totalTime)
     {
-        float TotalTime = CheckpointManager.Instance.Tracker[CarManager.Instance.Car.transform].GetTrackTime();
-        float milliseconds = Mathf.Floor(TotalTime * 1000) % 1000;
-        float seconds = Mathf.Floor(TotalTime) % 60;
-        float minutes = Mathf.Floor(TotalTime / 60);
+        float milliseconds = Mathf.Floor(totalTime * 1000) % 1000;
+        float seconds = Mathf.Floor(totalTime) % 60;
+        float minutes = Mathf.Floor(totalTime / 60);
 
-        trackTime.text = $"{minutes:00}:{seconds:00}.{milliseconds:000}";
+        return $"{minutes:00}:{seconds:00}.{milliseconds:000}";
+    }
+
+    private void DecideWin()
+    {
+        TrackerData playerTracker = CheckpointManager.Instance.Tracker[CarManager.Instance.PlayerCar.transform];
+        TrackerData npcTracker = CheckpointManager.Instance.Tracker[CarManager.Instance.Npc.transform];
+        float playerTime = playerTracker.GetTrackTime();
+        float npcTime = npcTracker.GetTrackTime();
+        if (playerTracker.LapCount != npcTracker.LapCount)
+        {
+            npcTime += npcTracker.LapTimer.ElapsedTime;
+            title.text = "Won";
+            carNames.text = $"Player:{System.Environment.NewLine}Npc:";
+            trackTimes.text = $"{GetTrackTimeText(playerTime)}{System.Environment.NewLine}DNF";
+        }
+        else
+        {
+            if (playerTime > npcTime)
+            {
+                title.text = "Lost";
+                carNames.text = $"Npc:{System.Environment.NewLine}Player:";
+                trackTimes.text = $"{GetTrackTimeText(npcTime)}{System.Environment.NewLine}{GetTrackTimeText(playerTime)}";
+            }
+            else
+            {
+                title.text = "Won";
+                carNames.text = $"Player:{System.Environment.NewLine}Npc:";
+                trackTimes.text = $"{GetTrackTimeText(playerTime)}{System.Environment.NewLine}{GetTrackTimeText(npcTime)}";
+            }
+        }
     }
 }

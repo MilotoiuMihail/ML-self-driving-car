@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -16,14 +14,7 @@ public class SettingsPanel : MonoBehaviour
     [SerializeField] private TMP_Text title;
     [SerializeField] private CarPanel difficultyPanel;
     [SerializeField] private FinishScreen finishScreen;
-    private void OnEnable()
-    {
-        GameManager.Instance.RaceStart += Hide;
-    }
-    private void OnDisable()
-    {
-        GameManager.Instance.RaceStart -= Hide;
-    }
+
     private void Start()
     {
         GameManager.Instance.RaceStart += DisplayPlaySettings;

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -35,7 +33,6 @@ public class Speedometer : MonoBehaviour
     {
 
         GameManager.Instance.RaceStart += Reset;
-        // car.GearShift += DisplayGear;
     }
     private void OnDisable()
     {
@@ -44,10 +41,6 @@ public class Speedometer : MonoBehaviour
     }
     private void Start()
     {
-        // GameManager.Instance.EnterViewState += Show;
-        // GameManager.Instance.ExitViewState += Hide;
-        // GameManager.Instance.EnterPlayState += Show;
-        // GameManager.Instance.ExitPlayState += Hide;
         GameManager.Instance.EnterEditState += Hide;
         GameManager.Instance.ExitEditState += Show;
         gameObject.SetActive(true);
@@ -58,17 +51,12 @@ public class Speedometer : MonoBehaviour
     }
     private void OnDestroy()
     {
-        // GameManager.Instance.EnterViewState -= Show;
-        // GameManager.Instance.ExitViewState -= Hide;
-        // GameManager.Instance.EnterPlayState -= Show;
-        // GameManager.Instance.ExitPlayState -= Hide;
         GameManager.Instance.EnterEditState -= Hide;
         GameManager.Instance.ExitEditState -= Show;
     }
     private void Show()
     {
         gameObject.SetActive(true);
-        // DisplayGear(1);
         car.GearShift += DisplayGear;
         Reset();
     }
@@ -90,11 +78,11 @@ public class Speedometer : MonoBehaviour
     }
     private void Update()
     {
-        RotateNeedle();
-        if (CarManager.Instance.BlockInput)
+        if (car.Input.IsBlocked)
         {
             return;
         }
+        RotateNeedle();
         DisplaySpeed();
     }
     private void Reset()
@@ -102,8 +90,11 @@ public class Speedometer : MonoBehaviour
         DisplayGear(1);
         currentSpeed = 0;
         DisplaySpeed();
-        // speedDisplay.text = "0";
         needle.localEulerAngles = new Vector3(0, minAngle, 0);
+    }
+    public void ResetSpeed()
+    {
+        currentSpeed = 0;
     }
     private void RotateNeedle()
     {

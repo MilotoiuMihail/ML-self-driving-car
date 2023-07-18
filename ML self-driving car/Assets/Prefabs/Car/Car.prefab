@@ -566,6 +566,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adcb0115752cd5d40a671c849e98895b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackLayer:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!1 &1827668020892891159
 GameObject:
   m_ObjectHideFlags: 0
@@ -677,6 +680,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adcb0115752cd5d40a671c849e98895b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackLayer:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!1 &1827668021219637202
 GameObject:
   m_ObjectHideFlags: 0
@@ -809,6 +815,7 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 40000
   hasRandomReset: 1
+  hasRandomDirection: 0
 --- !u!114 &1592640974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -915,6 +922,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adcb0115752cd5d40a671c849e98895b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackLayer:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!1 &1827668022092242154
 GameObject:
   m_ObjectHideFlags: 0
@@ -991,6 +1001,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adcb0115752cd5d40a671c849e98895b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackLayer:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!1 &7568790854087880304
 GameObject:
   m_ObjectHideFlags: 0

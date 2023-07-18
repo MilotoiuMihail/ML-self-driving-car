@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -8,18 +6,12 @@ public class LapTracker : MonoBehaviour
     [SerializeField] private TMP_Text lapCount;
     [SerializeField] private TMP_Text lapTimeText;
     [SerializeField] private Track track;
-    // private float lapTime;
-    // private Coroutine timerCoroutine;
     private void OnEnable()
     {
         GameManager.Instance.EnterEditState += Hide;
         GameManager.Instance.ExitEditState += Show;
         CheckpointManager.Instance.CompletedLap += HandleLapCompletion;
         CheckpointManager.Instance.FinishedRace += HandleFinishedRace;
-        GameManager.Instance.EnterViewState += ResetLapText;
-        GameManager.Instance.RaceStart += ResetLapText;
-        // CarManager.Instance.CarInputBlocked += StopTimer;
-        // CarManager.Instance.CarInputUnblocked += StartTimer;
     }
     private void OnDisable()
     {
@@ -27,16 +19,11 @@ public class LapTracker : MonoBehaviour
         GameManager.Instance.ExitEditState -= Show;
         CheckpointManager.Instance.CompletedLap -= HandleLapCompletion;
         CheckpointManager.Instance.FinishedRace -= HandleFinishedRace;
-        GameManager.Instance.EnterViewState -= ResetLapText;
-        GameManager.Instance.RaceStart -= ResetLapText;
-        // CarManager.Instance.CarInputBlocked -= StopTimer;
-        // CarManager.Instance.CarInputUnblocked -= StartTimer;
     }
 
     private void Start()
     {
-        UpdateLapText(1);
-        // ResetTimer();
+        ResetLapText();
     }
     private void Show()
     {
@@ -48,37 +35,9 @@ public class LapTracker : MonoBehaviour
         lapCount.transform.parent.gameObject.SetActive(false);
         lapTimeText.gameObject.SetActive(false);
     }
-    // private void ResetTimer()
-    // {
-    //     ResetLapTime();
-    //     StartTimer();
-    // }
-    // private void StartTimer()
-    // {
-    //     timerCoroutine = StartCoroutine(TimerCoroutine());
-    // }
-    // private void StopTimer()
-    // {
-    //     if (timerCoroutine != null)
-    //     {
-    //         StopCoroutine(timerCoroutine);
-    //     }
-    // }
-    // private IEnumerator TimerCoroutine()
-    // {
-    //     while (true)
-    //     {
-    //         lapTime += Time.deltaTime;
-    //         UpdateLapTimeText();
-    //         yield return null;
-    //     }
-    // }
     private void Update()
     {
-        if (CarManager.Instance.BlockInput)
-        {
-            return;
-        }
+
         UpdateLapTimeText();
     }
     private void UpdateLapTimeText()
@@ -97,8 +56,6 @@ public class LapTracker : MonoBehaviour
             return;
         }
         TrackerData tracker = CheckpointManager.Instance.Tracker[carTransform];
-        // tracker.LapTimes.Add(lapTime);
-        // ResetLapTime();
         UpdateLapText(tracker.LapCount);
     }
     private void HandleFinishedRace(Transform carTransform)
@@ -107,22 +64,14 @@ public class LapTracker : MonoBehaviour
         {
             return;
         }
-        ResetLapText();
     }
     private void UpdateLapText(int laps)
     {
         int maxLaps = track.IsCircular ? track.Laps : 1;
         lapCount.text = $"{Mathf.Min(laps, maxLaps)}/{maxLaps}";
     }
-    private void ResetLapText()
+    public void ResetLapText()
     {
-        Debug.Log("reset all");
-        // ResetLapTime();
         UpdateLapText(1);
     }
-    // private void ResetLapTime()
-    // {
-    //     // lapTime = 0;
-    //     UpdateLapTimeText();
-    // }
 }

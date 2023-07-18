@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class StartGate : MonoBehaviour
@@ -31,7 +29,7 @@ public class StartGate : MonoBehaviour
             return;
         }
         Transform firstCheckpoint = track.GetFirstCheckpoint().transform;
-        transform.position = firstCheckpoint.position + Vector3.forward * (track.StartPiece.IsFacingForward ? 1 : (-1));
+        transform.position = new Vector3(firstCheckpoint.position.x, transform.position.y, firstCheckpoint.position.z);
         transform.forward = firstCheckpoint.forward;
     }
 }

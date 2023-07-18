@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using Newtonsoft.Json;
@@ -9,19 +7,17 @@ public static class SaveManager
     public const string SaveDirectory = "Saves";
     public const string FileName = "Save.json";
     public static SaveData CurrentSaveData { get; private set; } = new SaveData();
+    public static string SaveDirectoryPath = Path.Combine(Application.persistentDataPath, SaveDirectory);
     public static void Save()
     {
-        string directory = Path.Combine(Application.persistentDataPath, SaveDirectory);
-        if (!Directory.Exists(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
+        CheckForDirectory();
         string json = JsonConvert.SerializeObject(CurrentSaveData);
-        File.WriteAllText(Path.Combine(directory, FileName), json);
+        File.WriteAllText(Path.Combine(SaveDirectoryPath, FileName), json);
     }
     public static void Load()
     {
-        string filePath = Path.Combine(Application.persistentDataPath, SaveDirectory, FileName);
+        CheckForDirectory();
+        string filePath = Path.Combine(SaveDirectoryPath, FileName);
         SaveData data = null;
         try
         {
@@ -42,6 +38,13 @@ public static class SaveManager
         }
 
         CurrentSaveData = data != null ? data : new SaveData();
+    }
+    private static void CheckForDirectory()
+    {
+        if (!Directory.Exists(SaveDirectoryPath))
+        {
+            Directory.CreateDirectory(SaveDirectoryPath);
+        }
     }
     private static void CreateDefaultSaveFile(string saveFilePath)
     {

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -88,7 +87,7 @@ public class SaveDataManager : Singleton<SaveDataManager>
             }
         }
     }
-    private void LoadObstaclesData()
+    public void LoadObstaclesData()
     {
         LoadObstacles(SaveManager.CurrentSaveData);
     }

@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 public class ButtonExitEdit : MonoBehaviour
 {
@@ -43,7 +40,7 @@ public class ButtonExitEdit : MonoBehaviour
     }
     public void SaveChanges()
     {
-        GameManager.Instance.ChangeToViewState();
         SaveDataManager.Instance.SaveMap();
+        GameManager.Instance.ChangeToViewState();
     }
 }

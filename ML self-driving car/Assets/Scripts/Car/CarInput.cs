@@ -5,4 +5,7 @@ public interface CarInput
     public bool GearUp { get; }
     public bool GearDown { get; }
     public bool Reverse { get; }
+    public bool IsBlocked { get; }
+    public void BlockInput();
+    public void UnblockInput();
 }

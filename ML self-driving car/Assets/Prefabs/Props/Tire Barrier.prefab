@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 6646069323886242616}
   - component: {fileID: 396331431207967237}
   - component: {fileID: 2838474616739069989}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: SR_Prop_Barrier_Tires_01 (2)
-  m_TagString: Obstacle
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -93,9 +93,9 @@ GameObject:
   m_Component:
   - component: {fileID: 5896855325186478162}
   - component: {fileID: 5618118931731034761}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Tire Barrier
-  m_TagString: Obstacle
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -144,9 +144,9 @@ GameObject:
   - component: {fileID: 4646701284024959211}
   - component: {fileID: 4646701284024222033}
   - component: {fileID: 4646701284022959425}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: SR_Prop_Barrier_Tires_02
-  m_TagString: Obstacle
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -227,9 +227,9 @@ GameObject:
   - component: {fileID: 8215053577188713365}
   - component: {fileID: 6356252508828142823}
   - component: {fileID: 4125364587076533296}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: SR_Prop_Barrier_Tires_01 (1)
-  m_TagString: Obstacle
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -310,9 +310,9 @@ GameObject:
   - component: {fileID: 7892352598146432642}
   - component: {fileID: 7892352598145115872}
   - component: {fileID: 7892352598144173120}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: SR_Prop_Barrier_Tires_01
-  m_TagString: Obstacle
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -393,9 +393,9 @@ GameObject:
   - component: {fileID: 2879996397393157054}
   - component: {fileID: 959470375285065654}
   - component: {fileID: 1145474279956252890}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: SR_Prop_Barrier_Tires_02 (1)
-  m_TagString: Obstacle
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

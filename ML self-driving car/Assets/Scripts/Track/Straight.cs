@@ -14,7 +14,6 @@ public class Straight : TrackPiece
     }
     private bool HasRotation(float degrees)
     {
-        // return Mathf.Approximately(transform.rotation.eulerAngles.y, degrees);
         return transform.rotation.eulerAngles.y == degrees;
     }
     protected override PlaceableItemType GetItemType()

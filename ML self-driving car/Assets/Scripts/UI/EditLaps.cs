@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -11,10 +9,6 @@ public class EditLaps : MonoBehaviour
     private void OnEnable()
     {
         UpdateLapCount();
-    }
-    private void OnDisable()
-    {
-        // GameManager.Instance.EnterEditState -= UpdateLapCount;
     }
     public void IncreaseLapCount()
     {

@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Linq;
 using System;
+using System.Collections;
 
 public class Car : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class Car : MonoBehaviour
     public Wheel[] Wheels { get; private set; }
     private Rigidbody rb;
     public CarEngine Engine { get; private set; }
-    private CarInput input;
+    public CarInput Input { get; set; }
     private float throttle;
     private int currentGear;
     private Gear[] gears;
@@ -21,53 +22,34 @@ public class Car : MonoBehaviour
     public event Action<int> GearShift;
     private Vector3 velocityOnSleep;
     private Vector3 angularVelocityOnSleep;
+    private Coroutine fullStopCoroutine;
+
     private void OnEnable()
     {
-        CarManager.Instance.CarInputBlocked += Sleep;
+        CarManager.Instance.CarInputBlocked += FullStop;
         CarManager.Instance.CarInputUnblocked += WakeUp;
     }
     private void OnDisable()
     {
-        CarManager.Instance.CarInputBlocked -= Sleep;
+        CarManager.Instance.CarInputBlocked -= FullStop;
         CarManager.Instance.CarInputUnblocked -= WakeUp;
-    }
-    public void Sleep()
-    {
-        velocityOnSleep = rb.velocity;
-        angularVelocityOnSleep = rb.angularVelocity;
-        rb.isKinematic = true;
-    }
-    private void WakeUp()
-    {
-        if (CheckpointManager.Instance.HasFinishedRace(transform))
-        {
-            Debug.Log("Go back to sleep");
-            return;
-        }
-        rb.velocity = velocityOnSleep;
-        rb.angularVelocity = angularVelocityOnSleep;
-        velocityOnSleep = Vector3.zero;
-        rb.isKinematic = false;
     }
     private void Awake()
     {
         Wheels = GetComponentsInChildren<Wheel>();
+        ApplyDriveType();
         Engine = GetComponent<CarEngine>();
-        input = GetComponent<CarInput>();
+        Input = GetComponent<CarInput>();
         rb = GetComponent<Rigidbody>();
     }
 
     void Start()
     {
         rb.centerOfMass = centreOfMass.localPosition;
-        ApplyDriveType();
         InitializeGears();
-        Stop();
     }
-
     void Update()
     {
-        HandleFullStop();
         TakeInput();
         Movement();
         Shifting();
@@ -76,34 +58,59 @@ public class Car : MonoBehaviour
 
     public void DebugInfo()
     {
-        Debug.Log($"speed: {Mathf.Round(GetSpeed())}; RPM: {Engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {Engine.CurrentEngineTorque}; steering: {input.SteerInput}; steer angle: {Wheels[0].SteeringAngle}");
+        Debug.Log($"speed: {Mathf.Round(GetSpeed())}; RPM: {Engine.Rpm}; gear: {gears[currentGear].Name}; throttle: {throttle}; torque: {Engine.CurrentEngineTorque}; steering: {Input.SteerInput}; steer angle: {Wheels[0].SteeringAngle}");
     }
-
-    public void Stop()
+    private void WakeUp()
     {
-        isStopped = true;
-        velocityOnSleep = Vector3.zero;
-        Engine.StopEngine();
-        currentGear = 1;
-        OnGearShift();
-    }
-    private void HandleFullStop()
-    {
-        if (isStopped)
+        if (CheckpointManager.Instance.HasFinishedRace(transform))
         {
-            if (throttle != 0)
-            {
-                isStopped = false;
-            }
+            return;
+        }
+        rb.velocity = velocityOnSleep;
+        rb.angularVelocity = angularVelocityOnSleep;
+        velocityOnSleep = Vector3.zero;
+        angularVelocityOnSleep = Vector3.zero;
+        Input.UnblockInput();
+    }
+    public void FullStop()
+    {
+        Stop(true);
+    }
+    public void IdleStop()
+    {
+        Stop(false);
+    }
+    private void Stop(bool doFullStop)
+    {
+        if (fullStopCoroutine != null)
+        {
+            StopCoroutine(fullStopCoroutine);
+        }
+        if (doFullStop)
+        {
+            Input.BlockInput();
+        }
+        velocityOnSleep = doFullStop ? rb.velocity : Vector3.zero;
+        angularVelocityOnSleep = doFullStop ? rb.angularVelocity : Vector3.zero;
+        fullStopCoroutine = StartCoroutine(StopCarCoroutine());
+    }
+    private IEnumerator StopCarCoroutine()
+    {
+        do
+        {
             foreach (Wheel wheel in Wheels)
             {
                 wheel.SteeringAngle = 0;
                 wheel.Torque = 0;
-                wheel.BrakeTorque = float.MaxValue;
+                wheel.BrakeTorque = Mathf.Infinity;
             }
+            Engine.StopEngine();
+            currentGear = 1;
             rb.velocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
-        }
+            yield return null;
+        } while (GetWheelsRpm() > 1f);
+        OnGearShift();
     }
     private void InitializeGears()
     {
@@ -126,7 +133,7 @@ public class Car : MonoBehaviour
     }
     private void TakeInput()
     {
-        throttle = input.ThrottleInput;
+        throttle = Input.ThrottleInput;
     }
 
     private void Movement()
@@ -187,11 +194,11 @@ public class Car : MonoBehaviour
 
     private void ManualShift()
     {
-        if (input.GearUp)
+        if (Input.GearUp)
         {
             ShiftUp();
         }
-        if (input.GearDown)
+        if (Input.GearDown)
         {
             ShiftDown();
         }
@@ -199,7 +206,7 @@ public class Car : MonoBehaviour
 
     private void AutomaticShift()
     {
-        if (input.Reverse)
+        if (Input.Reverse)
         {
             ToggleReverse();
         }
@@ -247,7 +254,6 @@ public class Car : MonoBehaviour
     public float GetSpeed()
     {
         return rb.velocity.magnitude;
-        // return !CarManager.Instance.BlockInput ? rb.velocity.magnitude : velocityOnSleep.magnitude;
     }
 
     private void ApplyDownforce()
@@ -283,5 +289,9 @@ public class Car : MonoBehaviour
     public float GetWheelsRpm()
     {
         return Wheels.Where(wheel => wheel.HasPower).Average(wheel => wheel.Rpm);
+    }
+    public bool IsOnTrack()
+    {
+        return Wheels.Where(wheel => wheel.IsOnTrack()).Count() > 1;
     }
 }

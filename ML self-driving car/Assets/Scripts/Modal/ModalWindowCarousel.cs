@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,7 +19,7 @@ public class ModalWindowCarousel : MonoBehaviour
             return;
         }
         ModalWindowData data = ModalWindowSystem.Instance
-        .SetTitle(carousel[index].Title)
+        .SetTitle($"{carousel[index].Title} ({currentIndex + 1}/{carousel.Count})")
         .SetBody(carousel[index].Body)
         .SetButton(0, "Back", BackButtonAction, ColorSystem.ColorPalette.Warning)
         .SetButton(1, "Next", NextButtonAction, ColorSystem.ColorPalette.Success)

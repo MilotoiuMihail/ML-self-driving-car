@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FinishLine : MonoBehaviour
@@ -31,7 +29,7 @@ public class FinishLine : MonoBehaviour
             return;
         }
         Transform lastCheckpoint = track.GetLastCheckpoint().transform;
-        transform.position = lastCheckpoint.position;
+        transform.position = new Vector3(lastCheckpoint.position.x, transform.position.y, lastCheckpoint.position.z);
         transform.forward = lastCheckpoint.forward;
     }
 }
