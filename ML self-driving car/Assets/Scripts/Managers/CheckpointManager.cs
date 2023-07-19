@@ -56,8 +56,8 @@ public class CheckpointManager : Singleton<CheckpointManager>
         int carCurrentCheckpointIndex = Tracker[carTransform].NextCheckpointIndex;
         if (checkpoints.IndexOf(checkpoint) == carCurrentCheckpointIndex)
         {
-            Tracker[carTransform].NextCheckpointIndex = (carCurrentCheckpointIndex + 1) % checkpoints.Count;
             CorrectCheckpointPassed?.Invoke(carTransform);
+            Tracker[carTransform].NextCheckpointIndex = GetNextIndex(carCurrentCheckpointIndex);
             if (!track.IsCircular && Tracker[carTransform].NextCheckpointIndex == 0)
             {
 
@@ -87,6 +87,10 @@ public class CheckpointManager : Singleton<CheckpointManager>
             WrongCheckpointPassed?.Invoke(carTransform);
         }
     }
+    private int GetNextIndex(int index)
+    {
+        return (index + 1) % checkpoints.Count;
+    }
     private void OnFinishRace(Transform carTransform)
     {
         Tracker[carTransform].FinishRace();
@@ -99,11 +103,11 @@ public class CheckpointManager : Singleton<CheckpointManager>
     }
     public Checkpoint GetNextCheckpoint(Transform carTransform)
     {
-        return checkpoints.Count > 0 ? checkpoints[Tracker[carTransform].NextCheckpointIndex] : null;
+        return checkpoints.Count > 0 ? checkpoints[GetNextIndex(Tracker[carTransform].NextCheckpointIndex)] : null;
     }
     public Checkpoint GetCurrentCheckpoint(Transform carTransform)
     {
-        return checkpoints.Count > 0 ? checkpoints[Mathf.Max(Tracker[carTransform].NextCheckpointIndex - 1, 0)] : null;
+        return checkpoints.Count > 0 ? checkpoints[Tracker[carTransform].NextCheckpointIndex] : null;
     }
     public List<Checkpoint> GetNextCheckpoints(Transform carTransform, int n)
     {

@@ -107,8 +107,7 @@ public class CarManager : Singleton<CarManager>
     }
     public void ResetCar(Car car, bool hasRandomPosition, bool hasRandomDirection)
     {
-        TrackPiece startPiece = hasRandomPosition ? track.GetRandomTrackPiece() : track.GetLastPiece();
-        // TrackPiece startPiece = hasRandomPosition ? track.GetRandomTrackPiece() : track.StartPiece;
+        TrackPiece startPiece = hasRandomPosition ? track.GetRandomTrackPiece() : track.StartPiece;
         if (startPiece == null)
         {
             car.gameObject.SetActive(false);

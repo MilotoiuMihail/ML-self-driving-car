@@ -36,12 +36,12 @@ public class Checkpoint : MonoBehaviour
     }
     public void Show()
     {
-        meshRenderer.enabled = true;
-        meshRenderer.material.color = new Color(meshRenderer.material.color.r, meshRenderer.material.color.g, meshRenderer.material.color.b, MaxAlpha);
         if (fadeTween.IsActive())
         {
             return;
         }
+        meshRenderer.enabled = true;
+        meshRenderer.material.color = new Color(meshRenderer.material.color.r, meshRenderer.material.color.g, meshRenderer.material.color.b, MaxAlpha);
         fadeTween = meshRenderer.material.DOFade(MinAlpha, FadeDuration)
         .SetLoops(-1, LoopType.Yoyo)
         .SetEase(Ease.InOutQuad);

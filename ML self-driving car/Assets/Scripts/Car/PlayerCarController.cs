@@ -27,7 +27,7 @@ public class PlayerCarController : MonoBehaviour, CarInput
     {
         if (!IsBlocked && !car.IsOnTrack())
         {
-            CheckpointManager.Instance.GetNextCheckpoint(transform).Show();
+            CheckpointManager.Instance.GetCurrentCheckpoint(transform).Show();
         }
     }
     public void BlockInput()
@@ -52,7 +52,7 @@ public class PlayerCarController : MonoBehaviour, CarInput
         {
             return;
         }
-        CheckpointManager.Instance.GetNextCheckpoint(transform).Show();
+        CheckpointManager.Instance.GetCurrentCheckpoint(transform).Show();
     }
 
 }

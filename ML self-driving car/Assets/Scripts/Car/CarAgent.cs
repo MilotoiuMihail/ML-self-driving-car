@@ -37,7 +37,7 @@ public class CarAgent : Agent, CarInput
         GameManager.Instance.ExitViewState += Hide;
         hasManualGearBox = Car.HasManualGearBox;
         maxStepRatio = MaxStep > 0 ? 1f / MaxStep : 1;
-        // CarManager.Instance.LoadNpcLevel();
+        CarManager.Instance.LoadNpcLevel();
     }
     private void OnDestroy()
     {
@@ -116,9 +116,9 @@ public class CarAgent : Agent, CarInput
     }
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
+        actionMask.SetActionEnabled(0, 1, false);
         if (hasManualGearBox || Car.GetCurrentGearIndex() > 1)
         {
-            actionMask.SetActionEnabled(0, 1, false);
         }
     }
     private void OnCorrectCheckpointPassed(Transform carTransform)
@@ -179,7 +179,7 @@ public class CarAgent : Agent, CarInput
         }
 
     }
-    private void OnCollisionStay(Collision other)
+    private void OnCollisionEnter(Collision other)
     {
         if (!this.enabled)
         {
@@ -187,7 +187,18 @@ public class CarAgent : Agent, CarInput
         }
         if (other.collider.tag.Equals("Obstacle"))
         {
-            AddReward(-.0001f);
+            AddReward(-.01f);
+        }
+    }
+    private void OnCollisionExit(Collision other)
+    {
+        if (!this.enabled)
+        {
+            return;
+        }
+        if (other.collider.tag.Equals("Obstacle"))
+        {
+            AddReward(.005f);
         }
     }
     private void GetNextCheckpointTransform()
@@ -203,7 +214,8 @@ public class CarAgent : Agent, CarInput
         {
             CheckpointManager.Instance.Tracker[transform].IncreaseLap();
         }
-        transform.position += transform.right * Random.Range(-1f, 1f) * 6f;
+        //-----------------------------------------
+        // transform.position += transform.right * Random.Range(-1f, 1f) * 6f;
         baseCheckpointIndex = CheckpointManager.Instance.Tracker[transform].NextCheckpointIndex;
     }
     private void ResetVariables()

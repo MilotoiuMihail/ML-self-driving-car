@@ -111,6 +111,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adcb0115752cd5d40a671c849e98895b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &174397521597646040
 GameObject:
   m_ObjectHideFlags: 0
@@ -187,6 +190,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adcb0115752cd5d40a671c849e98895b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &174397522065502684
 GameObject:
   m_ObjectHideFlags: 0
@@ -263,6 +269,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adcb0115752cd5d40a671c849e98895b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &174397522535062244
 GameObject:
   m_ObjectHideFlags: 0
@@ -395,6 +404,7 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 40000
   hasRandomReset: 1
+  hasRandomDirection: 0
 --- !u!114 &1960961391500716280
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -501,6 +511,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adcb0115752cd5d40a671c849e98895b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &1960961389928153416
 GameObject:
   m_ObjectHideFlags: 0
@@ -615,7 +628,7 @@ MonoBehaviour:
   - Obstacle
   m_RaysPerDirection: 2
   m_MaxRayDegrees: 15
-  m_SphereCastRadius: 2
+  m_SphereCastRadius: 1
   m_RayLength: 60
   m_RayLayerMask:
     serializedVersion: 2
@@ -675,7 +688,7 @@ MonoBehaviour:
   - Obstacle
   m_RaysPerDirection: 4
   m_MaxRayDegrees: 50
-  m_SphereCastRadius: 2
+  m_SphereCastRadius: 1
   m_RayLength: 20
   m_RayLayerMask:
     serializedVersion: 2
@@ -796,7 +809,7 @@ MonoBehaviour:
   - Obstacle
   m_RaysPerDirection: 3
   m_MaxRayDegrees: 10
-  m_SphereCastRadius: 2
+  m_SphereCastRadius: 1
   m_RayLength: 150
   m_RayLayerMask:
     serializedVersion: 2
@@ -948,7 +961,7 @@ MonoBehaviour:
   - Obstacle
   m_RaysPerDirection: 2
   m_MaxRayDegrees: 15
-  m_SphereCastRadius: 2
+  m_SphereCastRadius: 1
   m_RayLength: 60
   m_RayLayerMask:
     serializedVersion: 2

@@ -44,7 +44,7 @@ public class TopDownCameraRig : MonoBehaviour
         MoveToMapCenter();
         followTarget = true;
         desiredRotation = transform.rotation;
-        float defaultZoom = (ZoomBounds.x + ZoomBounds.y) * .5f;
+        float defaultZoom = (ZoomBounds.x + ZoomBounds.y) * .3f;
         cameraTransform.localPosition = new Vector3(
             cameraTransform.localPosition.x,
             defaultZoom,

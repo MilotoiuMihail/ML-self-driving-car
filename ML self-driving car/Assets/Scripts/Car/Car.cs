@@ -109,7 +109,7 @@ public class Car : MonoBehaviour
             rb.velocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
             yield return null;
-        } while (GetWheelsRpm() > 1f);
+        } while (GetWheelsRpm() < -1f || GetWheelsRpm() > 1f);
         OnGearShift();
     }
     private void InitializeGears()
