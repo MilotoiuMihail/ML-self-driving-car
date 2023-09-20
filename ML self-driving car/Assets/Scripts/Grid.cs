@@ -8,12 +8,34 @@ public class Grid : MonoBehaviour
     public int Height => height;
     [SerializeField] private float cellSize;
     [SerializeField] private Vector3 origin;
+    private Renderer gridRenderer;
     private TrackPiece[,] pieces;
+
     private void Awake()
     {
         pieces = new TrackPiece[Width, Height];
         transform.position = origin;
         transform.localScale = new Vector3(Width * cellSize * .1f, 1, Height * cellSize * .1f);
+        gridRenderer = GetComponentInChildren<Renderer>();
+    }
+    private void Start()
+    {
+        GameManager.Instance.EnterEditState += Show;
+        GameManager.Instance.ExitEditState += Hide;
+        Hide();
+    }
+    private void OnDestroy()
+    {
+        GameManager.Instance.EnterEditState -= Show;
+        GameManager.Instance.ExitEditState -= Hide;
+    }
+    private void Show()
+    {
+        gridRenderer.enabled = true;
+    }
+    private void Hide()
+    {
+        gridRenderer.enabled = false;
     }
     private bool isInBounds(int x, int y)
     {
@@ -94,20 +116,4 @@ public class Grid : MonoBehaviour
         }
         pieces = new TrackPiece[Width, Height];
     }
-
-    //temporary
-    // public void OnDrawGizmos()
-    // {
-    //     Gizmos.color = Color.white;
-    //     for (int x = 0; x < Width; x++)
-    //     {
-    //         for (int y = 0; y < Height; y++)
-    //         {
-    //             Gizmos.DrawLine(GridToWorldPosition(x, y), GridToWorldPosition(x, y + 1));
-    //             Gizmos.DrawLine(GridToWorldPosition(x, y), GridToWorldPosition(x + 1, y));
-    //         }
-    //     }
-    //     Gizmos.DrawLine(GridToWorldPosition(0, Height), GridToWorldPosition(Width, Height));
-    //     Gizmos.DrawLine(GridToWorldPosition(Width, 0), GridToWorldPosition(Width, Height));
-    // }
 }

@@ -1,16 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using System;
-using TMPro;
 
 public class ModalWindow : MonoBehaviour
 {
     [SerializeField] private ScalableTextContainer title;
     [SerializeField] private ScalableTextContainer body;
     private ModalButton[] buttons;
+    private bool shouldPause;
     private const int SHOW_DELAY = 100;
+    private void OnEnable()
+    {
+        InputManager.Instance.EscDown += Close;
+    }
+    private void OnDisable()
+    {
+        InputManager.Instance.EscDown -= Close;
+    }
     private void Awake()
     {
         buttons = GetComponentsInChildren<ModalButton>();
@@ -44,6 +48,11 @@ public class ModalWindow : MonoBehaviour
     }
     public void Close()
     {
+        if (shouldPause)
+        {
+            GameManager.Instance.ChangeToPreviousState();
+            shouldPause = false;
+        }
         gameObject.SetActive(false);
     }
     public async void Show(ModalWindowData data)
@@ -51,6 +60,11 @@ public class ModalWindow : MonoBehaviour
         SetTitle(data.Title);
         SetBody(data.Body);
         SetButtons(data.GetButtons());
+        if (!GameManager.Instance.IsGameState(GameState.PAUSED))
+        {
+            shouldPause = true;
+            GameManager.Instance.ChangeToPausedState();
+        }
         await System.Threading.Tasks.Task.Delay(SHOW_DELAY);
         gameObject.SetActive(true);
     }

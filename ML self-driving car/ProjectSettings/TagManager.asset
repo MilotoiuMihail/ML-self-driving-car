@@ -3,7 +3,12 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Ground
+  - Checkpoint
+  - Wall
+  - Track
+  - Obstacle
   layers:
   - Default
   - TransparentFX
@@ -12,11 +17,11 @@ TagManager:
   - Water
   - UI
   - Ground
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Checkpoints
+  - Walls
+  - Car
+  - Track
+  - Obstacles
   - 
   - 
   - 

@@ -1,0 +1,65 @@
+{
+    "Drive": {
+        "checkpoints": [
+            {
+                "steps": 19999962,
+                "file_path": "results\\Drive06\\Drive\\Drive-19999962.onnx",
+                "reward": 1.6818181872367859,
+                "creation_time": 1685771501.2932196,
+                "auxillary_file_paths": [
+                    "results\\Drive06\\Drive\\Drive-19999962.pt"
+                ]
+            },
+            {
+                "steps": 20499936,
+                "file_path": "results\\Drive06\\Drive\\Drive-20499936.onnx",
+                "reward": 2.009090933203697,
+                "creation_time": 1685772015.6210463,
+                "auxillary_file_paths": [
+                    "results\\Drive06\\Drive\\Drive-20499936.pt"
+                ]
+            },
+            {
+                "steps": 20999942,
+                "file_path": "results\\Drive06\\Drive\\Drive-20999942.onnx",
+                "reward": null,
+                "creation_time": 1685772532.392472,
+                "auxillary_file_paths": [
+                    "results\\Drive06\\Drive\\Drive-20999942.pt"
+                ]
+            },
+            {
+                "steps": 21499936,
+                "file_path": "results\\Drive06\\Drive\\Drive-21499936.onnx",
+                "reward": 4.011363659054041,
+                "creation_time": 1685773062.8470144,
+                "auxillary_file_paths": [
+                    "results\\Drive06\\Drive\\Drive-21499936.pt"
+                ]
+            },
+            {
+                "steps": 21885024,
+                "file_path": "results\\Drive06\\Drive\\Drive-21885024.onnx",
+                "reward": 5.920454539358616,
+                "creation_time": 1685773462.4743388,
+                "auxillary_file_paths": [
+                    "results\\Drive06\\Drive\\Drive-21885024.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 21885024,
+            "file_path": "results\\Drive06\\Drive.onnx",
+            "reward": 5.920454539358616,
+            "creation_time": 1685773462.4743388,
+            "auxillary_file_paths": [
+                "results\\Drive06\\Drive\\Drive-21885024.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.30.0",
+        "torch_version": "2.0.1+cu117"
+    }
+}

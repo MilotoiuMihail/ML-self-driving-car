@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using System;
 
 public class ModalWindowSystem : Singleton<ModalWindowSystem>
 {
@@ -45,5 +42,9 @@ public class ModalWindowSystem : Singleton<ModalWindowSystem>
     public void Show(ModalWindowData data)
     {
         modalWindow.Show(data);
+    }
+    public bool IsVisible()
+    {
+        return modalWindow.gameObject.activeInHierarchy;
     }
 }

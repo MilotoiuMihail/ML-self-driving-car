@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TopDownCameraRig : MonoBehaviour
@@ -11,7 +9,7 @@ public class TopDownCameraRig : MonoBehaviour
     [SerializeField] private float maxMovementSpeed;
     [SerializeField] private float zoomSpeed;
     [SerializeField] private float rotationSpeed;
-    [SerializeField] private Transform target;
+    private Transform target;
     private bool followTarget;
     private bool previousFollowTarget;
     private float edgeSizeRatio;
@@ -31,21 +29,22 @@ public class TopDownCameraRig : MonoBehaviour
     {
         GameManager.Instance.EnterEditState += UnsetFollowTarget;
         GameManager.Instance.ExitEditState += SetPreviousFollowTarget;
+        InputManager.Instance.LeftAltDown += SetRotationStartPosition;
     }
     private void OnDisable()
     {
         GameManager.Instance.EnterEditState -= UnsetFollowTarget;
         GameManager.Instance.ExitEditState += SetPreviousFollowTarget;
+        InputManager.Instance.LeftAltDown += SetRotationStartPosition;
     }
     private void Start()
     {
         minBounds = boundsRenderer.bounds.min;
         maxBounds = boundsRenderer.bounds.max;
-        transform.position = boundsRenderer.bounds.center;
+        MoveToMapCenter();
         followTarget = true;
-        desiredPosition = transform.position;
         desiredRotation = transform.rotation;
-        float defaultZoom = (ZoomBounds.x + ZoomBounds.y) * .5f;
+        float defaultZoom = (ZoomBounds.x + ZoomBounds.y) * .3f;
         cameraTransform.localPosition = new Vector3(
             cameraTransform.localPosition.x,
             defaultZoom,
@@ -58,14 +57,13 @@ public class TopDownCameraRig : MonoBehaviour
     void LateUpdate()
     {
         HandleZoom();
+        HandleRotation();
         if (followTarget)
         {
             FollowTarget();
             return;
         }
-        Vector2 mousePosition = Input.mousePosition;
-        HandleMovement(mousePosition);
-        HandleRotation(mousePosition);
+        HandleMovement();
     }
     private void UnsetFollowTarget()
     {
@@ -90,14 +88,28 @@ public class TopDownCameraRig : MonoBehaviour
         {
             return;
         }
-        transform.position = target.position;
+        SetPosition(target.position);
     }
-    private void HandleMovement(Vector2 mousePosition)
+    public void SetTarget(Transform newTarget)
     {
-        if (Input.GetKey(KeyCode.LeftAlt))
+        target = newTarget;
+    }
+    public void SetPosition(Vector3 position)
+    {
+        transform.position = position;
+        desiredPosition = transform.position;
+    }
+    public void MoveToMapCenter()
+    {
+        SetPosition(boundsRenderer.bounds.center);
+    }
+    private void HandleMovement()
+    {
+        if (InputManager.Instance.IsLeftAltPressed)
         {
             return;
         }
+        Vector2 mousePosition = InputManager.Instance.ScreenMousePosition;
         if (mousePosition.y >= Screen.height - edgeSize)
         {
             float distanceFromEdge = mousePosition.y - (Screen.height - edgeSize);
@@ -121,24 +133,24 @@ public class TopDownCameraRig : MonoBehaviour
         ClampMovement();
         UpdatePosition();
     }
-    private void HandleRotation(Vector2 mousePosition)
+    private void HandleRotation()
     {
-        if (Input.GetKey(KeyCode.LeftAlt))
+        if (InputManager.Instance.IsLeftAltPressed)
         {
-            if (Input.GetKeyDown(KeyCode.LeftAlt))
-            {
-                rotateStartPosition = mousePosition;
-            }
-            rotateCurrentPosition = mousePosition;
+            rotateCurrentPosition = InputManager.Instance.ScreenMousePosition;
             Vector3 difference = rotateStartPosition - rotateCurrentPosition;
             rotateStartPosition = rotateCurrentPosition;
             desiredRotation *= CalculateRotationAmount(difference.x);
         }
         UpdateRotation();
     }
+    private void SetRotationStartPosition()
+    {
+        rotateStartPosition = InputManager.Instance.ScreenMousePosition;
+    }
     private void HandleZoom()
     {
-        float mouseScroll = Input.mouseScrollDelta.y;
+        float mouseScroll = InputManager.Instance.MouseScrollDelta;
         if (mouseScroll != 0)
         {
             desiredZoom += CalculateZoomAmount(mouseScroll);

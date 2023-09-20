@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,9 +7,8 @@ public class ButtonSelectStart : MonoBehaviour
     [SerializeField] private Track track;
     private Button button;
     private Color defaultColor;
-    private async void OnEnable()
+    private void OnEnable()
     {
-        await System.Threading.Tasks.Task.Yield();
         InputManager.Instance.LeftControlDown += UnsetButtonPressed;
         track.SelectStartChanged += ChangeButtonColor;
     }

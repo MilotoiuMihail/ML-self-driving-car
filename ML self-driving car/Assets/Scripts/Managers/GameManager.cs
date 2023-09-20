@@ -1,37 +1,41 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
 
 public class GameManager : Singleton<GameManager>
 {
-    private GameState currentState = GameState.PAUSED;
+    private GameState currentState = GameState.VIEW;
     private GameState previousState;
     public event Action EnterViewState;
     public event Action EnterEditState;
     public event Action EnterPausedState;
+    public event Action EnterPlayState;
+    public event Action ExitPlayState;
     public event Action ExitViewState;
     public event Action ExitEditState;
     public event Action ExitPausedState;
-    [SerializeField] private Car car;
-    [SerializeField] private Track track;
-    [SerializeField] private TopDownCameraRig cameraRig;
-    protected override void Awake()
-    {
-        base.Awake();
-        ChangeGameState(GameState.VIEW);
-    }
+    public event Action RaceStart;
+    public event Action RaceFinish;
     private void Start()
     {
-        car.transform.position = track.StartPiece ? track.StartPiece.transform.position : cameraRig.transform.position;
+        CheckpointManager.Instance.FinishedRace += OnRaceFinish;
+        // QualitySettings.vSyncCount = 0;
+        // Application.targetFrameRate = 60;
+    }
+    private void OnDestroy()
+    {
+        CheckpointManager.Instance.FinishedRace -= OnRaceFinish;
     }
     public void ChangeGameState(GameState state)
     {
-        previousState = currentState;
+        if (currentState == state)
+        {
+            return;
+        }
         if (state != GameState.PAUSED)
         {
             HandleBeforeStateChange();
         }
+        previousState = currentState;
         currentState = state;
         if (previousState != GameState.PAUSED)
         {
@@ -47,6 +51,9 @@ public class GameManager : Singleton<GameManager>
                 break;
             case GameState.EDIT:
                 ExitEditState?.Invoke();
+                break;
+            case GameState.PLAY:
+                ExitPlayState?.Invoke();
                 break;
             case GameState.PAUSED:
                 ExitPausedState?.Invoke();
@@ -66,6 +73,10 @@ public class GameManager : Singleton<GameManager>
             case GameState.EDIT:
                 EnterEditState?.Invoke();
                 break;
+            case GameState.PLAY:
+                EnterPlayState?.Invoke();
+                OnRaceStart();
+                break;
             case GameState.PAUSED:
                 EnterPausedState?.Invoke();
                 break;
@@ -74,9 +85,25 @@ public class GameManager : Singleton<GameManager>
                 break;
         }
     }
-    public bool HasGameState(GameState state)
+    private void OnRaceFinish(Transform carTransform)
     {
-        return currentState == state;
+        if (!GameManager.Instance.IsGameState(GameState.PLAY) || carTransform != CarManager.Instance.Car.transform)
+        {
+            return;
+        }
+        RaceFinish?.Invoke();
+    }
+    public bool IsGameState(GameState gameState)
+    {
+        return currentState == gameState;
+    }
+    public bool IsPreviousGameState(GameState gameState)
+    {
+        return previousState == gameState;
+    }
+    public void OnRaceStart()
+    {
+        RaceStart?.Invoke();
     }
     // used by buttons in inspector
     public void ExitApplication()
@@ -85,6 +112,7 @@ public class GameManager : Singleton<GameManager>
     }
     public void ChangeToViewState() => ChangeGameState(GameState.VIEW);
     public void ChangeToEditState() => ChangeGameState(GameState.EDIT);
+    public void ChangeToPlayState() => ChangeGameState(GameState.PLAY);
     public void ChangeToPausedState() => ChangeGameState(GameState.PAUSED);
     public void ChangeToPreviousState() => ChangeGameState(previousState);
 }
@@ -94,5 +122,6 @@ public enum GameState
 {
     VIEW,
     EDIT,
+    PLAY,
     PAUSED
 }

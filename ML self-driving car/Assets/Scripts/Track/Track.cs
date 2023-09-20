@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -6,20 +5,42 @@ using System;
 
 public class Track : MonoBehaviour
 {
-    private List<TrackPiece> track = new List<TrackPiece>();
-    private List<Checkpoint> checkpoints = new List<Checkpoint>();
-    public TrackPiece StartPiece { get; set; }
-    public event Action<bool> IsTrackDirectionClockwiseChanged;
+    private const int MinLaps = 1;
+    private const int MaxLaps = 100;
+    private TrackPiece startPiece;
+    public TrackPiece StartPiece
+    {
+        get { return startPiece; }
+        set
+        {
+            startPiece = value;
+            if (StartPiece != null)
+            {
+
+                if (!track.Contains(StartPiece))
+                {
+                    StartPiece.IsFacingForward = IsTrackDirectionClockwise;
+                }
+            }
+            ComputeTrack();
+        }
+
+    }
     private bool isTrackDirectionClockwise = true;
     public bool IsTrackDirectionClockwise
     {
         get { return isTrackDirectionClockwise; }
         set
         {
+
             if (isTrackDirectionClockwise != value)
             {
+                foreach (TrackPiece piece in track)
+                {
+                    piece.IsFacingForward = !piece.IsFacingForward;
+                }
                 isTrackDirectionClockwise = value;
-                IsTrackDirectionClockwiseChanged?.Invoke(value);
+                ComputeTrack();
             }
         }
     }
@@ -37,28 +58,58 @@ public class Track : MonoBehaviour
             }
         }
     }
-    private Grid grid;
+    public event Action TrackComputed;
+    private List<TrackPiece> track = new List<TrackPiece>();
+    private List<Checkpoint> checkpoints = new List<Checkpoint>();
+    public bool IsCircular { get; private set; }
+    private int laps;
+    public int Laps
+    {
+        get
+        {
+            return laps;
+        }
+        set
+        {
+            laps = Mathf.Clamp(value, MinLaps, MaxLaps);
+        }
+    }
+    [SerializeField] private Grid grid;
     [SerializeField] private TrackEditor trackEditor;
-    public TrackEditor TrackEditor => trackEditor;
+
     private void OnEnable()
     {
-        TrackEditor.PiecePlaced += SelectStartPiece;
+        trackEditor.PiecePlaced += SelectStartPiece;
+        trackEditor.PieceRemoved += OnPieceRemoved;
     }
     private void OnDisable()
     {
-        TrackEditor.PiecePlaced -= SelectStartPiece;
+        trackEditor.PiecePlaced -= SelectStartPiece;
+        trackEditor.PieceRemoved -= OnPieceRemoved;
     }
-    private void Awake()
+    private void OnPieceRemoved(TrackPiece piece)
     {
-        grid = TrackEditor.Grid;
-    }
-    private void Start()
-    {
-        TrackDataManager.LoadTrack(this);
+        if (piece != StartPiece)
+        {
+            return;
+        }
+        StartPiece = null;
     }
     public List<Checkpoint> GetCheckpoints()
     {
         return checkpoints;
+    }
+    public Checkpoint GetLastCheckpoint()
+    {
+        return checkpoints[checkpoints.Count - 1];
+    }
+    public Checkpoint GetFirstCheckpoint()
+    {
+        return checkpoints[0];
+    }
+    public TrackPiece GetLastPiece()
+    {
+        return track[track.Count - 1];
     }
     public void SelectStartPiece()
     {
@@ -68,23 +119,75 @@ public class Track : MonoBehaviour
             SelectStart = false;
         }
     }
-    public void SetTrackDirection(bool trackDirection)
+    public void ToggleTrackDirection()
     {
-        IsTrackDirectionClockwise = trackDirection;
+        IsTrackDirectionClockwise = !IsTrackDirectionClockwise;
     }
     public void ComputeTrack()
     {
         if (!StartPiece)
         {
+            TrackComputed?.Invoke();
             return;
         }
         ResetTrack();
-        track.Add(StartPiece);
-        TrackPiece piece = GetNextTrackPiece(StartPiece, IsTrackDirectionClockwise);
-        while (piece != StartPiece && piece != null)
+        AddTrackPieceWithCheckpoints(StartPiece);
+        TrackPiece nextPiece = GetNextTrackPiece(StartPiece);
+        while (IsValidNextPiece(nextPiece))
         {
-            track.Add(piece);
-            piece = GetCurrentNextTrackPiece(piece);
+            AddTrackPieceWithCheckpoints(nextPiece);
+            nextPiece = GetNextTrackPiece(nextPiece);
+        }
+        IsCircular = nextPiece == StartPiece;
+        ProcessCheckpoints();
+        TrackComputed?.Invoke();
+    }
+
+    private bool IsValidNextPiece(TrackPiece nextPiece)
+    {
+        if (nextPiece == null || nextPiece == StartPiece)
+        {
+            return false;
+        }
+        nextPiece.IsFacingForward = DetermineTrackPieceFacingForward(nextPiece);
+        if (nextPiece.IsFacingForward)
+        {
+            return true;
+        }
+        return IsConnectedToPreviousPiece(nextPiece);
+    }
+    private bool IsConnectedToPreviousPiece(TrackPiece piece)
+    {
+        piece.IsFacingForward = !piece.IsFacingForward;
+        TrackPiece backTrackPiece = GetNextTrackPiece(piece);
+        piece.IsFacingForward = !piece.IsFacingForward;
+        return backTrackPiece == track[track.Count - 1];
+    }
+    private bool DetermineTrackPieceFacingForward(TrackPiece piece)
+    {
+        TrackPiece previousPiece = track[track.Count - 1];
+        TrackPiece backPiece = grid.GetNeighbor(piece, -piece.transform.forward);
+        return previousPiece == backPiece;
+    }
+    private TrackPiece GetNextTrackPiece(TrackPiece piece)
+    {
+        if (piece.IsFacingForward)
+        {
+            if (piece.IsStraight())
+            {
+                return grid.GetNeighbor(piece, piece.transform.forward);
+            }
+            return grid.GetNeighbor(piece, piece.transform.right);
+        }
+        return grid.GetNeighbor(piece, -piece.transform.forward);
+    }
+    private void ProcessCheckpoints()
+    {
+        Checkpoint firstCheckpoint = checkpoints[0];
+        checkpoints.Remove(firstCheckpoint);
+        if (IsCircular)
+        {
+            checkpoints.Add(firstCheckpoint);
         }
     }
     private void ResetTrack()
@@ -92,26 +195,26 @@ public class Track : MonoBehaviour
         track?.Clear();
         checkpoints?.Clear();
     }
-    private TrackPiece GetNextTrackPiece(TrackPiece piece, bool isGoingForward)
+    private void AddTrackPieceWithCheckpoints(TrackPiece piece)
     {
-        if (isGoingForward)
+        track.Add(piece);
+        AddTrackPieceCheckpoints(piece);
+    }
+    private void AddTrackPieceCheckpoints(TrackPiece piece)
+    {
+        IEnumerable<Checkpoint> checkpointsToAdd = piece.GetCheckpoints();
+        if (!piece.IsFacingForward)
         {
-            checkpoints.AddRange(piece.GetCheckpoints());
-            if (piece.IsStraight())
-            {
-                return grid.GetNeighbor(piece, piece.transform.forward);
-            }
-            return grid.GetNeighbor(piece, piece.transform.right);
+            checkpointsToAdd = checkpointsToAdd.Reverse();
         }
-        checkpoints.AddRange(piece.GetCheckpoints().Reverse());
-        return grid.GetNeighbor(piece, -piece.transform.forward);
+
+        foreach (Checkpoint checkpoint in checkpointsToAdd)
+        {
+            checkpoint.transform.forward = piece.IsFacingForward ? checkpoint.InitialForward : -checkpoint.InitialForward;
+            checkpoints.Add(checkpoint);
+        }
     }
-    private TrackPiece GetCurrentNextTrackPiece(TrackPiece piece)
-    {
-        TrackPiece previousPiece = track[track.Count - 2];
-        TrackPiece backPiece = grid.GetNeighbor(piece, -piece.transform.forward);
-        return GetNextTrackPiece(piece, previousPiece == backPiece);
-    }
+
     public bool IsValidStartPiece()
     {
         return StartPiece;
@@ -119,5 +222,28 @@ public class Track : MonoBehaviour
     public bool HasValidTrackLength()
     {
         return track.Count > 3;
+    }
+    public TrackPiece GetRandomTrackPiece()
+    {
+        return track.Count > 0 ? track[UnityEngine.Random.Range(0, track.Count)] : null;
+    }
+
+    public TrackData ToData()
+    {
+        TrackData trackData = new TrackData();
+        trackData.IsTrackDirectionClockwise = IsTrackDirectionClockwise;
+        trackData.StartPiece = StartPiece != null ? StartPiece.ToData() : null;
+        trackData.Laps = Laps;
+        return trackData;
+    }
+    public void Load(TrackData data)
+    {
+        if (data == null)
+        {
+            return;
+        }
+        IsTrackDirectionClockwise = data.IsTrackDirectionClockwise;
+        Laps = data.Laps;
+        StartPiece = data.StartPiece != null ? grid.GetPiece(data.StartPiece.Position) : null;
     }
 }
